@@ -1,0 +1,32 @@
+{
+  "name": "verifier-api",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/main.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc && echo 'Lambda build completed'",
+    "offline": "yarn build && serverless offline",
+    "test": "yarn build && node dist/test/lambda-test.js",
+    "serve": "yarn build && node dist/src/local-server.js",
+    "dev": "tsx src/local-server.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.821.0",
+    "@initia/initia.js": "^1.0.9",
+    "@keplr-wallet/unit": "^0.12.238",
+    "aws-lambda": "^1.0.7",
+    "bech32-converting": "^1.0.9",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.149",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.29",
+    "serverless": "^4.15.1",
+    "serverless-offline": "^14.4.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
