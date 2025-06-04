@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/verify",
+      "dest": "/api/verify"
+    },
+    {
+      "src": "/health",
+      "dest": "/api/health"
+    },
+    {
+      "src": "/config",
+      "dest": "/api/config"
+    },
+    {
+      "src": "/",
+      "dest": "/api/index"
+    }
+  ]
+}

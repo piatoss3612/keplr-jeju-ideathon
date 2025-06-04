@@ -1,7 +1,13 @@
-import { APIGatewayProxyResult } from "aws-lambda";
 import converter from "bech32-converting";
 import { ValidationResult, ErrorResponse } from "./types.js";
 import { CORS_HEADERS, HTTP_STATUS } from "./config.js";
+
+// Vercel용 응답 인터페이스 정의
+interface VercelResponse {
+  statusCode: number;
+  headers: Record<string, string>;
+  body: string;
+}
 
 /**
  * 주소 형식 유효성 검사
@@ -55,13 +61,13 @@ export function convertAddressToHex(address: string, prefix: string): string {
 }
 
 /**
- * API Gateway 응답 생성
+ * API Gateway 응답 생성 (AWS Lambda 호환)
  */
 export function createResponse(
   statusCode: number,
   body: Record<string, any>,
   additionalHeaders?: Record<string, string>
-): APIGatewayProxyResult {
+): VercelResponse {
   return {
     statusCode,
     headers: {
@@ -80,7 +86,7 @@ export function createErrorResponse(
   error: string,
   message?: string,
   example?: string
-): APIGatewayProxyResult {
+): VercelResponse {
   const errorBody: ErrorResponse = {
     error,
     ...(message && { message }),
@@ -95,7 +101,7 @@ export function createErrorResponse(
  */
 export function createSuccessResponse(
   body: Record<string, any>
-): APIGatewayProxyResult {
+): VercelResponse {
   return createResponse(HTTP_STATUS.OK, body);
 }
 

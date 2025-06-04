@@ -15,6 +15,12 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["*.ts", "src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "api/**/*",
+    "src/types.ts",
+    "src/config.ts",
+    "src/utils.ts",
+    "src/delegation-service.ts"
+  ],
+  "exclude": ["node_modules", "dist", ".vercel"]
 }

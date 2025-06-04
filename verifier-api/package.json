@@ -2,31 +2,43 @@
   "name": "verifier-api",
   "version": "1.0.0",
   "type": "module",
-  "main": "dist/main.js",
+  "main": "dist/api/index.js",
   "license": "MIT",
+  "description": "Initia Delegation Verification API on Vercel",
+  "keywords": [
+    "initia",
+    "delegation",
+    "verification",
+    "vercel",
+    "api",
+    "blockchain"
+  ],
+  "author": "Your Name",
   "scripts": {
-    "build": "tsc && echo 'Lambda build completed'",
-    "offline": "yarn build && serverless offline",
-    "test": "yarn build && node dist/test/lambda-test.js",
-    "serve": "yarn build && node dist/src/local-server.js",
-    "dev": "tsx src/local-server.ts"
+    "build": "tsc && echo 'Vercel build completed'",
+    "deploy": "vercel --prod",
+    "dev:vercel": "npx vercel dev --listen 3000",
+    "clean": "rm -rf dist .vercel",
+    "test": "tsx tests/test-runner.ts",
+    "test:unit": "tsx tests/unit-test.ts",
+    "test:api": "tsx tests/api-test.ts",
+    "test:local": "TEST_URL=http://localhost:3000 tsx tests/api-test.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.821.0",
     "@initia/initia.js": "^1.0.9",
     "@keplr-wallet/unit": "^0.12.238",
-    "aws-lambda": "^1.0.7",
-    "bech32-converting": "^1.0.9",
-    "express": "^5.1.0"
+    "bech32-converting": "^1.0.9"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.149",
-    "@types/express": "^5.0.2",
     "@types/node": "^22.15.29",
-    "serverless": "^4.15.1",
-    "serverless-offline": "^14.4.0",
+    "@vercel/node": "^3.0.21",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/initia-verifier-api.git"
+  },
+  "homepage": "https://keplr-ideathon.vercel.app",
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
