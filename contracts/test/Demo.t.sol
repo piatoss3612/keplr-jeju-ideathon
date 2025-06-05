@@ -4,18 +4,21 @@ pragma solidity ^0.8.13;
 import {Test, console} from "forge-std/Test.sol";
 import {Counter} from "../src/Counter.sol";
 import {AddressUtils} from "../src/AddressUtils.sol";
+import {StringUtils} from "../src/Types.sol";
 
 contract ParseAddressTest is Test {
     using AddressUtils for string;
     using AddressUtils for address;
     using AddressUtils for uint256;
     using AddressUtils for int256;
+    using StringUtils for string;
 
     /**
      * @dev Test different methods to convert hex string to address
      */
     function test_addressConversion() public {
-        string memory hexAddressString = "0x157D19957d4047Fb8601783805a54EF6ae80eaD7";
+        string
+            memory hexAddressString = "0x157D19957d4047Fb8601783805a54EF6ae80eaD7";
 
         // Method 1: Using vm.parseAddress (Foundry cheatcode - best for tests)
         address result1 = vm.parseAddress(hexAddressString);
@@ -26,7 +29,9 @@ contract ParseAddressTest is Test {
         console.log("Method 2 (AddressUtils library):", result2);
 
         // Method 3: Using AddressUtils tryParseAddress
-        (bool success, address result3) = AddressUtils.tryParseAddress(hexAddressString);
+        (bool success, address result3) = AddressUtils.tryParseAddress(
+            hexAddressString
+        );
         require(success, "tryParseAddress failed");
         console.log("Method 3 (AddressUtils.tryParseAddress):", result3);
 
@@ -42,6 +47,126 @@ contract ParseAddressTest is Test {
     }
 
     /**
+     * @dev Test StringUtils parseStringToUint with various inputs
+     */
+    function test_parseStringToUint() public {
+        // Test valid number strings
+        string memory num1 = "0";
+        string memory num2 = "123";
+        string memory num3 = "5000000"; // 5 INIT with 6 decimals
+        string memory num4 = "1000000000"; // 1000 INIT with 6 decimals
+        string memory num5 = "999999999999999999"; // Large number
+
+        uint256 result1 = num1.parseStringToUint();
+        uint256 result2 = num2.parseStringToUint();
+        uint256 result3 = num3.parseStringToUint();
+        uint256 result4 = num4.parseStringToUint();
+        uint256 result5 = num5.parseStringToUint();
+
+        assertEq(result1, 0);
+        assertEq(result2, 123);
+        assertEq(result3, 5000000);
+        assertEq(result4, 1000000000);
+        assertEq(result5, 999999999999999999);
+
+        console.log("String '0' parsed to:", result1);
+        console.log("String '123' parsed to:", result2);
+        console.log("String '5000000' parsed to:", result3);
+        console.log("String '1000000000' parsed to:", result4);
+        console.log("String '999999999999999999' parsed to:", result5);
+    }
+
+    /**
+     * @dev Test parseStringToUint with invalid inputs (should revert)
+     */
+    function test_parseStringToUint_invalidInputs() public {
+        console.log("Testing invalid inputs for parseStringToUint");
+
+        // Test empty string
+        try this.parseStringHelper("") {
+            revert("Should have reverted for empty string");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Empty string");
+        }
+
+        // Test string with letters
+        try this.parseStringHelper("123abc") {
+            revert("Should have reverted for string with letters");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Invalid number string");
+        }
+
+        // Test string with special characters
+        try this.parseStringHelper("123.45") {
+            revert("Should have reverted for string with special chars");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Invalid number string");
+        }
+
+        // Test string with spaces
+        try this.parseStringHelper("123 456") {
+            revert("Should have reverted for string with spaces");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Invalid number string");
+        }
+
+        // Test string starting with letter
+        try this.parseStringHelper("a123") {
+            revert("Should have reverted for string starting with letter");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Invalid number string");
+        }
+
+        console.log("All invalid input tests passed (reverted as expected)");
+    }
+
+    /**
+     * @dev Helper function for testing parseStringToUint (external call for try-catch)
+     */
+    function parseStringHelper(
+        string memory input
+    ) external pure returns (uint256) {
+        return input.parseStringToUint();
+    }
+
+    /**
+     * @dev Test parseStringToUint with edge cases
+     */
+    function test_parseStringToUint_edgeCases() public {
+        // Test single digit
+        string memory singleDigit = "9";
+        uint256 result1 = singleDigit.parseStringToUint();
+        assertEq(result1, 9);
+
+        // Test leading zeros (should work fine)
+        string memory leadingZeros = "000123";
+        uint256 result2 = leadingZeros.parseStringToUint();
+        assertEq(result2, 123);
+
+        // Test all zeros
+        string memory allZeros = "0000";
+        uint256 result3 = allZeros.parseStringToUint();
+        assertEq(result3, 0);
+
+        console.log("Single digit '9' parsed to:", result1);
+        console.log("Leading zeros '000123' parsed to:", result2);
+        console.log("All zeros '0000' parsed to:", result3);
+
+        // Test INIT tier thresholds
+        string memory asteroidThreshold = "5000000"; // 5 INIT
+        string memory cometThreshold = "20000000"; // 20 INIT
+        string memory starThreshold = "100000000"; // 100 INIT
+        string memory galaxyThreshold = "1000000000"; // 1000 INIT
+
+        assertEq(asteroidThreshold.parseStringToUint(), 5 * 1e6);
+        assertEq(cometThreshold.parseStringToUint(), 20 * 1e6);
+        assertEq(starThreshold.parseStringToUint(), 100 * 1e6);
+        assertEq(galaxyThreshold.parseStringToUint(), 1000 * 1e6);
+
+        console.log("INIT cosmic tier threshold tests passed");
+    }
+
+    /**
      * @dev Test AddressUtils tryParseAddress with various inputs
      */
     function test_tryParseAddress() public {
@@ -50,9 +175,15 @@ contract ParseAddressTest is Test {
         string memory validAddr2 = "0x157d19957d4047fb8601783805a54ef6ae80ead7"; // lowercase
         string memory validAddr3 = "0x157D19957D4047FB8601783805A54EF6AE80EAD7"; // uppercase
 
-        (bool success1, address addr1) = AddressUtils.tryParseAddress(validAddr1);
-        (bool success2, address addr2) = AddressUtils.tryParseAddress(validAddr2);
-        (bool success3, address addr3) = AddressUtils.tryParseAddress(validAddr3);
+        (bool success1, address addr1) = AddressUtils.tryParseAddress(
+            validAddr1
+        );
+        (bool success2, address addr2) = AddressUtils.tryParseAddress(
+            validAddr2
+        );
+        (bool success3, address addr3) = AddressUtils.tryParseAddress(
+            validAddr3
+        );
 
         assertTrue(success1);
         assertTrue(success2);
@@ -69,13 +200,22 @@ contract ParseAddressTest is Test {
         // Test invalid addresses
         string memory invalidAddr1 = "invalid";
         string memory invalidAddr2 = "0x123"; // too short
-        string memory invalidAddr3 = "0xGGGD19957d4047Fb8601783805a54EF6ae80eaD7"; // invalid hex
+        string
+            memory invalidAddr3 = "0xGGGD19957d4047Fb8601783805a54EF6ae80eaD7"; // invalid hex
         string memory invalidAddr4 = "157D19957d4047Fb8601783805a54EF6ae80eaD7"; // missing 0x
 
-        (bool success4, address addr4) = AddressUtils.tryParseAddress(invalidAddr1);
-        (bool success5, address addr5) = AddressUtils.tryParseAddress(invalidAddr2);
-        (bool success6, address addr6) = AddressUtils.tryParseAddress(invalidAddr3);
-        (bool success7, address addr7) = AddressUtils.tryParseAddress(invalidAddr4);
+        (bool success4, address addr4) = AddressUtils.tryParseAddress(
+            invalidAddr1
+        );
+        (bool success5, address addr5) = AddressUtils.tryParseAddress(
+            invalidAddr2
+        );
+        (bool success6, address addr6) = AddressUtils.tryParseAddress(
+            invalidAddr3
+        );
+        (bool success7, address addr7) = AddressUtils.tryParseAddress(
+            invalidAddr4
+        );
 
         assertFalse(success4);
         assertFalse(success5);
@@ -107,8 +247,12 @@ contract ParseAddressTest is Test {
         // Test signed number to string conversion
         int256 positiveNumber = 6789;
         int256 negativeNumber = -6789;
-        string memory positiveString = AddressUtils.toStringSigned(positiveNumber);
-        string memory negativeString = AddressUtils.toStringSigned(negativeNumber);
+        string memory positiveString = AddressUtils.toStringSigned(
+            positiveNumber
+        );
+        string memory negativeString = AddressUtils.toStringSigned(
+            negativeNumber
+        );
         console.log("Positive number as string:", positiveString);
         console.log("Negative number as string:", negativeString);
 
@@ -155,7 +299,9 @@ contract ParseAddressTest is Test {
         console.log("From AddressUtils:", hexFromUtils);
 
         // Parse back using AddressUtils tryParseAddress
-        (bool success, address parsedBack) = AddressUtils.tryParseAddress(hexFromUtils);
+        (bool success, address parsedBack) = AddressUtils.tryParseAddress(
+            hexFromUtils
+        );
         assertTrue(success);
         console.log("Parsed back with tryParseAddress:", parsedBack);
 
