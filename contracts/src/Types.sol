@@ -14,6 +14,7 @@ enum DelegationTier {
     Comet, // 20+ INIT
     Star, // 100+ INIT
     Galaxy // 1000+ INIT
+
 }
 
 /**
@@ -74,16 +75,17 @@ library TierUtils {
      * @param amount The delegation amount
      * @return tier The delegation tier
      */
-    function getTierForAmount(
-        uint256 amount
-    ) internal pure returns (DelegationTier tier) {
-        if (amount >= TierConstants.GALAXY_THRESHOLD)
+    function getTierForAmount(uint256 amount) internal pure returns (DelegationTier tier) {
+        if (amount >= TierConstants.GALAXY_THRESHOLD) {
             return DelegationTier.Galaxy;
+        }
         if (amount >= TierConstants.STAR_THRESHOLD) return DelegationTier.Star;
-        if (amount >= TierConstants.COMET_THRESHOLD)
+        if (amount >= TierConstants.COMET_THRESHOLD) {
             return DelegationTier.Comet;
-        if (amount >= TierConstants.ASTEROID_THRESHOLD)
+        }
+        if (amount >= TierConstants.ASTEROID_THRESHOLD) {
             return DelegationTier.Asteroid;
+        }
         revert("Amount too low for any tier");
     }
 
@@ -92,11 +94,10 @@ library TierUtils {
      * @param tier The delegation tier
      * @return points Base points for navigation
      */
-    function getBasePointsForTier(
-        DelegationTier tier
-    ) internal pure returns (uint256 points) {
-        if (tier == DelegationTier.Asteroid)
+    function getBasePointsForTier(DelegationTier tier) internal pure returns (uint256 points) {
+        if (tier == DelegationTier.Asteroid) {
             return TierConstants.ASTEROID_POINTS;
+        }
         if (tier == DelegationTier.Comet) return TierConstants.COMET_POINTS;
         if (tier == DelegationTier.Star) return TierConstants.STAR_POINTS;
         if (tier == DelegationTier.Galaxy) return TierConstants.GALAXY_POINTS;
@@ -108,9 +109,7 @@ library TierUtils {
      * @param consecutiveOrbits Number of consecutive orbits of navigation
      * @return multiplier Multiplier in basis points (10000 = 1.0x)
      */
-    function getStreakMultiplier(
-        uint256 consecutiveOrbits
-    ) internal pure returns (uint256 multiplier) {
+    function getStreakMultiplier(uint256 consecutiveOrbits) internal pure returns (uint256 multiplier) {
         if (consecutiveOrbits >= 5) return TierConstants.STREAK_ORBIT_5_PLUS;
         if (consecutiveOrbits == 4) return TierConstants.STREAK_ORBIT_4;
         if (consecutiveOrbits == 3) return TierConstants.STREAK_ORBIT_3;
@@ -124,10 +123,11 @@ library TierUtils {
      * @param consecutiveOrbits Consecutive orbits of navigation
      * @return totalPoints Total points earned
      */
-    function calculateTotalPoints(
-        DelegationTier tier,
-        uint256 consecutiveOrbits
-    ) internal pure returns (uint256 totalPoints) {
+    function calculateTotalPoints(DelegationTier tier, uint256 consecutiveOrbits)
+        internal
+        pure
+        returns (uint256 totalPoints)
+    {
         uint256 basePoints = getBasePointsForTier(tier);
         uint256 multiplier = getStreakMultiplier(consecutiveOrbits);
 
@@ -142,9 +142,7 @@ library TierUtils {
      * @param daysLate Number of days late beyond the navigation window
      * @return penaltyRate Penalty rate in basis points (500 = 5%)
      */
-    function calculatePenalty(
-        uint256 daysLate
-    ) internal pure returns (uint256 penaltyRate) {
+    function calculatePenalty(uint256 daysLate) internal pure returns (uint256 penaltyRate) {
         if (daysLate == 0) return 0;
 
         penaltyRate = daysLate * TierConstants.PENALTY_RATE_PER_DAY;
@@ -163,10 +161,7 @@ library TierUtils {
      * @return daysLate How many days late (0 if not late)
      * @return penaltyApplies Whether penalty should be applied
      */
-    function checkNavigationStatus(
-        uint256 lastNavigationTime,
-        uint256 currentTime
-    )
+    function checkNavigationStatus(uint256 lastNavigationTime, uint256 currentTime)
         internal
         pure
         returns (bool canNavigate, uint256 daysLate, bool penaltyApplies)
@@ -184,9 +179,7 @@ library TierUtils {
         }
 
         // Beyond penalty threshold (>14 days): penalty applies
-        daysLate =
-            (timeSinceLastNavigation - TierConstants.PENALTY_THRESHOLD) /
-            86400;
+        daysLate = (timeSinceLastNavigation - TierConstants.PENALTY_THRESHOLD) / 86400;
         return (true, daysLate, true);
     }
 
@@ -196,9 +189,7 @@ library TierUtils {
      * @return level Current level
      * @return pointsToNextLevel Points needed for next level
      */
-    function calculateLevel(
-        uint256 totalPoints
-    ) internal pure returns (uint256 level, uint256 pointsToNextLevel) {
+    function calculateLevel(uint256 totalPoints) internal pure returns (uint256 level, uint256 pointsToNextLevel) {
         level = 1;
         uint256 pointsUsed = 0;
 
@@ -207,37 +198,21 @@ library TierUtils {
             level = (totalPoints / TierConstants.POINTS_PER_LEVEL_EARLY) + 1;
             if (level > 10) level = 10;
             pointsUsed = (level - 1) * TierConstants.POINTS_PER_LEVEL_EARLY;
-            pointsToNextLevel = (level <= 10)
-                ? TierConstants.POINTS_PER_LEVEL_EARLY -
-                    (totalPoints - pointsUsed)
-                : 0;
+            pointsToNextLevel = (level <= 10) ? TierConstants.POINTS_PER_LEVEL_EARLY - (totalPoints - pointsUsed) : 0;
         }
         // Levels 11-20: 200 points each
         else if (totalPoints < 3000) {
             // 1000 + (10 * 200) = 3000
-            level =
-                11 +
-                ((totalPoints - 1000) / TierConstants.POINTS_PER_LEVEL_MID);
+            level = 11 + ((totalPoints - 1000) / TierConstants.POINTS_PER_LEVEL_MID);
             if (level > 20) level = 20;
-            pointsUsed =
-                1000 +
-                ((level - 11) * TierConstants.POINTS_PER_LEVEL_MID);
-            pointsToNextLevel = (level <= 20)
-                ? TierConstants.POINTS_PER_LEVEL_MID -
-                    (totalPoints - pointsUsed)
-                : 0;
+            pointsUsed = 1000 + ((level - 11) * TierConstants.POINTS_PER_LEVEL_MID);
+            pointsToNextLevel = (level <= 20) ? TierConstants.POINTS_PER_LEVEL_MID - (totalPoints - pointsUsed) : 0;
         }
         // Levels 21+: 500 points each
         else {
-            level =
-                21 +
-                ((totalPoints - 3000) / TierConstants.POINTS_PER_LEVEL_LATE);
-            pointsUsed =
-                3000 +
-                ((level - 21) * TierConstants.POINTS_PER_LEVEL_LATE);
-            pointsToNextLevel =
-                TierConstants.POINTS_PER_LEVEL_LATE -
-                (totalPoints - pointsUsed);
+            level = 21 + ((totalPoints - 3000) / TierConstants.POINTS_PER_LEVEL_LATE);
+            pointsUsed = 3000 + ((level - 21) * TierConstants.POINTS_PER_LEVEL_LATE);
+            pointsToNextLevel = TierConstants.POINTS_PER_LEVEL_LATE - (totalPoints - pointsUsed);
         }
 
         return (level, pointsToNextLevel);
@@ -248,9 +223,7 @@ library TierUtils {
      * @param tier The delegation tier
      * @return name The tier name
      */
-    function getTierName(
-        DelegationTier tier
-    ) internal pure returns (string memory name) {
+    function getTierName(DelegationTier tier) internal pure returns (string memory name) {
         if (tier == DelegationTier.Asteroid) return "Asteroid";
         if (tier == DelegationTier.Comet) return "Comet";
         if (tier == DelegationTier.Star) return "Star";
@@ -263,15 +236,15 @@ library TierUtils {
      * @param tier The delegation tier
      * @return threshold The minimum amount required for the tier
      */
-    function getThresholdForTier(
-        DelegationTier tier
-    ) internal pure returns (uint256 threshold) {
-        if (tier == DelegationTier.Asteroid)
+    function getThresholdForTier(DelegationTier tier) internal pure returns (uint256 threshold) {
+        if (tier == DelegationTier.Asteroid) {
             return TierConstants.ASTEROID_THRESHOLD;
+        }
         if (tier == DelegationTier.Comet) return TierConstants.COMET_THRESHOLD;
         if (tier == DelegationTier.Star) return TierConstants.STAR_THRESHOLD;
-        if (tier == DelegationTier.Galaxy)
+        if (tier == DelegationTier.Galaxy) {
             return TierConstants.GALAXY_THRESHOLD;
+        }
         revert("Invalid tier");
     }
 
@@ -281,10 +254,7 @@ library TierUtils {
      * @param tier The target tier
      * @return qualified Whether the amount qualifies for the tier
      */
-    function qualifiesForTier(
-        uint256 amount,
-        DelegationTier tier
-    ) internal pure returns (bool qualified) {
+    function qualifiesForTier(uint256 amount, DelegationTier tier) internal pure returns (bool qualified) {
         return amount >= getThresholdForTier(tier);
     }
 
@@ -293,9 +263,7 @@ library TierUtils {
      * @param tier The delegation tier
      * @return tierValue The tier as uint256 (0=Asteroid, 1=Comet, 2=Star, 3=Galaxy)
      */
-    function tierToUint(
-        DelegationTier tier
-    ) internal pure returns (uint256 tierValue) {
+    function tierToUint(DelegationTier tier) internal pure returns (uint256 tierValue) {
         return uint256(tier);
     }
 
@@ -304,9 +272,7 @@ library TierUtils {
      * @param tierValue The tier value (0=Asteroid, 1=Comet, 2=Star, 3=Galaxy)
      * @return tier The delegation tier
      */
-    function uintToTier(
-        uint256 tierValue
-    ) internal pure returns (DelegationTier tier) {
+    function uintToTier(uint256 tierValue) internal pure returns (DelegationTier tier) {
         require(tierValue <= 3, "Invalid tier value");
         return DelegationTier(tierValue);
     }
@@ -322,9 +288,7 @@ library StringUtils {
      * @param str The string to parse
      * @return result The parsed uint256 value
      */
-    function parseStringToUint(
-        string memory str
-    ) internal pure returns (uint256 result) {
+    function parseStringToUint(string memory str) internal pure returns (uint256 result) {
         bytes memory strBytes = bytes(str);
         require(strBytes.length > 0, "Empty string");
 

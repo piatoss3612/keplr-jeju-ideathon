@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 import {Counter} from "../src/Counter.sol";
-import {AddressUtils} from "../src/AddressUtils.sol";
+import {AddressUtils} from "../src/libraries/AddressUtils.sol";
 import {StringUtils} from "../src/Types.sol";
 
 contract ParseAddressTest is Test {
@@ -16,7 +16,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test different methods to convert hex string to address
      */
-    function test_addressConversion() public {
+    function test_addressConversion() public pure {
         string
             memory hexAddressString = "0x157D19957d4047Fb8601783805a54EF6ae80eaD7";
 
@@ -49,7 +49,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test StringUtils parseStringToUint with various inputs
      */
-    function test_parseStringToUint() public {
+    function test_parseStringToUint() public pure {
         // Test valid number strings
         string memory num1 = "0";
         string memory num2 = "123";
@@ -79,7 +79,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test parseStringToUint with invalid inputs (should revert)
      */
-    function test_parseStringToUint_invalidInputs() public {
+    function test_parseStringToUint_invalidInputs() public view {
         console.log("Testing invalid inputs for parseStringToUint");
 
         // Test empty string
@@ -132,7 +132,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test parseStringToUint with edge cases
      */
-    function test_parseStringToUint_edgeCases() public {
+    function test_parseStringToUint_edgeCases() public pure {
         // Test single digit
         string memory singleDigit = "9";
         uint256 result1 = singleDigit.parseStringToUint();
@@ -169,7 +169,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test AddressUtils tryParseAddress with various inputs
      */
-    function test_tryParseAddress() public {
+    function test_tryParseAddress() public pure {
         // Test valid addresses
         string memory validAddr1 = "0x157D19957d4047Fb8601783805a54EF6ae80eaD7";
         string memory validAddr2 = "0x157d19957d4047fb8601783805a54ef6ae80ead7"; // lowercase
@@ -238,7 +238,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test string utility functions from AddressUtils
      */
-    function test_stringUtils() public {
+    function test_stringUtils() public pure {
         // Test number to string conversion
         uint256 testNumber = 12345;
         string memory numberAsString = AddressUtils.toString(testNumber);
@@ -269,7 +269,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test address conversion functions
      */
-    function test_addressConversions() public {
+    function test_addressConversions() public pure {
         address testAddr = 0x157D19957d4047Fb8601783805a54EF6ae80eaD7;
 
         // Test address to hex string conversion
@@ -291,7 +291,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test round trip: address -> string -> address
      */
-    function test_roundTripConversion() public {
+    function test_roundTripConversion() public pure {
         address originalAddr = 0x157D19957d4047Fb8601783805a54EF6ae80eaD7;
 
         // Convert address to string using AddressUtils
@@ -320,7 +320,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test string equality function
      */
-    function test_stringEquality() public {
+    function test_stringEquality() public pure {
         string memory str1 = "hello world";
         string memory str2 = "hello world";
         string memory str3 = "hello world!";
@@ -335,7 +335,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test validation functions
      */
-    function test_validation() public {
+    function test_validation() public pure {
         string memory validAddr = "0x157D19957d4047Fb8601783805a54EF6ae80eaD7";
         string memory invalidAddr = "0x123";
 
@@ -348,7 +348,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Test edge cases and error conditions
      */
-    function test_edgeCases() public {
+    function test_edgeCases() public pure {
         // Test with zero address
         address zeroAddr = address(0);
         string memory zeroHex = AddressUtils.toHexString(zeroAddr);
