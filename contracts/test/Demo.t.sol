@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Counter} from "../src/Counter.sol";
 import {AddressUtils} from "../src/libraries/AddressUtils.sol";
 import {StringUtils} from "../src/Types.sol";
 
@@ -17,8 +16,7 @@ contract ParseAddressTest is Test {
      * @dev Test different methods to convert hex string to address
      */
     function test_addressConversion() public pure {
-        string
-            memory hexAddressString = "0x157D19957d4047Fb8601783805a54EF6ae80eaD7";
+        string memory hexAddressString = "0x157D19957d4047Fb8601783805a54EF6ae80eaD7";
 
         // Method 1: Using vm.parseAddress (Foundry cheatcode - best for tests)
         address result1 = vm.parseAddress(hexAddressString);
@@ -29,9 +27,7 @@ contract ParseAddressTest is Test {
         console.log("Method 2 (AddressUtils library):", result2);
 
         // Method 3: Using AddressUtils tryParseAddress
-        (bool success, address result3) = AddressUtils.tryParseAddress(
-            hexAddressString
-        );
+        (bool success, address result3) = AddressUtils.tryParseAddress(hexAddressString);
         require(success, "tryParseAddress failed");
         console.log("Method 3 (AddressUtils.tryParseAddress):", result3);
 
@@ -123,9 +119,7 @@ contract ParseAddressTest is Test {
     /**
      * @dev Helper function for testing parseStringToUint (external call for try-catch)
      */
-    function parseStringHelper(
-        string memory input
-    ) external pure returns (uint256) {
+    function parseStringHelper(string memory input) external pure returns (uint256) {
         return input.parseStringToUint();
     }
 
@@ -175,15 +169,9 @@ contract ParseAddressTest is Test {
         string memory validAddr2 = "0x157d19957d4047fb8601783805a54ef6ae80ead7"; // lowercase
         string memory validAddr3 = "0x157D19957D4047FB8601783805A54EF6AE80EAD7"; // uppercase
 
-        (bool success1, address addr1) = AddressUtils.tryParseAddress(
-            validAddr1
-        );
-        (bool success2, address addr2) = AddressUtils.tryParseAddress(
-            validAddr2
-        );
-        (bool success3, address addr3) = AddressUtils.tryParseAddress(
-            validAddr3
-        );
+        (bool success1, address addr1) = AddressUtils.tryParseAddress(validAddr1);
+        (bool success2, address addr2) = AddressUtils.tryParseAddress(validAddr2);
+        (bool success3, address addr3) = AddressUtils.tryParseAddress(validAddr3);
 
         assertTrue(success1);
         assertTrue(success2);
@@ -200,22 +188,13 @@ contract ParseAddressTest is Test {
         // Test invalid addresses
         string memory invalidAddr1 = "invalid";
         string memory invalidAddr2 = "0x123"; // too short
-        string
-            memory invalidAddr3 = "0xGGGD19957d4047Fb8601783805a54EF6ae80eaD7"; // invalid hex
+        string memory invalidAddr3 = "0xGGGD19957d4047Fb8601783805a54EF6ae80eaD7"; // invalid hex
         string memory invalidAddr4 = "157D19957d4047Fb8601783805a54EF6ae80eaD7"; // missing 0x
 
-        (bool success4, address addr4) = AddressUtils.tryParseAddress(
-            invalidAddr1
-        );
-        (bool success5, address addr5) = AddressUtils.tryParseAddress(
-            invalidAddr2
-        );
-        (bool success6, address addr6) = AddressUtils.tryParseAddress(
-            invalidAddr3
-        );
-        (bool success7, address addr7) = AddressUtils.tryParseAddress(
-            invalidAddr4
-        );
+        (bool success4, address addr4) = AddressUtils.tryParseAddress(invalidAddr1);
+        (bool success5, address addr5) = AddressUtils.tryParseAddress(invalidAddr2);
+        (bool success6, address addr6) = AddressUtils.tryParseAddress(invalidAddr3);
+        (bool success7, address addr7) = AddressUtils.tryParseAddress(invalidAddr4);
 
         assertFalse(success4);
         assertFalse(success5);
@@ -247,12 +226,8 @@ contract ParseAddressTest is Test {
         // Test signed number to string conversion
         int256 positiveNumber = 6789;
         int256 negativeNumber = -6789;
-        string memory positiveString = AddressUtils.toStringSigned(
-            positiveNumber
-        );
-        string memory negativeString = AddressUtils.toStringSigned(
-            negativeNumber
-        );
+        string memory positiveString = AddressUtils.toStringSigned(positiveNumber);
+        string memory negativeString = AddressUtils.toStringSigned(negativeNumber);
         console.log("Positive number as string:", positiveString);
         console.log("Negative number as string:", negativeString);
 
@@ -299,9 +274,7 @@ contract ParseAddressTest is Test {
         console.log("From AddressUtils:", hexFromUtils);
 
         // Parse back using AddressUtils tryParseAddress
-        (bool success, address parsedBack) = AddressUtils.tryParseAddress(
-            hexFromUtils
-        );
+        (bool success, address parsedBack) = AddressUtils.tryParseAddress(hexFromUtils);
         assertTrue(success);
         console.log("Parsed back with tryParseAddress:", parsedBack);
 

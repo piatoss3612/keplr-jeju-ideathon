@@ -21,11 +21,9 @@ library LoyaltySystem {
      * @param tier The delegation tier
      * @param amount The delegation amount
      */
-    function initializeLoyalty(
-        ILoyaltySystem.LoyaltyInfo storage loyalty,
-        DelegationTier tier,
-        uint256 amount
-    ) internal {
+    function initializeLoyalty(ILoyaltySystem.LoyaltyInfo storage loyalty, DelegationTier tier, uint256 amount)
+        internal
+    {
         uint256 tierUint = TierUtils.tierToUint(tier);
 
         loyalty.firstClaimTimestamp = block.timestamp;
@@ -43,7 +41,7 @@ library LoyaltySystem {
         loyalty.totalPoints = pointsEarned;
 
         // Calculate level from points
-        (uint256 level, ) = TierUtils.calculateLevel(pointsEarned);
+        (uint256 level,) = TierUtils.calculateLevel(pointsEarned);
         loyalty.currentLevel = level;
     }
 
@@ -61,27 +59,16 @@ library LoyaltySystem {
         ILoyaltySystem.LoyaltyInfo storage loyalty,
         DelegationTier delegationTier,
         uint256 amount
-    )
-        internal
-        returns (
-            uint256 pointsEarned,
-            uint256[4] memory penaltyInfo,
-            uint256 previousLevel,
-            uint256 newLevel
-        )
-    {
+    ) internal returns (uint256 pointsEarned, uint256[4] memory penaltyInfo, uint256 previousLevel, uint256 newLevel) {
         previousLevel = loyalty.currentLevel;
 
         // Check verification timing
-        (bool canNavigate, uint256 daysLate, bool penaltyApplies) = TierUtils
-            .checkNavigationStatus(
-                loyalty.lastVerificationTime,
-                block.timestamp
-            );
+        (bool canNavigate, uint256 daysLate, bool penaltyApplies) =
+            TierUtils.checkNavigationStatus(loyalty.lastVerificationTime, block.timestamp);
 
         if (!canNavigate) {
-            uint256 timeRemaining = (loyalty.lastVerificationTime +
-                TierConstants.VERIFICATION_INTERVAL) - block.timestamp;
+            uint256 timeRemaining =
+                (loyalty.lastVerificationTime + TierConstants.VERIFICATION_INTERVAL) - block.timestamp;
             revert ILoyaltySystem.VerificationTooEarly(timeRemaining);
         }
 
@@ -107,16 +94,13 @@ library LoyaltySystem {
         }
 
         // Calculate points
-        pointsEarned = TierUtils.calculateTotalPoints(
-            delegationTier,
-            loyalty.consecutiveWeeks
-        );
+        pointsEarned = TierUtils.calculateTotalPoints(delegationTier, loyalty.consecutiveWeeks);
 
         // Update points and level
         loyalty.totalPoints += pointsEarned;
 
         // Calculate level
-        (newLevel, ) = TierUtils.calculateLevel(loyalty.totalPoints);
+        (newLevel,) = TierUtils.calculateLevel(loyalty.totalPoints);
         loyalty.currentLevel = newLevel;
 
         // Check legacy eligibility
@@ -131,16 +115,16 @@ library LoyaltySystem {
      * @return canVerify Whether user can verify now
      * @return nextVerificationTime When user can next verify
      */
-    function getNextVerificationTime(
-        ILoyaltySystem.LoyaltyInfo memory loyalty
-    ) internal view returns (bool canVerify, uint256 nextVerificationTime) {
+    function getNextVerificationTime(ILoyaltySystem.LoyaltyInfo memory loyalty)
+        internal
+        view
+        returns (bool canVerify, uint256 nextVerificationTime)
+    {
         if (loyalty.firstClaimTimestamp == 0) {
             return (false, 0); // User hasn't claimed initially
         }
 
-        nextVerificationTime =
-            loyalty.lastVerificationTime +
-            TierConstants.VERIFICATION_INTERVAL;
+        nextVerificationTime = loyalty.lastVerificationTime + TierConstants.VERIFICATION_INTERVAL;
         canVerify = block.timestamp >= nextVerificationTime;
     }
 
@@ -151,39 +135,25 @@ library LoyaltySystem {
      * @return timeRemaining Time remaining until eligible (if not eligible)
      * @return verificationsNeeded Additional verifications needed
      */
-    function getLoyaltyBonusEligibility(
-        ILoyaltySystem.LoyaltyInfo memory loyalty
-    )
+    function getLoyaltyBonusEligibility(ILoyaltySystem.LoyaltyInfo memory loyalty)
         internal
         view
-        returns (
-            bool eligible,
-            uint256 timeRemaining,
-            uint256 verificationsNeeded
-        )
+        returns (bool eligible, uint256 timeRemaining, uint256 verificationsNeeded)
     {
         if (loyalty.firstClaimTimestamp == 0) {
             return (false, 0, 0); // User hasn't claimed initially
         }
 
-        bool timeQualified = block.timestamp >=
-            loyalty.firstClaimTimestamp + TierConstants.LOYALTY_PERIOD;
-        bool verificationsQualified = loyalty.verificationCount >=
-            TierConstants.MINIMUM_VERIFICATIONS;
+        bool timeQualified = block.timestamp >= loyalty.firstClaimTimestamp + TierConstants.LOYALTY_PERIOD;
+        bool verificationsQualified = loyalty.verificationCount >= TierConstants.MINIMUM_VERIFICATIONS;
 
-        eligible =
-            timeQualified &&
-            verificationsQualified &&
-            !loyalty.bonusClaimed;
+        eligible = timeQualified && verificationsQualified && !loyalty.bonusClaimed;
 
-        timeRemaining = timeQualified
-            ? 0
-            : (loyalty.firstClaimTimestamp + TierConstants.LOYALTY_PERIOD) -
-                block.timestamp;
+        timeRemaining =
+            timeQualified ? 0 : (loyalty.firstClaimTimestamp + TierConstants.LOYALTY_PERIOD) - block.timestamp;
 
-        verificationsNeeded = verificationsQualified
-            ? 0
-            : TierConstants.MINIMUM_VERIFICATIONS - loyalty.verificationCount;
+        verificationsNeeded =
+            verificationsQualified ? 0 : TierConstants.MINIMUM_VERIFICATIONS - loyalty.verificationCount;
     }
 
     /**
@@ -191,9 +161,7 @@ library LoyaltySystem {
      * @param currentMultiplier The current multiplier value
      * @return newMultiplier The updated multiplier value
      */
-    function updateLoyaltyMultiplier(
-        uint256 currentMultiplier
-    ) internal pure returns (uint256 newMultiplier) {
+    function updateLoyaltyMultiplier(uint256 currentMultiplier) internal pure returns (uint256 newMultiplier) {
         if (currentMultiplier == 0) {
             newMultiplier = 150; // 1.5x for first loyalty completion
         } else {
@@ -213,10 +181,10 @@ library LoyaltySystem {
      * @param daysLate Number of days late
      * @return penaltyInfo [daysLate, penaltyRate, pointsLost, streakReset]
      */
-    function _applyPenalty(
-        ILoyaltySystem.LoyaltyInfo storage loyalty,
-        uint256 daysLate
-    ) internal returns (uint256[4] memory penaltyInfo) {
+    function _applyPenalty(ILoyaltySystem.LoyaltyInfo storage loyalty, uint256 daysLate)
+        internal
+        returns (uint256[4] memory penaltyInfo)
+    {
         uint256 penaltyRate = TierUtils.calculatePenalty(daysLate);
         uint256 pointsToLose = (loyalty.totalPoints * penaltyRate) / 10000;
 
@@ -236,17 +204,11 @@ library LoyaltySystem {
      * @notice Check legacy eligibility
      * @param loyalty The loyalty info storage reference
      */
-    function _checkLegacyEligibility(
-        ILoyaltySystem.LoyaltyInfo storage loyalty
-    ) internal {
-        bool timeQualified = block.timestamp >=
-            loyalty.firstClaimTimestamp + TierConstants.LOYALTY_PERIOD;
-        bool verificationsQualified = loyalty.verificationCount >=
-            TierConstants.MINIMUM_VERIFICATIONS;
+    function _checkLegacyEligibility(ILoyaltySystem.LoyaltyInfo storage loyalty) internal {
+        bool timeQualified = block.timestamp >= loyalty.firstClaimTimestamp + TierConstants.LOYALTY_PERIOD;
+        bool verificationsQualified = loyalty.verificationCount >= TierConstants.MINIMUM_VERIFICATIONS;
 
-        if (
-            timeQualified && verificationsQualified && !loyalty.eligibleForBonus
-        ) {
+        if (timeQualified && verificationsQualified && !loyalty.eligibleForBonus) {
             loyalty.eligibleForBonus = true;
         }
     }
@@ -259,16 +221,11 @@ library LoyaltySystem {
      * @param amount The delegation amount
      * @return tokenId The generated unique token ID
      */
-    function generateTokenId(
-        string memory prefix,
-        address user,
-        DelegationTier tier,
-        uint256 amount
-    ) internal view returns (uint256 tokenId) {
-        tokenId = uint256(
-            keccak256(
-                abi.encodePacked(prefix, user, tier, amount, block.timestamp)
-            )
-        );
+    function generateTokenId(string memory prefix, address user, DelegationTier tier, uint256 amount)
+        internal
+        view
+        returns (uint256 tokenId)
+    {
+        tokenId = uint256(keccak256(abi.encodePacked(prefix, user, tier, amount, block.timestamp)));
     }
 }

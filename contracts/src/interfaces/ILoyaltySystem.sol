@@ -48,20 +48,14 @@ interface ILoyaltySystem {
      * @param delegationTier The delegation tier
      * @param amount The delegation amount
      */
-    function updateLoyalty(
-        address claimant,
-        DelegationTier delegationTier,
-        uint256 amount
-    ) external;
+    function updateLoyalty(address claimant, DelegationTier delegationTier, uint256 amount) external;
 
     /**
      * @notice Get user's loyalty status and progress
      * @param user The user address
      * @return loyalty The complete loyalty information
      */
-    function getLoyaltyStatus(
-        address user
-    ) external view returns (LoyaltyInfo memory loyalty);
+    function getLoyaltyStatus(address user) external view returns (LoyaltyInfo memory loyalty);
 
     /**
      * @notice Check when user can next verify their loyalty
@@ -69,9 +63,10 @@ interface ILoyaltySystem {
      * @return canVerify Whether user can verify now
      * @return nextVerificationTime When user can next verify
      */
-    function getNextVerificationTime(
-        address user
-    ) external view returns (bool canVerify, uint256 nextVerificationTime);
+    function getNextVerificationTime(address user)
+        external
+        view
+        returns (bool canVerify, uint256 nextVerificationTime);
 
     /**
      * @notice Get loyalty bonus eligibility information
@@ -80,23 +75,15 @@ interface ILoyaltySystem {
      * @return timeRemaining Time remaining until eligible (if not eligible)
      * @return verificationsNeeded Additional verifications needed
      */
-    function getLoyaltyBonusEligibility(
-        address user
-    )
+    function getLoyaltyBonusEligibility(address user)
         external
         view
-        returns (
-            bool eligible,
-            uint256 timeRemaining,
-            uint256 verificationsNeeded
-        );
+        returns (bool eligible, uint256 timeRemaining, uint256 verificationsNeeded);
 
     /**
      * @notice Get user's effective loyalty multiplier
      * @param user The user address
      * @return multiplier The loyalty multiplier (100 = 1x, 200 = 2x)
      */
-    function getLoyaltyMultiplier(
-        address user
-    ) external view returns (uint256 multiplier);
+    function getLoyaltyMultiplier(address user) external view returns (uint256 multiplier);
 }
