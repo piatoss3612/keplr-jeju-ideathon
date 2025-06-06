@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { Orbitron, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ReownProvider from "@/context/ReownProvider";
+import { KeplrProvider } from "@/context/KeplrProvider";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -32,7 +33,9 @@ export default async function RootLayout({
       <body
         className={`${orbitron.variable} ${jetBrainsMono.variable} antialiased`}
       >
-        <ReownProvider cookies={cookies}>{children}</ReownProvider>
+        <ReownProvider cookies={cookies}>
+          <KeplrProvider>{children}</KeplrProvider>
+        </ReownProvider>
       </body>
     </html>
   );

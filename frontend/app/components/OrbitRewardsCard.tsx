@@ -1,20 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useAppKit } from "@reown/appkit/react";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
+import { useKeplrContext } from "@/context/KeplrProvider";
+import ConnectWallets from "./ConnectWallets";
+import CheckEligibility from "./CheckEligibility";
 
-type Tab = "dashboard" | "proof";
+type Tab = "connect" | "dashboard" | "proof";
 
 export default function OrbitRewardsCard() {
-  const { open } = useAppKit();
   const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
+  const keplr = useKeplrContext();
 
-  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
-  const [step, setStep] = useState<"connect" | "proof" | "verify">("connect");
-  const [delegatorAddress, setDelegatorAddress] = useState("");
-  const [validatorAddress, setValidatorAddress] = useState("");
+  const [activeTab, setActiveTab] = useState<Tab>("connect");
+  const [step, setStep] = useState<"check" | "proof" | "verify">("check");
   const [isGeneratingProof, setIsGeneratingProof] = useState(false);
   const [proof, setProof] = useState<string | null>(null);
 
@@ -36,14 +35,14 @@ export default function OrbitRewardsCard() {
   };
 
   const handleGenerateProof = async () => {
-    if (!delegatorAddress || !validatorAddress) {
-      alert("모든 필드를 입력해주세요");
+    if (!keplr.isConnected || !keplr.account) {
+      alert("Keplr 지갑을 먼저 연결해주세요");
       return;
     }
 
     setIsGeneratingProof(true);
 
-    // 시뮬레이션 - 실제로는 vlayer prover 호출
+    // 시뮬레이션 - 실제로는 vlayer prover를 Keplr 주소로 호출
     setTimeout(() => {
       setProof("0x" + Math.random().toString(16).substring(2, 50) + "...");
       setIsGeneratingProof(false);
@@ -56,9 +55,7 @@ export default function OrbitRewardsCard() {
   };
 
   const resetCard = () => {
-    setStep("connect");
-    setDelegatorAddress("");
-    setValidatorAddress("");
+    setStep("check");
     setProof(null);
   };
 
@@ -67,6 +64,28 @@ export default function OrbitRewardsCard() {
       {/* Tab Navigation - Above the card */}
       <div className="flex justify-center mb-0 relative z-20">
         <div className="flex space-x-1">
+          {/* Connect Tab */}
+          <button
+            onClick={() => setActiveTab("connect")}
+            className={`px-6 py-3 rounded-t-xl font-medium transition-all duration-300 relative border-t border-l border-r backdrop-blur-xl ${
+              activeTab === "connect"
+                ? "bg-gradient-to-r from-slate-900/95 to-purple-900/95 text-white border-pink-400/40 shadow-lg"
+                : "bg-slate-900/60 text-pink-300 hover:text-white hover:bg-slate-800/80 border-pink-400/20"
+            }`}
+            style={{
+              clipPath:
+                activeTab === "connect"
+                  ? "none"
+                  : "polygon(0 0, 100% 0, 90% 100%, 10% 100%)",
+            }}
+          >
+            <span className="relative z-10 font-orbitron">🔗 Connect</span>
+            {activeTab === "connect" && (
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-t-xl"></div>
+            )}
+          </button>
+
+          {/* Dashboard Tab */}
           <button
             onClick={() => setActiveTab("dashboard")}
             className={`px-6 py-3 rounded-t-xl font-medium transition-all duration-300 relative border-t border-l border-r backdrop-blur-xl ${
@@ -78,7 +97,7 @@ export default function OrbitRewardsCard() {
               clipPath:
                 activeTab === "dashboard"
                   ? "none"
-                  : "polygon(0 0, 100% 0, 95% 100%, 5% 100%)",
+                  : "polygon(10% 0, 90% 0, 90% 100%, 10% 100%)",
             }}
           >
             <span className="relative z-10 font-orbitron">🌌 Dashboard</span>
@@ -86,6 +105,8 @@ export default function OrbitRewardsCard() {
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-t-xl"></div>
             )}
           </button>
+
+          {/* Generate Proof Tab */}
           <button
             onClick={() => setActiveTab("proof")}
             className={`px-6 py-3 rounded-t-xl font-medium transition-all duration-300 relative border-t border-l border-r backdrop-blur-xl ${
@@ -97,7 +118,7 @@ export default function OrbitRewardsCard() {
               clipPath:
                 activeTab === "proof"
                   ? "none"
-                  : "polygon(5% 0, 95% 0, 100% 100%, 0% 100%)",
+                  : "polygon(10% 0, 100% 0, 100% 100%, 0% 100%)",
             }}
           >
             <span className="relative z-10 font-orbitron">
@@ -121,27 +142,26 @@ export default function OrbitRewardsCard() {
 
         {/* Tab Content */}
         <div className="p-8 relative z-10">
-          {activeTab === "dashboard" ? (
+          {activeTab === "connect" && (
+            <ConnectWallets onBothConnected={() => setActiveTab("proof")} />
+          )}
+
+          {activeTab === "dashboard" && (
             <DashboardContent
               data={dashboardData}
               isConnected={isConnected}
               address={address}
-              onConnect={() => open()}
+              keplr={keplr}
             />
-          ) : (
+          )}
+
+          {activeTab === "proof" && (
             <ProofContent
               step={step}
               setStep={setStep}
-              delegatorAddress={delegatorAddress}
-              setDelegatorAddress={setDelegatorAddress}
-              validatorAddress={validatorAddress}
-              setValidatorAddress={setValidatorAddress}
               isGeneratingProof={isGeneratingProof}
               proof={proof}
-              isConnected={isConnected}
-              address={address}
-              onConnect={() => open()}
-              onDisconnect={() => disconnect()}
+              keplr={keplr}
               onGenerateProof={handleGenerateProof}
               onVerifyProof={handleVerifyProof}
               onReset={resetCard}
@@ -158,7 +178,7 @@ function DashboardContent({
   data,
   isConnected,
   address,
-  onConnect,
+  keplr,
 }: {
   data: {
     totalPoints: number;
@@ -169,24 +189,57 @@ function DashboardContent({
   };
   isConnected: boolean;
   address: string | undefined;
-  onConnect: () => void;
+  keplr: ReturnType<typeof useKeplrContext>;
 }) {
-  if (!isConnected) {
+  const bothConnected = isConnected && keplr.isConnected;
+
+  if (!bothConnected) {
     return (
       <div className="text-center space-y-6">
         <div className="text-6xl mb-4">🔐</div>
         <h2 className="text-2xl font-bold font-orbitron text-white mb-2">
-          Connect to View Dashboard
+          Connect Wallets to View Dashboard
         </h2>
         <p className="text-cyan-200 mb-6">
-          Connect your wallet to see your Orbit Rewards status
+          Please connect both EVM and Cosmos wallets to see your Orbit Rewards
+          status
         </p>
-        <button
-          onClick={onConnect}
-          className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105"
-        >
-          Connect Wallet
-        </button>
+
+        {/* Connection Status */}
+        <div className="flex justify-center space-x-8 mb-6">
+          <div className="flex items-center space-x-2">
+            <div
+              className={`w-3 h-3 rounded-full ${
+                isConnected ? "bg-green-400 animate-pulse" : "bg-gray-600"
+              }`}
+            ></div>
+            <span
+              className={`text-sm ${
+                isConnected ? "text-green-300" : "text-gray-400"
+              }`}
+            >
+              EVM Wallet {isConnected ? "✓" : "✗"}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div
+              className={`w-3 h-3 rounded-full ${
+                keplr.isConnected ? "bg-green-400 animate-pulse" : "bg-gray-600"
+              }`}
+            ></div>
+            <span
+              className={`text-sm ${
+                keplr.isConnected ? "text-green-300" : "text-gray-400"
+              }`}
+            >
+              Cosmos Wallet {keplr.isConnected ? "✓" : "✗"}
+            </span>
+          </div>
+        </div>
+
+        <p className="text-cyan-300 text-sm">
+          Go to 🔗 Connect tab to connect your wallets
+        </p>
       </div>
     );
   }
@@ -276,32 +329,18 @@ function DashboardContent({
 function ProofContent({
   step,
   setStep,
-  delegatorAddress,
-  setDelegatorAddress,
-  validatorAddress,
-  setValidatorAddress,
   isGeneratingProof,
   proof,
-  isConnected,
-  address,
-  onConnect,
-  onDisconnect,
+  keplr,
   onGenerateProof,
   onVerifyProof,
   onReset,
 }: {
-  step: "connect" | "proof" | "verify";
-  setStep: (step: "connect" | "proof" | "verify") => void;
-  delegatorAddress: string;
-  setDelegatorAddress: (address: string) => void;
-  validatorAddress: string;
-  setValidatorAddress: (address: string) => void;
+  step: "check" | "proof" | "verify";
+  setStep: (step: "check" | "proof" | "verify") => void;
   isGeneratingProof: boolean;
   proof: string | null;
-  isConnected: boolean;
-  address: string | undefined;
-  onConnect: () => void;
-  onDisconnect: () => void;
+  keplr: ReturnType<typeof useKeplrContext>;
   onGenerateProof: () => void;
   onVerifyProof: () => void;
   onReset: () => void;
@@ -313,10 +352,10 @@ function ProofContent({
         <div className="flex justify-between items-center mb-2">
           <span
             className={`text-sm font-medium ${
-              step === "connect" ? "text-cyan-300" : "text-gray-400"
+              step === "check" ? "text-cyan-300" : "text-gray-400"
             }`}
           >
-            Connect
+            Check Eligibility
           </span>
           <span
             className={`text-sm font-medium ${
@@ -338,57 +377,15 @@ function ProofContent({
             className="bg-gradient-to-r from-cyan-500 to-pink-500 h-2 rounded-full transition-all duration-500 shadow-sm shadow-cyan-500/50"
             style={{
               width:
-                step === "connect" ? "33%" : step === "proof" ? "66%" : "100%",
+                step === "check" ? "33%" : step === "proof" ? "66%" : "100%",
             }}
           ></div>
         </div>
       </div>
 
       {/* Step Content */}
-      {step === "connect" && (
-        <div className="text-center space-y-6">
-          <div className="text-6xl mb-4">🚀</div>
-          <h2 className="text-2xl font-bold font-orbitron text-white mb-2">
-            Connect to Orbit
-          </h2>
-          <p className="text-cyan-200 mb-6">
-            Connect your wallet to start your orbit journey
-          </p>
-
-          {!isConnected ? (
-            <button
-              onClick={onConnect}
-              className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              Connect Wallet
-            </button>
-          ) : (
-            <div className="space-y-4">
-              <div className="bg-green-500/20 border border-green-400/30 rounded-xl p-4">
-                <p className="text-green-300 text-sm mb-1">
-                  ✓ Wallet Connected
-                </p>
-                <p className="text-green-100 font-jetbrains text-xs">
-                  {address?.slice(0, 6)}...{address?.slice(-4)}
-                </p>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setStep("proof")}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300"
-                >
-                  Continue
-                </button>
-                <button
-                  onClick={onDisconnect}
-                  className="px-4 py-3 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-xl transition-all duration-300"
-                >
-                  Disconnect
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+      {step === "check" && (
+        <CheckEligibility onEligibilityConfirmed={() => setStep("proof")} />
       )}
 
       {step === "proof" && (
@@ -399,49 +396,77 @@ function ProofContent({
               Generate Proof
             </h2>
             <p className="text-cyan-200">
-              Enter delegation details to generate zero-knowledge proof
+              Generate zero-knowledge proof for your delegation
             </p>
           </div>
 
+          {/* Wallet Selection */}
           <div className="space-y-4">
-            <div>
-              <label className="block text-cyan-300 text-sm font-medium mb-2">
-                Delegator Address
-              </label>
-              <input
-                type="text"
-                value={delegatorAddress}
-                onChange={(e) => setDelegatorAddress(e.target.value)}
-                placeholder="init1..."
-                className="w-full bg-slate-900/70 border border-cyan-400/40 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 shadow-lg shadow-cyan-500/10"
-              />
-            </div>
+            {keplr.isConnected && keplr.account ? (
+              <div className="bg-slate-900/50 border border-cyan-400/40 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">🌌</div>
+                    <div>
+                      <h3 className="text-cyan-300 font-orbitron font-medium">
+                        Keplr Wallet Connected
+                      </h3>
+                      <p className="text-cyan-200 text-sm">
+                        {keplr.account.name}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-green-300 text-xs">Connected</span>
+                  </div>
+                </div>
 
-            <div>
-              <label className="block text-pink-300 text-sm font-medium mb-2">
-                Validator Address
-              </label>
-              <input
-                type="text"
-                value={validatorAddress}
-                onChange={(e) => setValidatorAddress(e.target.value)}
-                placeholder="initvaloper1..."
-                className="w-full bg-slate-900/70 border border-pink-400/40 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-400/30 shadow-lg shadow-pink-500/10"
-              />
-            </div>
+                <div className="bg-slate-800/50 border border-cyan-400/20 rounded-lg p-3">
+                  <p className="text-cyan-300 text-xs font-medium mb-1">
+                    Delegator Address
+                  </p>
+                  <p className="text-cyan-200 text-xs font-jetbrains break-all">
+                    {keplr.account.address}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-900/50 border border-orange-400/40 rounded-xl p-4">
+                <div className="text-center space-y-4">
+                  <div className="text-4xl">🌌</div>
+                  <h3 className="text-orange-300 font-orbitron font-medium">
+                    Keplr Wallet Required
+                  </h3>
+                  <p className="text-orange-200 text-sm">
+                    Please connect your Keplr wallet to generate proof
+                  </p>
+                  <div className="text-center">
+                    <p className="text-orange-200 text-sm mb-4">
+                      Please go back to the Connect step to connect your Keplr
+                      wallet
+                    </p>
+                    <p className="text-orange-200 text-sm">
+                      Please go to the Connect tab to connect your Keplr wallet
+                      first
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex space-x-3">
             <button
-              onClick={() => setStep("connect")}
+              onClick={() => setStep("check")}
               className="px-6 py-3 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-xl transition-all duration-300"
             >
-              Back
+              Back to Check
             </button>
             <button
               onClick={onGenerateProof}
               disabled={
-                isGeneratingProof || !delegatorAddress || !validatorAddress
+                isGeneratingProof || !keplr.isConnected || !keplr.account
               }
               className="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 disabled:from-gray-600 disabled:to-gray-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 disabled:cursor-not-allowed"
             >
