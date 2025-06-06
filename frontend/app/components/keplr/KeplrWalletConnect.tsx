@@ -34,6 +34,9 @@ export default function KeplrWalletConnect() {
     return (
       <div className="space-y-4">
         <div className="bg-slate-800/50 border border-cyan-400/20 rounded-lg p-3">
+          <p className="text-cyan-300 text-xs font-medium mb-1">
+            Connected Address
+          </p>
           <p className="text-cyan-200 text-xs font-jetbrains break-all">
             {account.address}
           </p>
@@ -66,10 +69,10 @@ export default function KeplrWalletConnect() {
       {isLoading ? (
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-          Connecting...
+          Connecting to Initia...
         </div>
       ) : (
-        "🌌 Connect Keplr"
+        "🌌 Connect Keplr (Initia)"
       )}
     </button>
   );

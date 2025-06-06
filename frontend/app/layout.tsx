@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Orbitron, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import ReownProvider from "@/context/ReownProvider";
+import RainbowKitProvider from "@/context/RainbowKitProvider";
 import { KeplrProvider } from "@/context/KeplrProvider";
 
 const orbitron = Orbitron({
@@ -16,8 +16,8 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Initia Delegation Verifier",
-  description: "Initia 블록체인 delegation을 검증하는 dApp with Reown AppKit",
+  title: "Keplr Jeju Ideathon",
+  description: "Initia Delegation Verifier",
 };
 
 export default async function RootLayout({
@@ -33,9 +33,9 @@ export default async function RootLayout({
       <body
         className={`${orbitron.variable} ${jetBrainsMono.variable} antialiased`}
       >
-        <ReownProvider cookies={cookies}>
+        <RainbowKitProvider cookies={cookies}>
           <KeplrProvider>{children}</KeplrProvider>
-        </ReownProvider>
+        </RainbowKitProvider>
       </body>
     </html>
   );

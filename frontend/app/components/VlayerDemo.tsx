@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
-import WalletConnect from "./WalletConnect";
 import { PROVER_ADDRESS } from "../utils/constants";
 import { PROVER_ABI } from "../utils/abis";
 
@@ -60,11 +59,6 @@ export default function VlayerDemo() {
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
         vlayer Initia Delegation Verification
       </h2>
-
-      {/* Wallet Connection */}
-      <div className="mb-6">
-        <WalletConnect />
-      </div>
 
       {/* Input Form */}
       <div className="space-y-4 mb-6">

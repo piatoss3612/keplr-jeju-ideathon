@@ -7,18 +7,27 @@ interface CheckEligibilityProps {
   onEligibilityConfirmed: () => void;
 }
 
+interface EligibilityData {
+  bech32Address: string;
+  hexAddress: string;
+  delegationAmount: string;
+  requiredAmount: string;
+  isQualified: boolean;
+  timestamp: string;
+}
+
+interface ErrorData {
+  error: string;
+  message: string;
+}
+
 export default function CheckEligibility({
   onEligibilityConfirmed,
 }: CheckEligibilityProps) {
   const keplr = useKeplrContext();
   const [isChecking, setIsChecking] = useState(false);
-  const [eligibilityData, setEligibilityData] = useState<{
-    isEligible: boolean;
-    tier: string;
-    delegatedAmount: string;
-    validatorCount: number;
-    minRequirement: string;
-  } | null>(null);
+  const [eligibilityData, setEligibilityData] =
+    useState<EligibilityData | null>(null);
 
   const checkEligibility = async () => {
     if (!keplr.isConnected || !keplr.account) {
@@ -26,22 +35,27 @@ export default function CheckEligibility({
       return;
     }
 
-    setIsChecking(true);
+    try {
+      setIsChecking(true);
 
-    // 시뮬레이션 - 실제로는 Initia 체인에서 delegation 정보 조회
-    setTimeout(() => {
-      // Mock eligibility data
-      const mockData = {
-        isEligible: Math.random() > 0.3, // 70% 확률로 eligible
-        tier: "Silver Delegator",
-        delegatedAmount: "1,250.00",
-        validatorCount: 3,
-        minRequirement: "100.00",
-      };
+      const response = await fetch(
+        `https://keplr-ideathon.vercel.app/verify?address=${keplr.account.address}`
+      );
 
-      setEligibilityData(mockData);
+      if (!response.ok) {
+        const errorData = (await response.json()) as ErrorData;
+        console.error("Failed to check eligibility:", errorData);
+        return;
+      }
+
+      const data = (await response.json()) as EligibilityData;
+
+      setEligibilityData(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
       setIsChecking(false);
-    }, 2000);
+    }
   };
 
   if (!keplr.isConnected || !keplr.account) {
@@ -126,33 +140,33 @@ export default function CheckEligibility({
           {/* Eligibility Results */}
           <div
             className={`border rounded-xl p-6 ${
-              eligibilityData.isEligible
+              eligibilityData.isQualified
                 ? "bg-green-500/20 border-green-400/30"
                 : "bg-red-500/20 border-red-400/30"
             }`}
           >
             <div className="flex items-center justify-center mb-4">
               <div className="text-4xl mr-3">
-                {eligibilityData.isEligible ? "✅" : "❌"}
+                {eligibilityData.isQualified ? "✅" : "❌"}
               </div>
               <div className="text-center">
                 <h3
                   className={`text-2xl font-orbitron font-bold ${
-                    eligibilityData.isEligible
+                    eligibilityData.isQualified
                       ? "text-green-300"
                       : "text-red-300"
                   }`}
                 >
-                  {eligibilityData.isEligible ? "Eligible" : "Not Eligible"}
+                  {eligibilityData.isQualified ? "Eligible" : "Not Eligible"}
                 </h3>
                 <p
                   className={`text-sm ${
-                    eligibilityData.isEligible
+                    eligibilityData.isQualified
                       ? "text-green-200"
                       : "text-red-200"
                   }`}
                 >
-                  {eligibilityData.isEligible
+                  {eligibilityData.isQualified
                     ? "You can generate delegation proof"
                     : "Insufficient delegation amount"}
                 </p>
@@ -163,24 +177,24 @@ export default function CheckEligibility({
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold font-orbitron text-cyan-400">
-                  {eligibilityData.delegatedAmount}
+                  {eligibilityData.delegationAmount}
                 </div>
                 <div className="text-xs text-cyan-300">INIT Delegated</div>
               </div>
               <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold font-orbitron text-pink-400">
-                  {eligibilityData.validatorCount}
+                  {eligibilityData.requiredAmount}
                 </div>
-                <div className="text-xs text-pink-300">Validators</div>
+                <div className="text-xs text-pink-300">Required Amount</div>
               </div>
             </div>
 
             <div className="text-center mb-4">
               <div className="text-lg font-orbitron text-purple-300 mb-1">
-                Tier: {eligibilityData.tier}
+                Tier: {eligibilityData.isQualified ? "Silver" : "Bronze"}
               </div>
               <div className="text-sm text-gray-400">
-                Minimum requirement: {eligibilityData.minRequirement} INIT
+                Minimum requirement: {eligibilityData.requiredAmount} INIT
               </div>
             </div>
           </div>
@@ -196,7 +210,7 @@ export default function CheckEligibility({
               Check Again
             </button>
 
-            {eligibilityData.isEligible && (
+            {eligibilityData.isQualified && (
               <button
                 onClick={onEligibilityConfirmed}
                 className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 font-orbitron"
@@ -206,14 +220,14 @@ export default function CheckEligibility({
             )}
           </div>
 
-          {!eligibilityData.isEligible && (
+          {!eligibilityData.isQualified && (
             <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-xl p-4">
               <h4 className="text-yellow-300 font-orbitron font-medium mb-2">
                 How to become eligible:
               </h4>
               <ul className="text-yellow-200 text-sm space-y-1">
                 <li>
-                  • Delegate at least {eligibilityData.minRequirement} INIT to
+                  • Delegate at least {eligibilityData.requiredAmount} INIT to
                   validators
                 </li>
                 <li>• Wait for delegation to be confirmed on-chain</li>

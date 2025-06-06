@@ -1,5 +1,5 @@
-import OrbitRewardsCard from "./components/OrbitRewardsCard";
-import SpaceBackground from "./components/SpaceBackground";
+import OrbitRewardsCard from "./components/tabs/OrbitRewardsCard";
+import SpaceBackground from "./components/background/SpaceBackground";
 
 export default function Home() {
   return (
