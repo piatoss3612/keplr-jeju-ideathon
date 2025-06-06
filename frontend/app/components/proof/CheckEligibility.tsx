@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 import { useKeplrContext } from "@/context/KeplrProvider";
+import { formatUnits } from "viem";
+import {
+  getTierForAmount,
+  getTierName,
+  getTierEmoji,
+  getTierColorClass,
+  getNextTierInfo,
+  formatInitAmount as formatTierAmount,
+} from "../../utils/tierUtils";
 
 interface CheckEligibilityProps {
   onEligibilityConfirmed: () => void;
@@ -28,6 +37,11 @@ export default function CheckEligibility({
   const [isChecking, setIsChecking] = useState(false);
   const [eligibilityData, setEligibilityData] =
     useState<EligibilityData | null>(null);
+  const [errorData, setErrorData] = useState<ErrorData | null>(null);
+
+  const formatInitAmount = (amount: string) => {
+    return formatUnits(BigInt(amount), 6).toString();
+  };
 
   const checkEligibility = async () => {
     if (!keplr.isConnected || !keplr.account) {
@@ -37,6 +51,8 @@ export default function CheckEligibility({
 
     try {
       setIsChecking(true);
+      setErrorData(null); // Clear previous errors
+      setEligibilityData(null); // Clear previous results
 
       const response = await fetch(
         `https://keplr-ideathon.vercel.app/verify?address=${keplr.account.address}`
@@ -44,15 +60,21 @@ export default function CheckEligibility({
 
       if (!response.ok) {
         const errorData = (await response.json()) as ErrorData;
-        console.error("Failed to check eligibility:", errorData);
+        setErrorData(errorData);
         return;
       }
 
       const data = (await response.json()) as EligibilityData;
-
       setEligibilityData(data);
     } catch (error) {
       console.error(error);
+      setErrorData({
+        error: "Network Error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to connect to verification service",
+      });
     } finally {
       setIsChecking(false);
     }
@@ -113,8 +135,34 @@ export default function CheckEligibility({
         </div>
       </div>
 
+      {/* Error Display */}
+      {errorData && (
+        <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-6 mb-6">
+          <div className="flex items-center justify-center mb-4">
+            <div className="text-4xl mr-3">❌</div>
+            <div className="text-center">
+              <h3 className="text-2xl font-orbitron font-bold text-red-300">
+                {errorData.error}
+              </h3>
+              <p className="text-sm text-red-200">{errorData.message}</p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <button
+              onClick={() => {
+                setErrorData(null);
+              }}
+              className="px-6 py-3 bg-red-600/50 hover:bg-red-600/70 text-red-200 rounded-xl transition-all duration-300"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Check Button or Results */}
-      {!eligibilityData ? (
+      {!eligibilityData && !errorData && (
         <div className="text-center">
           <button
             onClick={checkEligibility}
@@ -135,7 +183,10 @@ export default function CheckEligibility({
             This will check your INIT delegation status on Initia network
           </p>
         </div>
-      ) : (
+      )}
+
+      {/* Eligibility Results */}
+      {eligibilityData && (
         <div className="space-y-6">
           {/* Eligibility Results */}
           <div
@@ -177,25 +228,99 @@ export default function CheckEligibility({
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold font-orbitron text-cyan-400">
-                  {eligibilityData.delegationAmount}
+                  {formatInitAmount(eligibilityData.delegationAmount)}
                 </div>
                 <div className="text-xs text-cyan-300">INIT Delegated</div>
               </div>
               <div className="bg-slate-800/50 rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold font-orbitron text-pink-400">
-                  {eligibilityData.requiredAmount}
+                  {(() => {
+                    try {
+                      const nextTierInfo = getNextTierInfo(
+                        eligibilityData.delegationAmount
+                      );
+                      if (nextTierInfo.nextTier) {
+                        return formatTierAmount(
+                          nextTierInfo.requiredAmount || 0
+                        );
+                      } else {
+                        return "MAX"; // Already at Galaxy tier
+                      }
+                    } catch {
+                      return formatTierAmount("5000000"); // Minimum for Asteroid
+                    }
+                  })()}
                 </div>
-                <div className="text-xs text-pink-300">Required Amount</div>
+                <div className="text-xs text-pink-300">
+                  {(() => {
+                    try {
+                      const nextTierInfo = getNextTierInfo(
+                        eligibilityData.delegationAmount
+                      );
+                      if (nextTierInfo.nextTier) {
+                        return `Next Tier (${getTierName(
+                          nextTierInfo.nextTier
+                        )})`;
+                      } else {
+                        return "Maximum Tier";
+                      }
+                    } catch {
+                      return "Minimum (Asteroid)";
+                    }
+                  })()}
+                </div>
               </div>
             </div>
 
             <div className="text-center mb-4">
-              <div className="text-lg font-orbitron text-purple-300 mb-1">
-                Tier: {eligibilityData.isQualified ? "Silver" : "Bronze"}
-              </div>
-              <div className="text-sm text-gray-400">
-                Minimum requirement: {eligibilityData.requiredAmount} INIT
-              </div>
+              {(() => {
+                try {
+                  const currentTier = getTierForAmount(
+                    eligibilityData.delegationAmount
+                  );
+                  const tierName = getTierName(currentTier);
+                  const tierEmoji = getTierEmoji(currentTier);
+                  const tierColorClass = getTierColorClass(currentTier);
+                  const nextTierInfo = getNextTierInfo(
+                    eligibilityData.delegationAmount
+                  );
+
+                  return (
+                    <>
+                      <div
+                        className={`text-lg font-orbitron mb-1 ${tierColorClass}`}
+                      >
+                        {tierEmoji} Tier: {tierName}
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        Current delegation:{" "}
+                        {formatTierAmount(eligibilityData.delegationAmount)}{" "}
+                        INIT
+                      </div>
+                      {nextTierInfo.nextTier && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Next tier ({getTierName(nextTierInfo.nextTier)}):{" "}
+                          {formatTierAmount(nextTierInfo.remainingAmount || 0)}{" "}
+                          INIT more needed
+                        </div>
+                      )}
+                    </>
+                  );
+                } catch {
+                  // Fallback for amounts too low for any tier
+                  return (
+                    <>
+                      <div className="text-lg font-orbitron text-gray-400 mb-1">
+                        ❓ Tier: Not Qualified
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        Minimum requirement: {formatTierAmount("5000000")} INIT
+                        (Asteroid tier)
+                      </div>
+                    </>
+                  );
+                }
+              })()}
             </div>
           </div>
 
@@ -204,6 +329,7 @@ export default function CheckEligibility({
             <button
               onClick={() => {
                 setEligibilityData(null);
+                setErrorData(null);
               }}
               className="px-6 py-3 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-xl transition-all duration-300"
             >
@@ -215,7 +341,7 @@ export default function CheckEligibility({
                 onClick={onEligibilityConfirmed}
                 className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 font-orbitron"
               >
-                🚀 Continue to Generate Proof
+                🚀 Generate Proof
               </button>
             )}
           </div>
@@ -223,15 +349,27 @@ export default function CheckEligibility({
           {!eligibilityData.isQualified && (
             <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-xl p-4">
               <h4 className="text-yellow-300 font-orbitron font-medium mb-2">
-                How to become eligible:
+                🚀 How to become eligible:
               </h4>
               <ul className="text-yellow-200 text-sm space-y-1">
                 <li>
-                  • Delegate at least {eligibilityData.requiredAmount} INIT to
-                  validators
+                  ☄️ <strong>Asteroid Tier</strong>: Delegate at least{" "}
+                  {formatTierAmount("5000000")} INIT (Entry level)
+                </li>
+                <li>
+                  💫 <strong>Comet Tier</strong>: Delegate at least{" "}
+                  {formatTierAmount("20000000")} INIT (+3x points)
+                </li>
+                <li>
+                  ⭐ <strong>Star Tier</strong>: Delegate at least{" "}
+                  {formatTierAmount("100000000")} INIT (+8x points)
+                </li>
+                <li>
+                  🌌 <strong>Galaxy Tier</strong>: Delegate at least{" "}
+                  {formatTierAmount("1000000000")} INIT (+20x points)
                 </li>
                 <li>• Wait for delegation to be confirmed on-chain</li>
-                <li>• Stake with active validators for better tier</li>
+                <li>• Higher tiers earn more stellar points for navigation!</li>
               </ul>
             </div>
           )}
