@@ -14,6 +14,7 @@
     "@tanstack/react-query": "^5.80.5",
     "@vlayer/react": "^1.0.2-nightly-20250604-6e4721b4573776bdc81a0cd24afa29f83e1977be",
     "@vlayer/sdk": "^1.0.2-nightly-20250605-c9dae53257c0ffc9d2779430f693f6bc81050db0",
+    "framer-motion": "^12.16.0",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

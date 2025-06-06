@@ -71,8 +71,8 @@ export default function OrbitRewardsCard() {
             onClick={() => setActiveTab("dashboard")}
             className={`px-6 py-3 rounded-t-xl font-medium transition-all duration-300 relative border-t border-l border-r backdrop-blur-xl ${
               activeTab === "dashboard"
-                ? "bg-gradient-to-r from-slate-800/90 to-purple-800/90 text-white border-purple-500/30 shadow-lg"
-                : "bg-slate-900/60 text-purple-300 hover:text-white hover:bg-slate-800/80 border-purple-500/20"
+                ? "bg-gradient-to-r from-slate-900/95 to-purple-900/95 text-white border-pink-400/40 shadow-lg"
+                : "bg-slate-900/60 text-pink-300 hover:text-white hover:bg-slate-800/80 border-pink-400/20"
             }`}
             style={{
               clipPath:
@@ -81,17 +81,17 @@ export default function OrbitRewardsCard() {
                   : "polygon(0 0, 100% 0, 95% 100%, 5% 100%)",
             }}
           >
-            <span className="relative z-10">🌌 Dashboard</span>
+            <span className="relative z-10 font-orbitron">🌌 Dashboard</span>
             {activeTab === "dashboard" && (
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 rounded-t-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-t-xl"></div>
             )}
           </button>
           <button
             onClick={() => setActiveTab("proof")}
             className={`px-6 py-3 rounded-t-xl font-medium transition-all duration-300 relative border-t border-l border-r backdrop-blur-xl ${
               activeTab === "proof"
-                ? "bg-gradient-to-r from-slate-800/90 to-purple-800/90 text-white border-purple-500/30 shadow-lg"
-                : "bg-slate-900/60 text-purple-300 hover:text-white hover:bg-slate-800/80 border-purple-500/20"
+                ? "bg-gradient-to-r from-slate-900/95 to-purple-900/95 text-white border-pink-400/40 shadow-lg"
+                : "bg-slate-900/60 text-pink-300 hover:text-white hover:bg-slate-800/80 border-pink-400/20"
             }`}
             style={{
               clipPath:
@@ -100,18 +100,24 @@ export default function OrbitRewardsCard() {
                   : "polygon(5% 0, 95% 0, 100% 100%, 0% 100%)",
             }}
           >
-            <span className="relative z-10">⚡ Generate Proof</span>
+            <span className="relative z-10 font-orbitron">
+              ⚡ Generate Proof
+            </span>
             {activeTab === "proof" && (
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 rounded-t-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-t-xl"></div>
             )}
           </button>
         </div>
       </div>
 
-      {/* Main Card */}
-      <div className="bg-gradient-to-br from-slate-800/90 to-purple-800/90 backdrop-blur-xl rounded-2xl border border-purple-500/30 shadow-2xl relative overflow-hidden">
-        {/* Card background effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-cyan-600/10 rounded-2xl"></div>
+      {/* 사이버펑크 메인 카드 */}
+      <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-xl rounded-2xl border border-pink-400/40 shadow-2xl relative overflow-hidden">
+        {/* 사이버펑크 카드 배경 효과 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-pink-500/20 rounded-2xl"></div>
+        {/* 네온 글로우 효과 */}
+        <div className="absolute inset-0 rounded-2xl shadow-inner shadow-pink-500/25"></div>
+        {/* 추가 사이버펑크 글로우 */}
+        <div className="absolute inset-px bg-gradient-to-br from-cyan-500/5 to-pink-500/5 rounded-2xl"></div>
 
         {/* Tab Content */}
         <div className="p-8 relative z-10">
@@ -169,10 +175,10 @@ function DashboardContent({
     return (
       <div className="text-center space-y-6">
         <div className="text-6xl mb-4">🔐</div>
-        <h2 className="text-2xl font-bold text-white mb-2">
+        <h2 className="text-2xl font-bold font-orbitron text-white mb-2">
           Connect to View Dashboard
         </h2>
-        <p className="text-purple-200 mb-6">
+        <p className="text-cyan-200 mb-6">
           Connect your wallet to see your Orbit Rewards status
         </p>
         <button
@@ -190,26 +196,30 @@ function DashboardContent({
       {/* User Status */}
       <div className="text-center mb-6">
         <div className="text-5xl mb-3">🌟</div>
-        <h2 className="text-2xl font-bold text-white mb-1">{data.level}</h2>
-        <p className="text-purple-200 text-sm">
+        <h2 className="text-2xl font-bold font-orbitron text-white mb-1">
+          {data.level}
+        </h2>
+        <p className="text-cyan-200 text-sm font-jetbrains">
           {address?.slice(0, 6)}...{address?.slice(-4)}
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-slate-700/30 border border-purple-500/30 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-cyan-400">
+        <div className="bg-slate-900/50 border border-cyan-400/40 rounded-xl p-4 text-center shadow-lg shadow-cyan-500/10">
+          <div className="text-2xl font-bold font-orbitron text-cyan-400">
             {data.totalPoints}
           </div>
-          <div className="text-xs text-purple-300">Total Points</div>
+          <div className="text-xs text-cyan-300">Total Points</div>
         </div>
-        <div className="bg-slate-700/30 border border-purple-500/30 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-green-400">{data.rank}</div>
-          <div className="text-xs text-purple-300">Global Rank</div>
+        <div className="bg-slate-900/50 border border-pink-400/40 rounded-xl p-4 text-center shadow-lg shadow-pink-500/10">
+          <div className="text-2xl font-bold font-orbitron text-pink-400">
+            {data.rank}
+          </div>
+          <div className="text-xs text-pink-300">Global Rank</div>
         </div>
-        <div className="bg-slate-700/30 border border-purple-500/30 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-400">
+        <div className="bg-slate-900/50 border border-purple-400/40 rounded-xl p-4 text-center shadow-lg shadow-purple-500/10">
+          <div className="text-2xl font-bold font-orbitron text-purple-400">
             {data.recentProofs}
           </div>
           <div className="text-xs text-purple-300">Proofs Generated</div>
@@ -217,18 +227,18 @@ function DashboardContent({
       </div>
 
       {/* Weekly Activity */}
-      <div className="bg-slate-700/30 border border-purple-500/30 rounded-xl p-4">
-        <h3 className="text-purple-300 text-sm font-medium mb-3">
+      <div className="bg-slate-900/50 border border-cyan-400/40 rounded-xl p-4 shadow-lg shadow-cyan-500/10">
+        <h3 className="text-cyan-300 text-sm font-medium mb-3">
           Weekly Activity
         </h3>
         <div className="flex justify-between items-end h-20">
           {data.weeklyActivity.map((day, index: number) => (
             <div key={index} className="flex flex-col items-center space-y-1">
               <div
-                className="bg-gradient-to-t from-purple-500 to-cyan-500 rounded-t w-6 transition-all duration-300"
+                className="bg-gradient-to-t from-cyan-500 to-pink-400 rounded-t w-6 transition-all duration-300 shadow-sm shadow-cyan-500/30"
                 style={{ height: `${Math.max(8, day.proofs * 15)}px` }}
               ></div>
-              <span className="text-xs text-purple-300">
+              <span className="text-xs text-cyan-300">
                 {day.day.slice(0, 1)}
               </span>
             </div>
@@ -237,8 +247,8 @@ function DashboardContent({
       </div>
 
       {/* Recent Achievements */}
-      <div className="bg-slate-700/30 border border-purple-500/30 rounded-xl p-4">
-        <h3 className="text-purple-300 text-sm font-medium mb-3">
+      <div className="bg-slate-900/50 border border-pink-400/40 rounded-xl p-4 shadow-lg shadow-pink-500/10">
+        <h3 className="text-pink-300 text-sm font-medium mb-3">
           Recent Achievements
         </h3>
         <div className="space-y-2">
@@ -246,14 +256,14 @@ function DashboardContent({
             <span className="text-lg">🏆</span>
             <div>
               <div className="text-white text-sm">First Proof Generated</div>
-              <div className="text-purple-300 text-xs">2 days ago</div>
+              <div className="text-pink-300 text-xs">2 days ago</div>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <span className="text-lg">🎯</span>
             <div>
               <div className="text-white text-sm">Weekly Goal Achieved</div>
-              <div className="text-purple-300 text-xs">5 days ago</div>
+              <div className="text-pink-300 text-xs">5 days ago</div>
             </div>
           </div>
         </div>
@@ -303,14 +313,14 @@ function ProofContent({
         <div className="flex justify-between items-center mb-2">
           <span
             className={`text-sm font-medium ${
-              step === "connect" ? "text-purple-300" : "text-gray-400"
+              step === "connect" ? "text-cyan-300" : "text-gray-400"
             }`}
           >
             Connect
           </span>
           <span
             className={`text-sm font-medium ${
-              step === "proof" ? "text-purple-300" : "text-gray-400"
+              step === "proof" ? "text-pink-300" : "text-gray-400"
             }`}
           >
             Generate
@@ -323,9 +333,9 @@ function ProofContent({
             Verify
           </span>
         </div>
-        <div className="w-full bg-gray-700 rounded-full h-2">
+        <div className="w-full bg-slate-800/60 rounded-full h-2 shadow-inner">
           <div
-            className="bg-gradient-to-r from-purple-500 to-cyan-500 h-2 rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-cyan-500 to-pink-500 h-2 rounded-full transition-all duration-500 shadow-sm shadow-cyan-500/50"
             style={{
               width:
                 step === "connect" ? "33%" : step === "proof" ? "66%" : "100%",
@@ -338,10 +348,10 @@ function ProofContent({
       {step === "connect" && (
         <div className="text-center space-y-6">
           <div className="text-6xl mb-4">🚀</div>
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <h2 className="text-2xl font-bold font-orbitron text-white mb-2">
             Connect to Orbit
           </h2>
-          <p className="text-purple-200 mb-6">
+          <p className="text-cyan-200 mb-6">
             Connect your wallet to start your orbit journey
           </p>
 
@@ -358,7 +368,7 @@ function ProofContent({
                 <p className="text-green-300 text-sm mb-1">
                   ✓ Wallet Connected
                 </p>
-                <p className="text-green-100 font-mono text-xs">
+                <p className="text-green-100 font-jetbrains text-xs">
                   {address?.slice(0, 6)}...{address?.slice(-4)}
                 </p>
               </div>
@@ -385,17 +395,17 @@ function ProofContent({
         <div className="space-y-6">
           <div className="text-center mb-6">
             <div className="text-6xl mb-4">⚡</div>
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 className="text-2xl font-bold font-orbitron text-white mb-2">
               Generate Proof
             </h2>
-            <p className="text-purple-200">
+            <p className="text-cyan-200">
               Enter delegation details to generate zero-knowledge proof
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-purple-300 text-sm font-medium mb-2">
+              <label className="block text-cyan-300 text-sm font-medium mb-2">
                 Delegator Address
               </label>
               <input
@@ -403,12 +413,12 @@ function ProofContent({
                 value={delegatorAddress}
                 onChange={(e) => setDelegatorAddress(e.target.value)}
                 placeholder="init1..."
-                className="w-full bg-slate-700/50 border border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20"
+                className="w-full bg-slate-900/70 border border-cyan-400/40 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 shadow-lg shadow-cyan-500/10"
               />
             </div>
 
             <div>
-              <label className="block text-purple-300 text-sm font-medium mb-2">
+              <label className="block text-pink-300 text-sm font-medium mb-2">
                 Validator Address
               </label>
               <input
@@ -416,7 +426,7 @@ function ProofContent({
                 value={validatorAddress}
                 onChange={(e) => setValidatorAddress(e.target.value)}
                 placeholder="initvaloper1..."
-                className="w-full bg-slate-700/50 border border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20"
+                className="w-full bg-slate-900/70 border border-pink-400/40 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-400/30 shadow-lg shadow-pink-500/10"
               />
             </div>
           </div>
@@ -455,13 +465,13 @@ function ProofContent({
             <h2 className="text-2xl font-bold text-white mb-2">
               Proof Generated
             </h2>
-            <p className="text-purple-200">
+            <p className="text-cyan-200">
               Your zero-knowledge proof is ready for verification
             </p>
           </div>
 
-          <div className="bg-slate-700/30 border border-purple-500/30 rounded-xl p-4">
-            <h3 className="text-purple-300 text-sm font-medium mb-2">
+          <div className="bg-slate-800/40 border border-cyan-400/30 rounded-xl p-4">
+            <h3 className="text-cyan-300 text-sm font-medium mb-2">
               Generated Proof
             </h3>
             <p className="text-cyan-300 font-mono text-xs break-all bg-slate-800/50 p-3 rounded-lg">
