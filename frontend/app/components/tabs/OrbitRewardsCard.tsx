@@ -9,7 +9,6 @@ import ConnectWallets from "./ConnectWallets";
 import Dashboard, { DashboardData } from "./Dashboard";
 import ProofGeneration from "../proof/ProofGeneration";
 import { ProofStep } from "../proof/ProgressIndicator";
-import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { PROVER_ADDRESS } from "@/app/utils/constants";
 import { PROVER_ABI } from "@/app/utils/abis";
 import {
@@ -24,6 +23,7 @@ import {
 } from "@vlayer/sdk/web_proof";
 import { baseSepolia } from "viem/chains";
 import {
+  BrandedHash,
   createExtensionWebProofProvider,
   createVlayerClient,
 } from "@vlayer/sdk";
@@ -36,22 +36,10 @@ function OrbitRewardsCardContent() {
   const [activeTab, setActiveTab] = useState<Tab>("connect");
   const [step, setStep] = useState<ProofStep>("check");
   const [isGeneratingProof, setIsGeneratingProof] = useState(false);
-
-  // useCallProver hook to initiate proving
-  const {
-    callProver,
-    data: proofHash,
-    error: proverError,
-    isError: isProverError,
-  } = useCallProver({
-    address: PROVER_ADDRESS,
-    proverAbi: PROVER_ABI,
-    functionName: "proveSpecificTier",
-    chainId: baseSepolia.id,
-  });
-
-  // useWaitForProvingResult hook to wait for proof completion
-  const { data: proof } = useWaitForProvingResult(proofHash);
+  const [proof, setProof] = useState<BrandedHash<
+    typeof PROVER_ABI,
+    "proveSpecificTier"
+  > | null>(null);
 
   // Mock dashboard data
   const dashboardData: DashboardData = {
@@ -138,7 +126,7 @@ function OrbitRewardsCardContent() {
         ],
       });
 
-      const proofHash = await vlayer.proveWeb({
+      const proof = await vlayer.proveWeb({
         address: PROVER_ADDRESS,
         proverAbi: PROVER_ABI,
         functionName: "proveSpecificTier",
@@ -146,17 +134,7 @@ function OrbitRewardsCardContent() {
         args: [webProofRequest, keplr.account.address, BigInt(tierValue)],
       });
 
-      console.log("Proof hash:", proofHash);
-
-      console.log("Prover called successfully, waiting for result...");
-
-      // Show error if prover call failed
-      if (isProverError && proverError) {
-        console.error("Prover error:", proverError);
-        alert(
-          `Proof generation failed: ${proverError.message || "Unknown error"}`
-        );
-      }
+      setProof(proof);
     } catch (error) {
       console.error("Failed to call prover:", error);
       alert(
@@ -199,8 +177,8 @@ function OrbitRewardsCardContent() {
           <ProofGeneration
             step={step}
             setStep={setStep}
-            isGeneratingProof={isGeneratingProof || !!proofHash}
-            proof={proof ? String(proof) : null}
+            isGeneratingProof={isGeneratingProof || !!proof}
+            proof={proof}
             keplr={keplr}
             onGenerateProof={handleGenerateProof}
             onVerifyProof={handleVerifyProof}

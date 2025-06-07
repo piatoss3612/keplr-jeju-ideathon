@@ -1,7 +1,10 @@
 "use client";
 
+import { BrandedHash } from "@vlayer/sdk";
+import { PROVER_ABI } from "@/app/utils/abis";
+
 interface VerifyProofStepProps {
-  proof: string;
+  proof: BrandedHash<typeof PROVER_ABI, "proveSpecificTier">;
   onVerifyProof: () => void;
   onReset: () => void;
 }
@@ -26,7 +29,7 @@ export default function VerifyProofStep({
           Generated Proof
         </h3>
         <p className="text-cyan-300 font-mono text-xs break-all bg-slate-800/50 p-3 rounded-lg">
-          {proof}
+          {proof.hash}
         </p>
       </div>
 
