@@ -277,31 +277,3 @@ library TierUtils {
         return DelegationTier(tierValue);
     }
 }
-
-/**
- * @title StringUtils
- * @notice String parsing utilities
- */
-library StringUtils {
-    /**
-     * @notice Parse string to uint256
-     * @param str The string to parse
-     * @return result The parsed uint256 value
-     */
-    function parseStringToUint(string memory str) internal pure returns (uint256 result) {
-        bytes memory strBytes = bytes(str);
-        require(strBytes.length > 0, "Empty string");
-
-        for (uint256 i = 0; i < strBytes.length; i++) {
-            uint8 charCode = uint8(strBytes[i]);
-            if (charCode >= 48 && charCode <= 57) {
-                // 0-9
-                result = result * 10 + (charCode - 48);
-            } else {
-                revert("Invalid number string");
-            }
-        }
-
-        return result;
-    }
-}

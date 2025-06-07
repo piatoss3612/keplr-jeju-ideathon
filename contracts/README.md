@@ -48,7 +48,7 @@ $ anvil
 ### Deploy
 
 ```shell
-$ forge script script/OrbitScript.s.sol --rpc-url base-sepolia --account dev --sender 0x965b0e63e00e7805569ee3b428cf96330dfc57ef --broadcast --verify -vvvv
+$ forge script script/OrbitScript.s.sol --rpc-url base-sepolia --account dev --sender 0x965b0e63e00e7805569ee3b428cf96330dfc57ef --via-ir --optimize --optimizer-runs 10000 --broadcast --verify -vvvv
 ```
 
 ### Cast
@@ -64,3 +64,8 @@ $ forge --help
 $ anvil --help
 $ cast --help
 ```
+
+## Deployed Contracts
+
+- OrbitRewards: 0x3ef54615e0FB1DA461f19962246A8441b4D83FD6
+- OrbitRewardsNFT: 0xE1b45215D5008eFcfb1d1e7E69236817c420905B
