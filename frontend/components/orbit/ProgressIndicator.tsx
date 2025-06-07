@@ -46,9 +46,9 @@ export default function ProgressIndicator({
                   flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold transition-all duration-300 mb-1
                   ${
                     status === "completed"
-                      ? "bg-green-500 text-white"
+                      ? "bg-green-500 text-white shadow-lg shadow-green-500/50"
                       : status === "active"
-                      ? "bg-purple-500 text-white"
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/50 animate-pulse"
                       : "bg-gray-600 text-gray-400"
                   }
                 `}
@@ -66,7 +66,7 @@ export default function ProgressIndicator({
                     status === "completed"
                       ? "text-green-400"
                       : status === "active"
-                      ? "text-purple-400"
+                      ? "text-blue-400"
                       : "text-gray-500"
                   }
                 `}
@@ -80,7 +80,7 @@ export default function ProgressIndicator({
         {/* Connection line background */}
         <div className="absolute top-3 left-3 right-3 h-0.5 bg-gray-600 -z-10">
           <div
-            className="h-full bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-500"
+            className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-500 shadow-sm shadow-blue-400/50"
             style={{
               width: `${Math.max(
                 0,

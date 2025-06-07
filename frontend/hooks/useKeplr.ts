@@ -189,6 +189,9 @@ export const useKeplr = () => {
     if (!window.keplr) return;
 
     const handleAccountChange = () => {
+      // 계정이 변경되면 사용자 데이터 초기화 이벤트 발생
+      window.dispatchEvent(new CustomEvent("keplr-account-changed"));
+
       // 계정이 변경되면 다시 연결 시도
       if (state.isConnected) {
         connect();

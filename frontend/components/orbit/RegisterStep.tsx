@@ -42,7 +42,6 @@ export default function RegisterStep({
   const actionText = isUpdate
     ? "Update Loyalty Status"
     : "Register for OrbitRewards";
-  const buttonText = isUpdate ? "🔄 Update Loyalty" : "🚀 Register Now";
   const descriptionText = isUpdate
     ? "Refresh your loyalty verification to continue earning rewards"
     : "Register with your current delegation tier to start earning rewards";
@@ -174,15 +173,33 @@ export default function RegisterStep({
         <button
           onClick={onRegisterOrUpdate}
           disabled={isRegistering || (!canRegister && !canUpdate)}
-          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:cursor-not-allowed shadow-lg font-orbitron"
+          className="group relative w-full bg-green-900/30 hover:bg-green-800/40 
+                     disabled:bg-gray-600/20 border border-green-400/40 
+                     hover:border-green-400/60 disabled:border-gray-500/40 
+                     text-green-300 hover:text-green-200 disabled:text-gray-400 
+                     font-semibold py-4 px-6 rounded-xl transition-all duration-300 
+                     transform hover:scale-105 disabled:hover:scale-100 
+                     disabled:cursor-not-allowed shadow-lg hover:shadow-green-400/20 
+                     backdrop-blur-sm font-orbitron"
         >
           {isRegistering ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-300 mr-3"></div>
               {isUpdate ? "Updating Loyalty..." : "Registering..."}
             </div>
           ) : (
-            buttonText
+            <div className="flex items-center justify-center space-x-2">
+              <span className="text-lg transition-transform duration-300 group-hover:scale-110">
+                {isUpdate ? "🔄" : "🚀"}
+              </span>
+              <span>{isUpdate ? "Update Loyalty" : "Register Now"}</span>
+            </div>
+          )}
+          {!isRegistering && (
+            <div
+              className="absolute inset-0 rounded-xl bg-green-400/0 group-hover:bg-green-400/10 
+                            transition-all duration-300 pointer-events-none"
+            ></div>
           )}
         </button>
 

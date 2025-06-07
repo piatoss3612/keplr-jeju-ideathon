@@ -86,9 +86,22 @@ export default function ConnectWallets({
         <div className="text-center ">
           <button
             onClick={onBothConnected}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg font-orbitron"
+            className="group relative bg-green-900/30 hover:bg-green-800/40 
+                       border border-green-400/40 hover:border-green-400/60 
+                       text-green-300 hover:text-green-200 font-bold py-4 px-8 
+                       rounded-xl transition-all duration-300 transform hover:scale-105 
+                       shadow-lg hover:shadow-green-400/20 backdrop-blur-sm"
           >
-            🚀 Continue to Dashboard
+            <div className="flex items-center justify-center space-x-2">
+              <span className="text-lg transition-transform duration-300 group-hover:scale-110">
+                🚀
+              </span>
+              <span className="font-orbitron">Continue to Dashboard</span>
+            </div>
+            <div
+              className="absolute inset-0 rounded-xl bg-green-400/0 group-hover:bg-green-400/10 
+                            transition-all duration-300 pointer-events-none"
+            ></div>
           </button>
         </div>
       )}
@@ -103,9 +116,22 @@ export default function ConnectWallets({
         {!isEvmConnected ? (
           <button
             onClick={open}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+            className="group relative w-full bg-blue-900/30 hover:bg-blue-800/40 
+                     border border-blue-400/40 hover:border-blue-400/60 
+                     text-blue-300 hover:text-blue-200 font-semibold py-3 px-6 
+                     rounded-xl transition-all duration-300 transform hover:scale-105 
+                     shadow-lg hover:shadow-blue-400/20 backdrop-blur-sm"
           >
-            🔌 Connect EVM Wallet
+            <div className="flex items-center justify-center space-x-2">
+              <span className="text-base transition-transform duration-300 group-hover:rotate-12">
+                🔌
+              </span>
+              <span className="font-orbitron">Connect EVM Wallet</span>
+            </div>
+            <div
+              className="absolute inset-0 rounded-xl bg-blue-400/0 group-hover:bg-blue-400/10 
+                          transition-all duration-300 pointer-events-none"
+            ></div>
           </button>
         ) : (
           <div className="space-y-3">

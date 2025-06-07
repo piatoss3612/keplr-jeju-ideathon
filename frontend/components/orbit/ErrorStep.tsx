@@ -30,11 +30,15 @@ export default function ErrorStep({ onRetry, onReset }: ErrorStepProps) {
           <div className="space-y-2 text-sm text-left">
             <div>
               <span className="text-gray-400">Error Type:</span>
-              <p className="text-red-300 font-medium">{errorData.error}</p>
+              <p className="text-red-300 font-medium break-words overflow-wrap-anywhere">
+                {errorData.error}
+              </p>
             </div>
             <div>
               <span className="text-gray-400">Message:</span>
-              <p className="text-red-200">{errorData.message}</p>
+              <p className="text-red-200 break-words overflow-wrap-anywhere font-jetbrains text-xs leading-relaxed">
+                {errorData.message}
+              </p>
             </div>
           </div>
         </div>
@@ -59,16 +63,42 @@ export default function ErrorStep({ onRetry, onReset }: ErrorStepProps) {
       <div className="space-y-4">
         <button
           onClick={onRetry}
-          className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg font-orbitron"
+          className="group relative w-full bg-orange-900/30 hover:bg-orange-800/40 
+                     border border-orange-400/40 hover:border-orange-400/60 
+                     text-orange-300 hover:text-orange-200 font-semibold py-4 px-6 
+                     rounded-xl transition-all duration-300 transform hover:scale-105 
+                     shadow-lg hover:shadow-orange-400/20 backdrop-blur-sm font-orbitron"
         >
-          🔄 Try Again
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-lg transition-transform duration-300 group-hover:rotate-180">
+              🔄
+            </span>
+            <span>Try Again</span>
+          </div>
+          <div
+            className="absolute inset-0 rounded-xl bg-orange-400/0 group-hover:bg-orange-400/10 
+                          transition-all duration-300 pointer-events-none"
+          ></div>
         </button>
 
         <button
           onClick={onReset}
-          className="w-full px-6 py-3 bg-gray-600/50 hover:bg-gray-600/70 text-gray-200 rounded-xl transition-all duration-300 font-orbitron"
+          className="group relative w-full bg-gray-900/30 hover:bg-gray-800/40 
+                     border border-gray-400/40 hover:border-gray-400/60 
+                     text-gray-300 hover:text-gray-200 px-6 py-3 
+                     rounded-xl transition-all duration-300 transform hover:scale-105 
+                     shadow-lg hover:shadow-gray-400/20 backdrop-blur-sm font-orbitron"
         >
-          ← Start Over
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-base transition-transform duration-300 group-hover:-translate-x-1">
+              ←
+            </span>
+            <span>Start Over</span>
+          </div>
+          <div
+            className="absolute inset-0 rounded-xl bg-gray-400/0 group-hover:bg-gray-400/10 
+                          transition-all duration-300 pointer-events-none"
+          ></div>
         </button>
       </div>
 

@@ -352,6 +352,33 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
     setRegistrationHash(null);
   }, []);
 
+  // EVM 계정 변경 감지 및 데이터 초기화
+  const [previousAddress, setPreviousAddress] = React.useState<
+    string | undefined
+  >(address);
+
+  React.useEffect(() => {
+    if (previousAddress && address && previousAddress !== address) {
+      console.log("EVM account changed - clearing OrbitRewards data");
+      clearAll();
+    }
+    setPreviousAddress(address);
+  }, [address, previousAddress, clearAll]);
+
+  // Keplr 계정 변경 감지 및 데이터 초기화
+  React.useEffect(() => {
+    const handleAccountChange = () => {
+      console.log("Keplr account changed - clearing OrbitRewards data");
+      clearAll();
+    };
+
+    window.addEventListener("keplr-account-changed", handleAccountChange);
+
+    return () => {
+      window.removeEventListener("keplr-account-changed", handleAccountChange);
+    };
+  }, [clearAll]);
+
   // Helper computed values
   const isEligible = eligibilityData?.isQualified || false;
   const canRegister = isEligible && !userStatus?.hasUserNFT;
