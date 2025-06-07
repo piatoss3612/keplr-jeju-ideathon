@@ -66,9 +66,8 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     // ==================== STATE VARIABLES ====================
 
     // Chainlink configuration
-    // TODO: 추후 외부 설정 가능하도록 수정
     uint64 public subscriptionId;
-    uint32 public gasLimit = 3000000;
+    uint32 public gasLimit = 300000; // Chainlink Functions 최대 제한: 300,000
     string public source;
 
     // NFT contract
@@ -79,7 +78,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     mapping(bytes32 => bool) public isVerificationRequest;
 
     // Fulfilled request results - 가스 최적화를 위해 결과만 저장
-    mapping(bytes32 => uint256) public fulfilledResults;
+    mapping(bytes32 => bytes) public fulfilledResults;
     mapping(bytes32 => bool) public isRequestFulfilled;
 
     mapping(address => bool) public hasNFT;
@@ -117,6 +116,17 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
         bytes32 indexed requestId,
         bool isVerification
     );
+
+    // Chainlink Functions 설정 관련 이벤트
+    event ChainlinkConfigUpdated(
+        uint64 subscriptionId,
+        uint32 gasLimit,
+        string source
+    );
+
+    event SubscriptionIdUpdated(uint64 newSubscriptionId);
+    event GasLimitUpdated(uint32 newGasLimit);
+    event SourceCodeUpdated(string newSource);
 
     // ==================== ERRORS ====================
 
@@ -233,9 +243,8 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
         isRequestFulfilled[requestId] = true;
         if (err.length > 0) return;
 
-        fulfilledResults[requestId] = ValidationUtils.validateAndParseAmount(
-            string(response)
-        );
+        // NOTE: gas limit 때문에 가공이 어려움
+        fulfilledResults[requestId] = response;
     }
 
     /**
@@ -245,7 +254,9 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
         require(isRequestFulfilled[requestId], "Request not fulfilled yet");
         require(requestToSender[requestId] == msg.sender, "Not request owner");
 
-        uint256 amount = fulfilledResults[requestId];
+        uint256 amount = ValidationUtils.validateAndParseAmount(
+            string(fulfilledResults[requestId])
+        );
         DelegationTier tier = amount.getTierForAmount();
 
         bool isVerification = isVerificationRequest[requestId];
@@ -355,7 +366,9 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
         require(isRequestFulfilled[requestId], "Request not fulfilled yet");
         require(requestToSender[requestId] == msg.sender, "Not request owner");
 
-        amount = fulfilledResults[requestId];
+        amount = ValidationUtils.validateAndParseAmount(
+            string(fulfilledResults[requestId])
+        );
         tier = amount.getTierForAmount();
         isVerification = isVerificationRequest[requestId];
     }
@@ -521,9 +534,53 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
         uint32 _gasLimit,
         string calldata _source
     ) external onlyOwner {
+        require(_gasLimit <= 300000, "Gas limit exceeds maximum allowed");
         subscriptionId = _subscriptionId;
         gasLimit = _gasLimit;
         source = _source;
+
+        emit ChainlinkConfigUpdated(_subscriptionId, _gasLimit, _source);
+    }
+
+    /**
+     * @notice 구독 ID만 업데이트
+     */
+    function updateSubscriptionId(uint64 _subscriptionId) external onlyOwner {
+        subscriptionId = _subscriptionId;
+        emit SubscriptionIdUpdated(_subscriptionId);
+    }
+
+    /**
+     * @notice 가스 제한만 업데이트
+     */
+    function updateGasLimit(uint32 _gasLimit) external onlyOwner {
+        require(_gasLimit <= 300000, "Gas limit exceeds maximum allowed");
+        gasLimit = _gasLimit;
+        emit GasLimitUpdated(_gasLimit);
+    }
+
+    /**
+     * @notice 소스 코드만 업데이트
+     */
+    function updateSource(string calldata _source) external onlyOwner {
+        require(bytes(_source).length > 0, "Source code cannot be empty");
+        source = _source;
+        emit SourceCodeUpdated(_source);
+    }
+
+    /**
+     * @notice Chainlink Functions 설정 조회
+     */
+    function getChainlinkConfig()
+        external
+        view
+        returns (
+            uint64 _subscriptionId,
+            uint32 _gasLimit,
+            string memory _source
+        )
+    {
+        return (subscriptionId, gasLimit, source);
     }
 
     /**

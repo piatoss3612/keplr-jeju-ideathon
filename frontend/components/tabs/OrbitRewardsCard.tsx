@@ -6,12 +6,13 @@ import { useKeplrContext } from "@/context/KeplrProvider";
 import TabNavigation, { Tab } from "./TabNavigation";
 import CyberpunkCard from "../card/CyberpunkCard";
 import ConnectWallets from "./ConnectWallets";
-import Dashboard, { DashboardData } from "./Dashboard";
+import Dashboard from "./Dashboard";
 import OrbitRewardsFlow from "../orbit/OrbitRewardsFlow";
 import {
   OrbitRewardsProvider,
   useOrbitRewards,
 } from "@/context/OrbitRewardsProvider";
+import { useOrbitRewardsData } from "@/hooks/useOrbitRewardsData";
 
 function OrbitRewardsCardContent() {
   const { address, isConnected } = useAccount();
@@ -25,24 +26,12 @@ function OrbitRewardsCardContent() {
     clearAll,
   } = useOrbitRewards();
 
+  // 실제 데이터 가져오기
+  const orbitData = useOrbitRewardsData();
+
   const [activeTab, setActiveTab] = useState<Tab>("connect");
 
-  // Mock dashboard data
-  const dashboardData: DashboardData = {
-    totalPoints: 1247,
-    level: "Cosmic Explorer",
-    rank: "#42",
-    recentProofs: 7,
-    weeklyActivity: [
-      { day: "Mon", proofs: 2 },
-      { day: "Tue", proofs: 1 },
-      { day: "Wed", proofs: 3 },
-      { day: "Thu", proofs: 0 },
-      { day: "Fri", proofs: 1 },
-      { day: "Sat", proofs: 0 },
-      { day: "Sun", proofs: 0 },
-    ],
-  };
+  // Dashboard는 이제 orbitData를 직접 사용합니다
 
   const handleRegisterOrUpdate = async () => {
     if (!keplr.isConnected || !keplr.account) {
@@ -73,7 +62,7 @@ function OrbitRewardsCardContent() {
 
         {activeTab === "dashboard" && (
           <Dashboard
-            data={dashboardData}
+            orbitData={orbitData}
             isConnected={isConnected}
             address={address}
             keplr={keplr}
@@ -90,6 +79,7 @@ function OrbitRewardsCardContent() {
             keplr={keplr}
             onRegisterOrUpdate={handleRegisterOrUpdate}
             onReset={resetCard}
+            onGoToDashboard={() => setActiveTab("dashboard")}
           />
         )}
       </CyberpunkCard>

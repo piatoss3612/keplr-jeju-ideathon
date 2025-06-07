@@ -51,7 +51,7 @@ export function useRequestStatus(
 ): UseRequestStatusReturn {
   const {
     polling = false,
-    pollInterval = 10000,
+    pollInterval = 8000,
     fetchPolicy = "cache-and-network",
   } = options;
 

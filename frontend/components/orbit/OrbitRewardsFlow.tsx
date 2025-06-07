@@ -17,6 +17,7 @@ interface OrbitRewardsFlowProps {
   keplr: ReturnType<typeof useKeplrContext>;
   onRegisterOrUpdate: () => void;
   onReset: () => void;
+  onGoToDashboard: () => void;
 }
 
 export default function OrbitRewardsFlow({
@@ -27,6 +28,7 @@ export default function OrbitRewardsFlow({
   keplr,
   onRegisterOrUpdate,
   onReset,
+  onGoToDashboard,
 }: OrbitRewardsFlowProps) {
   return (
     <div>
@@ -53,12 +55,14 @@ export default function OrbitRewardsFlow({
       )}
 
       {step === "success" && registrationHash && (
-        <SuccessStep transactionHash={registrationHash} onReset={onReset} />
+        <SuccessStep
+          transactionHash={registrationHash}
+          onReset={onReset}
+          onGoToDashboard={onGoToDashboard}
+        />
       )}
 
-      {step === "error" && (
-        <ErrorStep onRetry={() => setStep("register")} onReset={onReset} />
-      )}
+      {step === "error" && <ErrorStep onRetry={onReset} onReset={onReset} />}
     </div>
   );
 }

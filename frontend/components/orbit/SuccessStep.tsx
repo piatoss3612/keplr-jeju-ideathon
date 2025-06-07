@@ -3,11 +3,13 @@
 interface SuccessStepProps {
   transactionHash: string;
   onReset: () => void;
+  onGoToDashboard: () => void;
 }
 
 export default function SuccessStep({
   transactionHash,
   onReset,
+  onGoToDashboard,
 }: SuccessStepProps) {
   const explorerUrl = `https://sepolia.basescan.org/tx/${transactionHash}`;
 
@@ -87,7 +89,7 @@ export default function SuccessStep({
       {/* Action Buttons */}
       <div className="space-y-4">
         <button
-          onClick={() => window.location.reload()}
+          onClick={onGoToDashboard}
           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg font-orbitron"
         >
           📊 Go to Dashboard

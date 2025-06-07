@@ -3,9 +3,15 @@
 import React from "react";
 import { useKeplrContext } from "@/context/KeplrProvider";
 import { useOrbitRewards } from "@/context/OrbitRewardsProvider";
-import { usePendingRequests } from "@/hooks/useRequestStatus";
+
 import { getTierName, getTierEmoji } from "@/utils/tierUtils";
-import RequestStatusIndicator from "@/components/orbit/RequestStatusIndicator";
+import {
+  UserOrbitData,
+  formatTimeRemaining,
+  formatAmount,
+} from "@/hooks/useOrbitRewardsData";
+import NFTDisplay from "@/components/NFTDisplay";
+import RequestStatusSimple from "@/components/RequestStatusSimple";
 
 interface DashboardData {
   totalPoints: number;
@@ -16,7 +22,7 @@ interface DashboardData {
 }
 
 interface DashboardProps {
-  data: DashboardData;
+  orbitData: UserOrbitData;
   isConnected: boolean;
   address: string | undefined;
   keplr: ReturnType<typeof useKeplrContext>;
@@ -24,18 +30,14 @@ interface DashboardProps {
 }
 
 export default function Dashboard({
+  orbitData,
   isConnected,
   address,
   keplr,
   onSwitchToRegister,
 }: DashboardProps) {
   const bothConnected = isConnected && keplr.isConnected;
-  const { userStatus, isLoadingStatus, refreshUserStatus } = useOrbitRewards();
-
-  // GraphQL data for request status
-  // Check for ready-to-process requests
-  const { readyToProcessRequests, hasReadyToProcess } =
-    usePendingRequests(address);
+  const { refreshUserStatus } = useOrbitRewards();
 
   if (!bothConnected) {
     return (
@@ -100,7 +102,7 @@ export default function Dashboard({
   }
 
   // Show loading state while fetching user data
-  if (isLoadingStatus) {
+  if (orbitData.isLoading) {
     return (
       <div className="text-center space-y-6">
         <div className="text-6xl mb-4">⏳</div>
@@ -113,7 +115,7 @@ export default function Dashboard({
   }
 
   // Show registration prompt if user doesn't have NFT
-  if (!userStatus?.hasUserNFT) {
+  if (!orbitData.hasNFT) {
     return (
       <div className="text-center space-y-6">
         <div className="text-6xl mb-4">🚀</div>
@@ -153,15 +155,15 @@ export default function Dashboard({
 
         {/* Request Status - NFT가 없어도 확인 가능 */}
         <div className="mt-8">
-          <RequestStatusIndicator userAddress={address} />
+          <RequestStatusSimple userAddress={address} />
         </div>
       </div>
     );
   }
 
-  // Show user dashboard with actual data
-  const tierEmoji = getTierEmoji(userStatus.tier);
-  const tierName = getTierName(userStatus.tier);
+  // Show user dashboard with actual data from orbitData
+  const tierEmoji = getTierEmoji(orbitData.tier);
+  const tierName = getTierName(orbitData.tier);
 
   return (
     <div className="space-y-6">
@@ -176,27 +178,68 @@ export default function Dashboard({
         </p>
       </div>
 
-      {/* NFT Status */}
-      <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-400/30 rounded-xl p-4 lg:p-6 mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <div className="flex items-center space-x-4">
-            <div className="text-3xl lg:text-4xl">{tierEmoji}</div>
-            <div>
-              <h3 className="text-purple-300 font-orbitron font-medium text-lg">
-                OrbitRewards NFT #{userStatus.tokenId.toString()}
-              </h3>
-              <p className="text-purple-200 text-sm">
-                {userStatus.scoreActive ? "🟢 Active" : "🟡 Needs Update"}
-              </p>
+      {/* NFT Display & Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* NFT 이미지 */}
+        <div className="lg:col-span-1">
+          <NFTDisplay
+            svgImage={orbitData.svgImage}
+            tierName={tierName}
+            tokenId={orbitData.tokenId}
+            className="aspect-square w-full max-w-sm mx-auto"
+          />
+        </div>
+
+        {/* NFT 정보 */}
+        <div className="lg:col-span-2">
+          <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-400/30 rounded-xl p-4 lg:p-6 h-full">
+            <div className="flex flex-col justify-between h-full">
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="text-3xl lg:text-4xl">{tierEmoji}</div>
+                <div>
+                  <h3 className="text-purple-300 font-orbitron font-medium text-lg">
+                    OrbitRewards NFT #{orbitData.tokenId.toString()}
+                  </h3>
+                  <p className="text-purple-200 text-sm">
+                    {orbitData.scoreActive ? "🟢 Active" : "🟡 Needs Update"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-purple-300 text-sm">Tier:</span>
+                  <span className="text-white font-medium">{tierName}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-purple-300 text-sm">Delegation:</span>
+                  <span className="text-white font-medium">
+                    {formatAmount(orbitData.amount)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-purple-300 text-sm">Score Active:</span>
+                  <span
+                    className={`font-medium ${
+                      orbitData.scoreActive
+                        ? "text-green-400"
+                        : "text-orange-400"
+                    }`}
+                  >
+                    {orbitData.scoreActive ? "Yes" : "No"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-4">
+                <button
+                  onClick={refreshUserStatus}
+                  className="px-4 py-2 bg-purple-600/50 hover:bg-purple-600/70 text-purple-200 rounded-lg transition-all duration-300 text-sm font-medium flex-1"
+                >
+                  🔄 Refresh Status
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex space-x-3">
-            <button
-              onClick={refreshUserStatus}
-              className="px-4 py-2 bg-purple-600/50 hover:bg-purple-600/70 text-purple-200 rounded-lg transition-all duration-300 text-sm font-medium"
-            >
-              🔄 Refresh Status
-            </button>
           </div>
         </div>
       </div>
@@ -205,21 +248,21 @@ export default function Dashboard({
       <div className="grid grid-cols-3 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
         <div className="bg-slate-900/50 border border-cyan-400/40 rounded-xl p-4 text-center shadow-lg shadow-cyan-500/10">
           <div className="text-2xl font-bold font-orbitron text-cyan-400">
-            {userStatus.currentScore.toString()}
+            {orbitData.currentScore.toString()}
           </div>
-          <div className="text-xs text-cyan-300">Total Score</div>
+          <div className="text-xs text-cyan-300">Current Score</div>
         </div>
         <div className="bg-slate-900/50 border border-pink-400/40 rounded-xl p-4 text-center shadow-lg shadow-pink-500/10">
           <div className="text-2xl font-bold font-orbitron text-pink-400">
-            {userStatus.seasonPoints.toString()}
+            {orbitData.boostPoints.toString()}
           </div>
-          <div className="text-xs text-pink-300">Season Points</div>
+          <div className="text-xs text-pink-300">Boost Points</div>
         </div>
         <div className="bg-slate-900/50 border border-purple-400/40 rounded-xl p-4 text-center shadow-lg shadow-purple-500/10">
           <div className="text-2xl font-bold font-orbitron text-purple-400">
-            {userStatus.seasonsCompleted.toString()}
+            {orbitData.verificationCount.toString()}
           </div>
-          <div className="text-xs text-purple-300">Seasons Completed</div>
+          <div className="text-xs text-purple-300">Verifications</div>
         </div>
       </div>
 
@@ -233,19 +276,19 @@ export default function Dashboard({
             <div className="flex justify-between">
               <span className="text-gray-400">Boost Points:</span>
               <span className="text-cyan-300">
-                {userStatus.boostPoints.toString()}
+                {orbitData.boostPoints.toString()}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Season Milestones:</span>
+              <span className="text-gray-400">Next Verification:</span>
               <span className="text-cyan-300">
-                {userStatus.seasonMilestones.toString()}
+                {formatTimeRemaining(orbitData.timeUntilNextVerification)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Verification Count:</span>
               <span className="text-cyan-300">
-                {userStatus.verificationCount.toString()}
+                {orbitData.verificationCount.toString()}
               </span>
             </div>
           </div>
@@ -253,17 +296,17 @@ export default function Dashboard({
 
         <div className="bg-slate-900/50 border border-pink-400/40 rounded-xl p-4">
           <h3 className="text-pink-300 text-sm font-medium mb-3">
-            Status & Next Update
+            Status & Delegation Info
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-400">Status:</span>
               <span
                 className={
-                  userStatus.scoreActive ? "text-green-400" : "text-orange-400"
+                  orbitData.scoreActive ? "text-green-400" : "text-orange-400"
                 }
               >
-                {userStatus.scoreActive ? "Active" : "Inactive"}
+                {orbitData.scoreActive ? "Active" : "Inactive"}
               </span>
             </div>
             <div className="flex justify-between">
@@ -273,7 +316,7 @@ export default function Dashboard({
             <div className="flex justify-between">
               <span className="text-gray-400">Delegation:</span>
               <span className="text-pink-300">
-                {(Number(userStatus.amount) / 1_000_000).toLocaleString()} INIT
+                {formatAmount(orbitData.amount)}
               </span>
             </div>
           </div>
@@ -281,7 +324,7 @@ export default function Dashboard({
       </div>
 
       {/* Action Required Notice */}
-      {!userStatus.scoreActive && (
+      {!orbitData.scoreActive && (
         <div className="bg-orange-500/20 border border-orange-400/30 rounded-xl p-4">
           <div className="flex items-center space-x-3">
             <div className="text-2xl">⚠️</div>
@@ -298,26 +341,8 @@ export default function Dashboard({
         </div>
       )}
 
-      {/* Request Status Overview - 공통 컴포넌트 사용 */}
-      <RequestStatusIndicator userAddress={address} />
-
-      {/* Ready to Process Alert */}
-      {hasReadyToProcess && (
-        <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 border border-orange-400/30 rounded-xl p-4 lg:p-6 mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl">⚡</div>
-            <div>
-              <h3 className="text-orange-300 font-orbitron font-medium">
-                Action Required!
-              </h3>
-              <p className="text-orange-200 text-sm">
-                You have {readyToProcessRequests.length} request(s) that are
-                ready to be processed. Check the detailed monitor below.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Request Status Overview - 간단한 사용자별 통계 */}
+      <RequestStatusSimple userAddress={address} />
     </div>
   );
 }
