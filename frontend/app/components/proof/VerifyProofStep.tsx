@@ -1,10 +1,10 @@
 "use client";
 
 import { BrandedHash } from "@vlayer/sdk";
-import { PROVER_ABI } from "@/app/utils/abis";
+import { Abi } from "viem";
 
 interface VerifyProofStepProps {
-  proof: BrandedHash<typeof PROVER_ABI, "proveSpecificTier">;
+  proof: BrandedHash<Abi, string>;
   onVerifyProof: () => void;
   onReset: () => void;
 }

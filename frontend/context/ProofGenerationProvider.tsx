@@ -125,7 +125,12 @@ export function ProofGenerationProvider({
   };
 
   return (
-    <ProofProvider config={{ env: ProofEnv.DEV }}>
+    <ProofProvider
+      config={{
+        token: process.env.NEXT_PUBLIC_VLAYER_API_TOKEN,
+        env: ProofEnv.DEV,
+      }}
+    >
       <ProofGenerationContext.Provider value={value}>
         {children}
       </ProofGenerationContext.Provider>
