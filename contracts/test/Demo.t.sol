@@ -98,4 +98,13 @@ contract ParseAddressTest is Test {
         assertFalse(success);
         assertEq(result, 0);
     }
+
+    function test_parseBytesToUint() public pure {
+        bytes memory input = hex"35303030303030";
+        string memory amountStr = string(input);
+
+        (bool success, uint256 result) = amountStr.tryParseUint();
+        assertTrue(success);
+        assertEq(result, 5000000);
+    }
 }

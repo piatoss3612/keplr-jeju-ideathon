@@ -34,53 +34,9 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
-    name: "checkAndEndSeason",
-    inputs: [],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "claimSeasonReward",
-    inputs: [
-      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "currentSeason",
-    inputs: [],
-    outputs: [
-      {
-        name: "seasonNumber",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      { name: "startTime", type: "uint256", internalType: "uint256" },
-      { name: "endTime", type: "uint256", internalType: "uint256" },
-      { name: "active", type: "bool", internalType: "bool" },
-      {
-        name: "totalParticipants",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "endCurrentSeason",
-    inputs: [],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
     name: "fulfilledResults",
     inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
-    outputs: [{ name: "", type: "bytes", internalType: "bytes" }],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
   {
@@ -92,51 +48,9 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
-    name: "getCurrentSeasonInfo",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "tuple",
-        internalType: "struct OrbitRewards.SeasonInfo",
-        components: [
-          {
-            name: "seasonNumber",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "startTime",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          { name: "endTime", type: "uint256", internalType: "uint256" },
-          { name: "active", type: "bool", internalType: "bool" },
-          {
-            name: "totalParticipants",
-            type: "uint256",
-            internalType: "uint256",
-          },
-        ],
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "getNFTContract",
     inputs: [],
     outputs: [{ name: "", type: "address", internalType: "address" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "getUserSeasonPoints",
-    inputs: [
-      { name: "user", type: "address", internalType: "address" },
-      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
-    ],
-    outputs: [{ name: "points", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
   {
@@ -175,21 +89,6 @@ export const OrbitRewardsAbi = [
           },
           {
             name: "verificationCount",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "seasonPoints",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "seasonMilestones",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "seasonsCompleted",
             type: "uint256",
             internalType: "uint256",
           },
@@ -259,6 +158,20 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
+    name: "pause",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "paused",
+    inputs: [],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "previewRequestResult",
     inputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
     outputs: [
@@ -309,33 +222,10 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
-    name: "seasonRewardClaimed",
-    inputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "address", internalType: "address" },
-    ],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "source",
     inputs: [],
     outputs: [{ name: "", type: "string", internalType: "string" }],
     stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "startNewSeason",
-    inputs: [],
-    outputs: [
-      {
-        name: "newSeasonNumber",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -348,6 +238,13 @@ export const OrbitRewardsAbi = [
     type: "function",
     name: "transferOwnership",
     inputs: [{ name: "to", type: "address", internalType: "address" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "unpause",
+    inputs: [],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -404,32 +301,7 @@ export const OrbitRewardsAbi = [
         internalType: "uint256",
       },
       { name: "isActive", type: "bool", internalType: "bool" },
-      {
-        name: "seasonPoints",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "seasonMilestones",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "seasonsCompleted",
-        type: "uint256",
-        internalType: "uint256",
-      },
     ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "userSeasonPoints",
-    inputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "address", internalType: "address" },
-    ],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
   {
@@ -559,6 +431,19 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "event",
+    name: "Paused",
+    inputs: [
+      {
+        name: "account",
+        type: "address",
+        indexed: false,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
     name: "RequestFulfilled",
     inputs: [
       {
@@ -625,12 +510,6 @@ export const OrbitRewardsAbi = [
         internalType: "uint256",
       },
       {
-        name: "seasonalPoints",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
         name: "isActive",
         type: "bool",
         indexed: false,
@@ -660,106 +539,13 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "event",
-    name: "SeasonEnded",
+    name: "Unpaused",
     inputs: [
       {
-        name: "seasonNumber",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "endTime",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "SeasonMilestoneReached",
-    inputs: [
-      {
-        name: "user",
+        name: "account",
         type: "address",
-        indexed: true,
+        indexed: false,
         internalType: "address",
-      },
-      {
-        name: "seasonNumber",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "milestone",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "bonus",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "SeasonRewardClaimed",
-    inputs: [
-      {
-        name: "user",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "seasonNumber",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "totalPoints",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "bonus",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "specialNftId",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "SeasonStarted",
-    inputs: [
-      {
-        name: "seasonNumber",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "startTime",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
       },
     ],
     anonymous: false,
@@ -771,6 +557,8 @@ export const OrbitRewardsAbi = [
   },
   { type: "error", name: "EmptyArgs", inputs: [] },
   { type: "error", name: "EmptySource", inputs: [] },
+  { type: "error", name: "EnforcedPause", inputs: [] },
+  { type: "error", name: "ExpectedPause", inputs: [] },
   {
     type: "error",
     name: "InvalidAmountString",
@@ -790,22 +578,7 @@ export const OrbitRewardsAbi = [
     name: "NoNFTFound",
     inputs: [{ name: "user", type: "address", internalType: "address" }],
   },
-  { type: "error", name: "NotEligibleForSeasonReward", inputs: [] },
   { type: "error", name: "OnlyRouterCanFulfill", inputs: [] },
-  {
-    type: "error",
-    name: "SeasonNotEnded",
-    inputs: [
-      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
-    ],
-  },
-  {
-    type: "error",
-    name: "SeasonRewardAlreadyClaimed",
-    inputs: [
-      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
-    ],
-  },
   {
     type: "error",
     name: "UnauthorizedClaimant",

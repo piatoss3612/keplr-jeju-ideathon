@@ -4,6 +4,7 @@ pragma solidity ^0.8.21;
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 import {DelegationTier, TierUtils} from "./libraries/OrbitUtils.sol";
 import {ValidationUtils} from "./libraries/ValidationUtils.sol";
@@ -14,7 +15,7 @@ import {OrbitRewardsNFT} from "./OrbitRewardsNFT.sol";
  * @notice Time-based loyalty system with 21-day scoring windows, 14-day verification cycles, and seasonal progression
  * @dev Main contract that manages scoring and interacts with separate NFT contract
  */
-contract OrbitRewards is FunctionsClient, ConfirmedOwner {
+contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     using ValidationUtils for uint256;
     using ValidationUtils for string;
     using TierUtils for DelegationTier;
@@ -34,10 +35,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
     uint256 private constant TOTAL_CYCLE =
         VERIFICATION_INTERVAL + SCORE_GRACE_PERIOD;
 
-    // Seasonal rewards constants
-    uint256 private constant SEASON_DURATION = 30 days;
-    uint256 private constant SEASON_MILESTONE_BONUS = 100;
-    uint256 private constant SEASON_COMPLETION_BONUS = 300;
+    // 시즌 관련 상수 제거
 
     // ==================== STRUCTS ====================
 
@@ -51,17 +49,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         uint256 currentAmount;
         uint256 verificationCount;
         bool isActive;
-        uint256 seasonPoints;
-        uint256 seasonMilestones;
-        uint256 seasonsCompleted;
-    }
-
-    struct SeasonInfo {
-        uint256 seasonNumber;
-        uint256 startTime;
-        uint256 endTime;
-        bool active;
-        uint256 totalParticipants;
     }
 
     struct UserStatusInfo {
@@ -74,16 +61,14 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         bool scoreActive;
         uint256 nextVerificationTime;
         uint256 verificationCount;
-        uint256 seasonPoints;
-        uint256 seasonMilestones;
-        uint256 seasonsCompleted;
     }
 
     // ==================== STATE VARIABLES ====================
 
     // Chainlink configuration
+    // TODO: 추후 외부 설정 가능하도록 수정
     uint64 public subscriptionId;
-    uint32 public gasLimit = 300000;
+    uint32 public gasLimit = 3000000;
     string public source;
 
     // NFT contract
@@ -94,16 +79,11 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
     mapping(bytes32 => bool) public isVerificationRequest;
 
     // Fulfilled request results - 가스 최적화를 위해 결과만 저장
-    mapping(bytes32 => bytes) public fulfilledResults;
+    mapping(bytes32 => uint256) public fulfilledResults;
     mapping(bytes32 => bool) public isRequestFulfilled;
 
     mapping(address => bool) public hasNFT;
     mapping(address => UserData) public userData;
-
-    // Seasonal system
-    SeasonInfo public currentSeason;
-    mapping(uint256 => mapping(address => bool)) public seasonRewardClaimed;
-    mapping(uint256 => mapping(address => uint256)) public userSeasonPoints;
 
     // ==================== EVENTS ====================
 
@@ -127,30 +107,9 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         uint256 currentScore
     );
 
-    event ScoreCalculated(
-        address indexed user,
-        uint256 score,
-        uint256 seasonalPoints,
-        bool isActive
-    );
+    event ScoreCalculated(address indexed user, uint256 score, bool isActive);
 
     event ScoreExpired(address indexed user, uint256 expiredScore);
-
-    event SeasonStarted(uint256 indexed seasonNumber, uint256 startTime);
-    event SeasonEnded(uint256 indexed seasonNumber, uint256 endTime);
-    event SeasonMilestoneReached(
-        address indexed user,
-        uint256 indexed seasonNumber,
-        uint256 milestone,
-        uint256 bonus
-    );
-    event SeasonRewardClaimed(
-        address indexed user,
-        uint256 indexed seasonNumber,
-        uint256 totalPoints,
-        uint256 bonus,
-        uint256 specialNftId
-    );
 
     // 새로운 이벤트 - 2단계 처리 시스템용
     event RequestProcessed(
@@ -166,9 +125,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
     error NoNFTFound(address user);
     error VerificationTooEarly(uint256 timeRemaining);
     error InvalidClaimantAddress();
-    error SeasonNotEnded(uint256 seasonNumber);
-    error SeasonRewardAlreadyClaimed(uint256 seasonNumber);
-    error NotEligibleForSeasonReward();
 
     // ==================== CONSTRUCTOR ====================
 
@@ -181,9 +137,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
 
         // NFT 컨트랙트 배포
         nftContract = new OrbitRewardsNFT(address(this));
-
-        // 첫 번째 시즌 시작
-        _startNewSeason();
     }
 
     // ==================== MAIN FUNCTIONS ====================
@@ -277,13 +230,12 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         bytes memory response,
         bytes memory err
     ) internal override {
+        isRequestFulfilled[requestId] = true;
         if (err.length > 0) return;
 
-        // 가스 절약을 위해 결과만 저장하고 실제 처리는 별도 함수에서
-        fulfilledResults[requestId] = response;
-        isRequestFulfilled[requestId] = true;
-
-        emit RequestFulfilled(requestId);
+        fulfilledResults[requestId] = ValidationUtils.validateAndParseAmount(
+            string(response)
+        );
     }
 
     /**
@@ -293,9 +245,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         require(isRequestFulfilled[requestId], "Request not fulfilled yet");
         require(requestToSender[requestId] == msg.sender, "Not request owner");
 
-        bytes memory response = fulfilledResults[requestId];
-        string memory amountString = abi.decode(response, (string));
-        uint256 amount = ValidationUtils.validateAndParseAmount(amountString);
+        uint256 amount = fulfilledResults[requestId];
         DelegationTier tier = amount.getTierForAmount();
 
         bool isVerification = isVerificationRequest[requestId];
@@ -309,75 +259,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         emit RequestProcessed(msg.sender, requestId, isVerification);
     }
 
-    // ==================== SEASONAL FUNCTIONS ====================
-
-    /**
-     * @notice 시즌 종료 보상 수령
-     */
-    function claimSeasonReward(uint256 seasonNumber) external {
-        require(seasonNumber < currentSeason.seasonNumber, "Season not ended");
-
-        if (seasonRewardClaimed[seasonNumber][msg.sender]) {
-            revert SeasonRewardAlreadyClaimed(seasonNumber);
-        }
-
-        uint256 userPoints = userSeasonPoints[seasonNumber][msg.sender];
-        if (userPoints == 0) {
-            revert NotEligibleForSeasonReward();
-        }
-
-        (uint256 bonus, bool earnedSpecialNFT) = _calculateSeasonReward(
-            userPoints
-        );
-
-        uint256 specialNftId = 0;
-        if (earnedSpecialNFT) {
-            UserData storage _user = userData[msg.sender];
-            specialNftId = nftContract.mintSeasonEndNFT(
-                msg.sender,
-                _user.currentTier,
-                _user.currentAmount,
-                seasonNumber
-            );
-        }
-
-        UserData storage user = userData[msg.sender];
-        user.boostPoints += bonus;
-        user.seasonsCompleted++;
-
-        // NFT 컨트랙트의 사용자 점수 업데이트
-        _updateNFTUserScore(msg.sender);
-
-        seasonRewardClaimed[seasonNumber][msg.sender] = true;
-
-        emit SeasonRewardClaimed(
-            msg.sender,
-            seasonNumber,
-            userPoints,
-            bonus,
-            specialNftId
-        );
-    }
-
-    /**
-     * @notice 현재 시즌 정보 조회
-     */
-    function getCurrentSeasonInfo() external view returns (SeasonInfo memory) {
-        return currentSeason;
-    }
-
-    /**
-     * @notice 사용자 시즌 점수 조회
-     */
-    function getUserSeasonPoints(
-        address user,
-        uint256 seasonNumber
-    ) external view returns (uint256 points) {
-        if (seasonNumber == 0) {
-            seasonNumber = currentSeason.seasonNumber;
-        }
-        return userSeasonPoints[seasonNumber][user];
-    }
+    // 시즌 관련 함수들 제거
 
     // ==================== VIEW FUNCTIONS ====================
 
@@ -438,9 +320,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
             data.lastVerificationTime +
             VERIFICATION_INTERVAL;
         info.verificationCount = data.verificationCount;
-        info.seasonPoints = data.seasonPoints;
-        info.seasonMilestones = data.seasonMilestones;
-        info.seasonsCompleted = data.seasonsCompleted;
 
         return info;
     }
@@ -476,9 +355,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         require(isRequestFulfilled[requestId], "Request not fulfilled yet");
         require(requestToSender[requestId] == msg.sender, "Not request owner");
 
-        bytes memory response = fulfilledResults[requestId];
-        string memory amountString = abi.decode(response, (string));
-        amount = ValidationUtils.validateAndParseAmount(amountString);
+        amount = fulfilledResults[requestId];
         tier = amount.getTierForAmount();
         isVerification = isVerificationRequest[requestId];
     }
@@ -493,9 +370,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         DelegationTier tier,
         uint256 amount
     ) internal {
-        if (claimant != tx.origin) {
-            revert UnauthorizedClaimant(claimant, tx.origin);
-        }
         if (claimant == address(0)) revert InvalidClaimantAddress();
         if (hasNFT[claimant]) revert AlreadyHasNFT(claimant);
 
@@ -517,14 +391,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         uint256 baseScore = _calculateBaseScore(tier, amount);
         user.currentScore = baseScore;
 
-        _updateSeasonPoints(claimant, baseScore);
-
-        if (
-            userSeasonPoints[currentSeason.seasonNumber][claimant] == baseScore
-        ) {
-            currentSeason.totalParticipants++;
-        }
-
         // NFT 컨트랙트의 사용자 점수 업데이트
         _updateNFTUserScore(claimant);
 
@@ -540,8 +406,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         uint256 newAmount
     ) internal {
         UserData storage user = userData[claimant];
-
-        (uint256 oldScore, bool wasActive) = calculateCurrentScore(claimant);
 
         DelegationTier oldTier = user.currentTier;
         user.currentTier = newTier;
@@ -562,19 +426,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         user.currentScore = baseScore + user.boostPoints;
         user.isActive = true;
 
-        uint256 pointsToAdd = 0;
-        if (wasActive) {
-            if (user.currentScore > oldScore) {
-                pointsToAdd = user.currentScore - oldScore;
-            }
-        } else {
-            pointsToAdd = user.currentScore;
-        }
-
-        if (pointsToAdd > 0) {
-            _updateSeasonPoints(claimant, pointsToAdd);
-        }
-
         // NFT 컨트랙트의 사용자 점수 업데이트
         _updateNFTUserScore(claimant);
 
@@ -588,71 +439,18 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
     }
 
     /**
-     * @notice 시즌 포인트 업데이트 및 마일스톤 체크
-     */
-    function _updateSeasonPoints(address user, uint256 points) internal {
-        UserData storage userData_ = userData[user];
-        uint256 oldSeasonPoints = userData_.seasonPoints;
-        userData_.seasonPoints += points;
-
-        userSeasonPoints[currentSeason.seasonNumber][user] = userData_
-            .seasonPoints;
-
-        uint256 oldMilestones = oldSeasonPoints / 1000;
-        uint256 newMilestones = userData_.seasonPoints / 1000;
-
-        if (newMilestones > oldMilestones) {
-            uint256 milestonesAchieved = newMilestones - oldMilestones;
-            userData_.seasonMilestones += milestonesAchieved;
-
-            uint256 milestoneBonus = milestonesAchieved *
-                SEASON_MILESTONE_BONUS;
-            userData_.boostPoints += milestoneBonus;
-
-            emit SeasonMilestoneReached(
-                user,
-                currentSeason.seasonNumber,
-                newMilestones,
-                milestoneBonus
-            );
-        }
-    }
-
-    /**
      * @notice NFT 컨트랙트의 사용자 점수 데이터 업데이트
      */
     function _updateNFTUserScore(address user) internal {
-        UserData memory data = userData[user];
         (uint256 currentScore, bool isActive) = calculateCurrentScore(user);
 
         nftContract.updateUserScore(
             user,
             currentScore,
-            data.seasonPoints,
-            data.seasonsCompleted,
+            0, // seasonPoints 제거
+            0, // seasonsCompleted 제거
             isActive
         );
-    }
-
-    /**
-     * @notice 시즌 보상 계산
-     */
-    function _calculateSeasonReward(
-        uint256 userPoints
-    ) internal pure returns (uint256 bonus, bool earnedSpecialNFT) {
-        if (userPoints >= 5000) {
-            bonus = SEASON_COMPLETION_BONUS;
-            earnedSpecialNFT = true;
-        } else if (userPoints >= 2000) {
-            bonus = SEASON_COMPLETION_BONUS / 2;
-            earnedSpecialNFT = false;
-        } else if (userPoints >= 500) {
-            bonus = SEASON_COMPLETION_BONUS / 4;
-            earnedSpecialNFT = false;
-        } else {
-            bonus = 0;
-            earnedSpecialNFT = false;
-        }
     }
 
     /**
@@ -710,6 +508,14 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
 
     // ==================== ADMIN FUNCTIONS ====================
 
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     function updateChainlinkConfig(
         uint64 _subscriptionId,
         uint32 _gasLimit,
@@ -718,28 +524,6 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         subscriptionId = _subscriptionId;
         gasLimit = _gasLimit;
         source = _source;
-    }
-
-    /**
-     * @notice 새 시즌 시작
-     */
-    function startNewSeason()
-        external
-        onlyOwner
-        returns (uint256 newSeasonNumber)
-    {
-        return _startNewSeason();
-    }
-
-    /**
-     * @notice 시즌 강제 종료
-     */
-    function endCurrentSeason() external onlyOwner {
-        require(currentSeason.active, "Season not active");
-        currentSeason.active = false;
-        currentSeason.endTime = block.timestamp;
-
-        emit SeasonEnded(currentSeason.seasonNumber, block.timestamp);
     }
 
     /**
@@ -764,39 +548,5 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
             // NFT 컨트랙트 업데이트
             _updateNFTUserScore(user);
         }
-    }
-
-    /**
-     * @notice 시즌 자동 종료 체크 및 처리
-     */
-    function checkAndEndSeason() external {
-        if (currentSeason.active && block.timestamp >= currentSeason.endTime) {
-            currentSeason.active = false;
-            emit SeasonEnded(currentSeason.seasonNumber, block.timestamp);
-        }
-    }
-
-    /**
-     * @notice 내부 시즌 시작 처리
-     */
-    function _startNewSeason() internal returns (uint256 newSeasonNumber) {
-        if (currentSeason.active) {
-            currentSeason.active = false;
-            currentSeason.endTime = block.timestamp;
-            emit SeasonEnded(currentSeason.seasonNumber, block.timestamp);
-        }
-
-        newSeasonNumber = currentSeason.seasonNumber + 1;
-        currentSeason = SeasonInfo({
-            seasonNumber: newSeasonNumber,
-            startTime: block.timestamp,
-            endTime: block.timestamp + SEASON_DURATION,
-            active: true,
-            totalParticipants: 0
-        });
-
-        emit SeasonStarted(newSeasonNumber, block.timestamp);
-
-        return newSeasonNumber;
     }
 }

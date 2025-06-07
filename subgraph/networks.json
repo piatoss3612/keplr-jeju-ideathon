@@ -1,8 +1,8 @@
 {
   "base-sepolia": {
     "OrbitRewards": {
-      "address": "0x0e3Bad7d5e076788B8535E6b9fAB5D5FF9868cAb",
-      "startBlock": 26756742
+      "address": "0xB8104Ae8F46665862E6c9f22c36a58ffCBeBA68F",
+      "startBlock": 26761425
     }
   }
 }

@@ -33,8 +33,6 @@ export default function RequestStatusIndicator({
   } = useProcessRequest();
 
   const handleProcessRequest = async (requestId: string) => {
-    console.log("requestId", requestId);
-
     try {
       await processRequest(requestId);
       // 처리 후 상태 새로고침

@@ -4,15 +4,13 @@ import {
   LoyaltyVerified as LoyaltyVerifiedEvent,
   OwnershipTransferRequested as OwnershipTransferRequestedEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
+  Paused as PausedEvent,
   RequestFulfilled as RequestFulfilledEvent,
   RequestProcessed as RequestProcessedEvent,
   RequestSent as RequestSentEvent,
   ScoreCalculated as ScoreCalculatedEvent,
   ScoreExpired as ScoreExpiredEvent,
-  SeasonEnded as SeasonEndedEvent,
-  SeasonMilestoneReached as SeasonMilestoneReachedEvent,
-  SeasonRewardClaimed as SeasonRewardClaimedEvent,
-  SeasonStarted as SeasonStartedEvent
+  Unpaused as UnpausedEvent
 } from "../generated/OrbitRewards/OrbitRewards"
 import {
   InitialQualificationClaimed,
@@ -20,15 +18,13 @@ import {
   LoyaltyVerified,
   OwnershipTransferRequested,
   OwnershipTransferred,
+  Paused,
   RequestFulfilled,
   RequestProcessed,
   RequestSent,
   ScoreCalculated,
   ScoreExpired,
-  SeasonEnded,
-  SeasonMilestoneReached,
-  SeasonRewardClaimed,
-  SeasonStarted
+  Unpaused
 } from "../generated/schema"
 
 export function handleInitialQualificationClaimed(
@@ -114,6 +110,19 @@ export function handleOwnershipTransferred(
   entity.save()
 }
 
+export function handlePaused(event: PausedEvent): void {
+  let entity = new Paused(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.account = event.params.account
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
 export function handleRequestFulfilled(event: RequestFulfilledEvent): void {
   let entity = new RequestFulfilled(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -161,7 +170,6 @@ export function handleScoreCalculated(event: ScoreCalculatedEvent): void {
   )
   entity.user = event.params.user
   entity.score = event.params.score
-  entity.seasonalPoints = event.params.seasonalPoints
   entity.isActive = event.params.isActive
 
   entity.blockNumber = event.block.number
@@ -185,63 +193,11 @@ export function handleScoreExpired(event: ScoreExpiredEvent): void {
   entity.save()
 }
 
-export function handleSeasonEnded(event: SeasonEndedEvent): void {
-  let entity = new SeasonEnded(
+export function handleUnpaused(event: UnpausedEvent): void {
+  let entity = new Unpaused(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.seasonNumber = event.params.seasonNumber
-  entity.endTime = event.params.endTime
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleSeasonMilestoneReached(
-  event: SeasonMilestoneReachedEvent
-): void {
-  let entity = new SeasonMilestoneReached(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.user = event.params.user
-  entity.seasonNumber = event.params.seasonNumber
-  entity.milestone = event.params.milestone
-  entity.bonus = event.params.bonus
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleSeasonRewardClaimed(
-  event: SeasonRewardClaimedEvent
-): void {
-  let entity = new SeasonRewardClaimed(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.user = event.params.user
-  entity.seasonNumber = event.params.seasonNumber
-  entity.totalPoints = event.params.totalPoints
-  entity.bonus = event.params.bonus
-  entity.specialNftId = event.params.specialNftId
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleSeasonStarted(event: SeasonStartedEvent): void {
-  let entity = new SeasonStarted(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.seasonNumber = event.params.seasonNumber
-  entity.startTime = event.params.startTime
+  entity.account = event.params.account
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp

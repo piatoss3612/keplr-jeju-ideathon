@@ -48,6 +48,14 @@ type OwnershipTransferred @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type RequestFulfilled @entity(immutable: true) {
   id: Bytes!
   internal_id: Bytes! # bytes32
@@ -78,7 +86,6 @@ type ScoreCalculated @entity(immutable: true) {
   id: Bytes!
   user: Bytes! # address
   score: BigInt! # uint256
-  seasonalPoints: BigInt! # uint256
   isActive: Boolean! # bool
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -94,42 +101,9 @@ type ScoreExpired @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type SeasonEnded @entity(immutable: true) {
+type Unpaused @entity(immutable: true) {
   id: Bytes!
-  seasonNumber: BigInt! # uint256
-  endTime: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type SeasonMilestoneReached @entity(immutable: true) {
-  id: Bytes!
-  user: Bytes! # address
-  seasonNumber: BigInt! # uint256
-  milestone: BigInt! # uint256
-  bonus: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type SeasonRewardClaimed @entity(immutable: true) {
-  id: Bytes!
-  user: Bytes! # address
-  seasonNumber: BigInt! # uint256
-  totalPoints: BigInt! # uint256
-  bonus: BigInt! # uint256
-  specialNftId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type SeasonStarted @entity(immutable: true) {
-  id: Bytes!
-  seasonNumber: BigInt! # uint256
-  startTime: BigInt! # uint256
+  account: Bytes! # address
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

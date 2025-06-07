@@ -6,15 +6,13 @@ import {
   LoyaltyVerified,
   OwnershipTransferRequested,
   OwnershipTransferred,
+  Paused,
   RequestFulfilled,
   RequestProcessed,
   RequestSent,
   ScoreCalculated,
   ScoreExpired,
-  SeasonEnded,
-  SeasonMilestoneReached,
-  SeasonRewardClaimed,
-  SeasonStarted
+  Unpaused
 } from "../generated/OrbitRewards/OrbitRewards"
 
 export function createInitialQualificationClaimedEvent(
@@ -152,6 +150,18 @@ export function createOwnershipTransferredEvent(
   return ownershipTransferredEvent
 }
 
+export function createPausedEvent(account: Address): Paused {
+  let pausedEvent = changetype<Paused>(newMockEvent())
+
+  pausedEvent.parameters = new Array()
+
+  pausedEvent.parameters.push(
+    new ethereum.EventParam("account", ethereum.Value.fromAddress(account))
+  )
+
+  return pausedEvent
+}
+
 export function createRequestFulfilledEvent(id: Bytes): RequestFulfilled {
   let requestFulfilledEvent = changetype<RequestFulfilled>(newMockEvent())
 
@@ -207,7 +217,6 @@ export function createRequestSentEvent(id: Bytes): RequestSent {
 export function createScoreCalculatedEvent(
   user: Address,
   score: BigInt,
-  seasonalPoints: BigInt,
   isActive: boolean
 ): ScoreCalculated {
   let scoreCalculatedEvent = changetype<ScoreCalculated>(newMockEvent())
@@ -219,12 +228,6 @@ export function createScoreCalculatedEvent(
   )
   scoreCalculatedEvent.parameters.push(
     new ethereum.EventParam("score", ethereum.Value.fromUnsignedBigInt(score))
-  )
-  scoreCalculatedEvent.parameters.push(
-    new ethereum.EventParam(
-      "seasonalPoints",
-      ethereum.Value.fromUnsignedBigInt(seasonalPoints)
-    )
   )
   scoreCalculatedEvent.parameters.push(
     new ethereum.EventParam("isActive", ethereum.Value.fromBoolean(isActive))
@@ -254,122 +257,14 @@ export function createScoreExpiredEvent(
   return scoreExpiredEvent
 }
 
-export function createSeasonEndedEvent(
-  seasonNumber: BigInt,
-  endTime: BigInt
-): SeasonEnded {
-  let seasonEndedEvent = changetype<SeasonEnded>(newMockEvent())
+export function createUnpausedEvent(account: Address): Unpaused {
+  let unpausedEvent = changetype<Unpaused>(newMockEvent())
 
-  seasonEndedEvent.parameters = new Array()
+  unpausedEvent.parameters = new Array()
 
-  seasonEndedEvent.parameters.push(
-    new ethereum.EventParam(
-      "seasonNumber",
-      ethereum.Value.fromUnsignedBigInt(seasonNumber)
-    )
-  )
-  seasonEndedEvent.parameters.push(
-    new ethereum.EventParam(
-      "endTime",
-      ethereum.Value.fromUnsignedBigInt(endTime)
-    )
+  unpausedEvent.parameters.push(
+    new ethereum.EventParam("account", ethereum.Value.fromAddress(account))
   )
 
-  return seasonEndedEvent
-}
-
-export function createSeasonMilestoneReachedEvent(
-  user: Address,
-  seasonNumber: BigInt,
-  milestone: BigInt,
-  bonus: BigInt
-): SeasonMilestoneReached {
-  let seasonMilestoneReachedEvent =
-    changetype<SeasonMilestoneReached>(newMockEvent())
-
-  seasonMilestoneReachedEvent.parameters = new Array()
-
-  seasonMilestoneReachedEvent.parameters.push(
-    new ethereum.EventParam("user", ethereum.Value.fromAddress(user))
-  )
-  seasonMilestoneReachedEvent.parameters.push(
-    new ethereum.EventParam(
-      "seasonNumber",
-      ethereum.Value.fromUnsignedBigInt(seasonNumber)
-    )
-  )
-  seasonMilestoneReachedEvent.parameters.push(
-    new ethereum.EventParam(
-      "milestone",
-      ethereum.Value.fromUnsignedBigInt(milestone)
-    )
-  )
-  seasonMilestoneReachedEvent.parameters.push(
-    new ethereum.EventParam("bonus", ethereum.Value.fromUnsignedBigInt(bonus))
-  )
-
-  return seasonMilestoneReachedEvent
-}
-
-export function createSeasonRewardClaimedEvent(
-  user: Address,
-  seasonNumber: BigInt,
-  totalPoints: BigInt,
-  bonus: BigInt,
-  specialNftId: BigInt
-): SeasonRewardClaimed {
-  let seasonRewardClaimedEvent = changetype<SeasonRewardClaimed>(newMockEvent())
-
-  seasonRewardClaimedEvent.parameters = new Array()
-
-  seasonRewardClaimedEvent.parameters.push(
-    new ethereum.EventParam("user", ethereum.Value.fromAddress(user))
-  )
-  seasonRewardClaimedEvent.parameters.push(
-    new ethereum.EventParam(
-      "seasonNumber",
-      ethereum.Value.fromUnsignedBigInt(seasonNumber)
-    )
-  )
-  seasonRewardClaimedEvent.parameters.push(
-    new ethereum.EventParam(
-      "totalPoints",
-      ethereum.Value.fromUnsignedBigInt(totalPoints)
-    )
-  )
-  seasonRewardClaimedEvent.parameters.push(
-    new ethereum.EventParam("bonus", ethereum.Value.fromUnsignedBigInt(bonus))
-  )
-  seasonRewardClaimedEvent.parameters.push(
-    new ethereum.EventParam(
-      "specialNftId",
-      ethereum.Value.fromUnsignedBigInt(specialNftId)
-    )
-  )
-
-  return seasonRewardClaimedEvent
-}
-
-export function createSeasonStartedEvent(
-  seasonNumber: BigInt,
-  startTime: BigInt
-): SeasonStarted {
-  let seasonStartedEvent = changetype<SeasonStarted>(newMockEvent())
-
-  seasonStartedEvent.parameters = new Array()
-
-  seasonStartedEvent.parameters.push(
-    new ethereum.EventParam(
-      "seasonNumber",
-      ethereum.Value.fromUnsignedBigInt(seasonNumber)
-    )
-  )
-  seasonStartedEvent.parameters.push(
-    new ethereum.EventParam(
-      "startTime",
-      ethereum.Value.fromUnsignedBigInt(startTime)
-    )
-  )
-
-  return seasonStartedEvent
+  return unpausedEvent
 }

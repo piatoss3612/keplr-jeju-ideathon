@@ -8,9 +8,9 @@ dataSources:
     name: OrbitRewards
     network: base-sepolia
     source:
-      address: "0x0e3Bad7d5e076788B8535E6b9fAB5D5FF9868cAb"
+      address: "0xB8104Ae8F46665862E6c9f22c36a58ffCBeBA68F"
       abi: OrbitRewards
-      startBlock: 26756742
+      startBlock: 26761425
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -21,15 +21,13 @@ dataSources:
         - LoyaltyVerified
         - OwnershipTransferRequested
         - OwnershipTransferred
+        - Paused
         - RequestFulfilled
         - RequestProcessed
         - RequestSent
         - ScoreCalculated
         - ScoreExpired
-        - SeasonEnded
-        - SeasonMilestoneReached
-        - SeasonRewardClaimed
-        - SeasonStarted
+        - Unpaused
       abis:
         - name: OrbitRewards
           file: ./abis/OrbitRewards.json
@@ -44,22 +42,18 @@ dataSources:
           handler: handleOwnershipTransferRequested
         - event: OwnershipTransferred(indexed address,indexed address)
           handler: handleOwnershipTransferred
+        - event: Paused(address)
+          handler: handlePaused
         - event: RequestFulfilled(indexed bytes32)
           handler: handleRequestFulfilled
         - event: RequestProcessed(indexed address,indexed bytes32,bool)
           handler: handleRequestProcessed
         - event: RequestSent(indexed bytes32)
           handler: handleRequestSent
-        - event: ScoreCalculated(indexed address,uint256,uint256,bool)
+        - event: ScoreCalculated(indexed address,uint256,bool)
           handler: handleScoreCalculated
         - event: ScoreExpired(indexed address,uint256)
           handler: handleScoreExpired
-        - event: SeasonEnded(indexed uint256,uint256)
-          handler: handleSeasonEnded
-        - event: SeasonMilestoneReached(indexed address,indexed uint256,uint256,uint256)
-          handler: handleSeasonMilestoneReached
-        - event: SeasonRewardClaimed(indexed address,indexed uint256,uint256,uint256,uint256)
-          handler: handleSeasonRewardClaimed
-        - event: SeasonStarted(indexed uint256,uint256)
-          handler: handleSeasonStarted
+        - event: Unpaused(address)
+          handler: handleUnpaused
       file: ./src/orbit-rewards.ts

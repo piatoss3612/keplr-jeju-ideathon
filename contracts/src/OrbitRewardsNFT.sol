@@ -327,19 +327,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                     '"},',
                     '{"trait_type":"Type","value":"',
                     data.isSeasonEndNFT ? "Season Champion" : "Standard",
-                    '"},',
-                    '{"trait_type":"Seasons Completed","value":',
-                    scoreData.seasonsCompleted.toString(),
-                    "}",
-                    data.isSeasonEndNFT
-                        ? string(
-                            abi.encodePacked(
-                                ',{"trait_type":"Season Number","value":',
-                                data.seasonNumber.toString(),
-                                "}"
-                            )
-                        )
-                        : ""
+                    '"}'
                 )
             );
     }
@@ -400,7 +388,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
     }
 
     /**
-     * @notice SVG 바디 빌드
+     * @notice SVG 바디 빌드 - 함수 분리로 stack too deep 해결
      */
     function _buildSVGBody(
         TokenData memory data,
@@ -408,10 +396,23 @@ contract OrbitRewardsNFT is ERC721, Ownable {
         string memory color,
         string memory emoji
     ) internal pure returns (string memory) {
-        string memory statusColor = scoreData.isActive ? "#4CAF50" : "#F44336";
-        string memory specialGlow = data.isSeasonEndNFT
-            ? ' filter="url(#specialGlow)"'
-            : "";
+        return
+            string(
+                abi.encodePacked(
+                    _buildSVGCircles(color, data.isSeasonEndNFT),
+                    _buildSVGTexts(data, scoreData, color, emoji)
+                )
+            );
+    }
+
+    /**
+     * @notice SVG 원형 요소들 빌드
+     */
+    function _buildSVGCircles(
+        string memory color,
+        bool isSpecial
+    ) internal pure returns (string memory) {
+        string memory glow = isSpecial ? ' filter="url(#specialGlow)"' : "";
 
         return
             string(
@@ -419,15 +420,52 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                     '<circle cx="200" cy="120" r="50" fill="',
                     color,
                     '" opacity="0.3"',
-                    specialGlow,
-                    "/>",
+                    glow,
+                    '"/>',
                     '<circle cx="200" cy="120" r="30" fill="white" opacity="0.9"',
-                    specialGlow,
-                    "/>",
+                    glow,
+                    '"/>'
+                )
+            );
+    }
+
+    /**
+     * @notice SVG 텍스트 요소들 빌드
+     */
+    function _buildSVGTexts(
+        TokenData memory data,
+        UserScoreData memory scoreData,
+        string memory color,
+        string memory emoji
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    _buildEmojiAndTierText(data, color, emoji),
+                    _buildScoreAndStatusText(scoreData)
+                )
+            );
+    }
+
+    /**
+     * @notice 이모지와 티어 텍스트 빌드
+     */
+    function _buildEmojiAndTierText(
+        TokenData memory data,
+        string memory color,
+        string memory emoji
+    ) internal pure returns (string memory) {
+        string memory glow = data.isSeasonEndNFT
+            ? ' filter="url(#specialGlow)"'
+            : "";
+
+        return
+            string(
+                abi.encodePacked(
                     '<text x="200" y="135" text-anchor="middle" fill="',
                     color,
                     '" font-size="28"',
-                    specialGlow,
+                    glow,
                     ">",
                     emoji,
                     "</text>",
@@ -438,20 +476,25 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                     color,
                     '" font-size="14">',
                     data.amount.toString(),
-                    " INIT",
-                    "</text>",
+                    " INIT</text>"
+                )
+            );
+    }
+
+    /**
+     * @notice 점수와 상태 텍스트 빌드
+     */
+    function _buildScoreAndStatusText(
+        UserScoreData memory scoreData
+    ) internal pure returns (string memory) {
+        string memory statusColor = scoreData.isActive ? "#4CAF50" : "#F44336";
+
+        return
+            string(
+                abi.encodePacked(
                     '<text x="200" y="250" text-anchor="middle" fill="white" font-size="16">Score: ',
                     scoreData.currentScore.toString(),
                     "</text>",
-                    scoreData.seasonPoints > 0
-                        ? string(
-                            abi.encodePacked(
-                                '<text x="200" y="280" text-anchor="middle" fill="gold" font-size="14">Season: ',
-                                scoreData.seasonPoints.toString(),
-                                "</text>"
-                            )
-                        )
-                        : "",
                     '<circle cx="350" cy="50" r="8" fill="',
                     statusColor,
                     '"/>',
@@ -460,9 +503,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                     '" font-size="12">',
                     scoreData.isActive ? "ACTIVE" : "INACTIVE",
                     "</text>",
-                    '<text x="200" y="350" text-anchor="middle" fill="white" font-size="10" opacity="0.7">',
-                    data.isSeasonEndNFT ? "SEASON CHAMPION" : "SOULBOUND NFT",
-                    "</text>"
+                    '<text x="200" y="350" text-anchor="middle" fill="white" font-size="10" opacity="0.7">SOULBOUND NFT</text>'
                 )
             );
     }
