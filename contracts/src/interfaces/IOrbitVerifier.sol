@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {Proof} from "vlayer-0.1.0/Proof.sol";
 import {DelegationTier} from "../Types.sol";
 
 /**
@@ -32,36 +31,50 @@ interface IOrbitVerifier {
 
     // ==================== EVENTS ====================
 
-    event QualificationClaimed(address indexed claimer, uint256 indexed tokenId, DelegationTier tier, uint256 amount);
+    event QualificationClaimed(
+        address indexed claimer,
+        uint256 indexed tokenId,
+        DelegationTier tier,
+        uint256 amount
+    );
 
     // ==================== MAIN FUNCTIONS ====================
 
     /**
      * @notice Claim qualification with automatic tier detection
-     * @param proof The proof from OrbitProver.proveQualification
      * @param claimant The verified Ethereum address (automatically bound to proof)
      * @param tier The delegation tier (0=Asteroid, 1=Comet, 2=Star, 3=Galaxy)
      * @param amount The delegation amount in wei
      */
-    function claimQualification(Proof calldata proof, address claimant, uint256 tier, uint256 amount) external;
+    function claimQualification(
+        address claimant,
+        uint256 tier,
+        uint256 amount
+    ) external;
 
     /**
      * @notice Claim specific tier qualification
-     * @param proof The proof from OrbitProver.proveSpecificTier
      * @param claimant The verified Ethereum address (automatically bound to proof)
      * @param tier The verified tier (same as requested in prover)
      * @param amount The delegation amount in wei
      */
-    function claimSpecificTier(Proof calldata proof, address claimant, uint256 tier, uint256 amount) external;
+    function claimSpecificTier(
+        address claimant,
+        uint256 tier,
+        uint256 amount
+    ) external;
 
     /**
      * @notice Re-verify staking status with penalty system for late verification
-     * @param proof The proof from OrbitProver.proveQualification
      * @param claimant The verified Ethereum address (automatically bound to proof)
      * @param tier The delegation tier
      * @param amount The current delegation amount
      */
-    function verifyLoyalty(Proof calldata proof, address claimant, uint256 tier, uint256 amount) external;
+    function verifyLoyalty(
+        address claimant,
+        uint256 tier,
+        uint256 amount
+    ) external;
 
     /**
      * @notice Claim 21-day loyalty bonus (special NFT + multiplier)
@@ -78,10 +91,17 @@ interface IOrbitVerifier {
      * @return tierName The tier name
      * @return claimant The claimant address
      */
-    function getTokenMetadata(uint256 tokenId)
+    function getTokenMetadata(
+        uint256 tokenId
+    )
         external
         view
-        returns (DelegationTier tier, uint256 amount, string memory tierName, address claimant);
+        returns (
+            DelegationTier tier,
+            uint256 amount,
+            string memory tierName,
+            address claimant
+        );
 
     /**
      * @notice Check if Ethereum address has claimed
@@ -95,5 +115,7 @@ interface IOrbitVerifier {
      * @param tier The tier enum value
      * @return name The tier name
      */
-    function getTierName(uint256 tier) external pure returns (string memory name);
+    function getTierName(
+        uint256 tier
+    ) external pure returns (string memory name);
 }

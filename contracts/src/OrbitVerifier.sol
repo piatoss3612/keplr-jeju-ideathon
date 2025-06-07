@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {Proof} from "vlayer-0.1.0/Proof.sol";
-import {Verifier} from "vlayer-0.1.0/Verifier.sol";
-import {ERC721} from "openzeppelin-contracts/token/ERC721/ERC721.sol";
+import {ERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 
 import {OrbitProver} from "./OrbitProver.sol";
 import {ValidationUtils} from "./libraries/ValidationUtils.sol";
@@ -18,7 +16,7 @@ import {ILoyaltySystem} from "./interfaces/ILoyaltySystem.sol";
  * @dev Verifies cosmic proofs from OrbitProver and mints NFTs based on delegation tiers
  * @dev Includes orbital penalty system to maintain navigation discipline
  */
-contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
+contract OrbitVerifier is ERC721, IOrbitVerifier {
     using ValidationUtils for uint256;
     using ValidationUtils for string;
     using TierUtils for DelegationTier;
@@ -69,17 +67,38 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
         uint256 timestamp
     );
 
-    event LoyaltyBonusClaimed(address indexed user, uint256 multiplier, uint256 bonusTokenId);
-
-    event LoyaltyMilestoneReached(address indexed user, uint256 milestone, uint256 reward);
-
-    event StreakBonus(address indexed user, uint256 consecutiveWeeks, uint256 multiplier);
-
-    event PenaltyApplied(
-        address indexed user, uint256 daysLate, uint256 penaltyRate, uint256 pointsLost, bool streakReset
+    event LoyaltyBonusClaimed(
+        address indexed user,
+        uint256 multiplier,
+        uint256 bonusTokenId
     );
 
-    event LevelUp(address indexed user, uint256 previousLevel, uint256 newLevel, uint256 totalPoints);
+    event LoyaltyMilestoneReached(
+        address indexed user,
+        uint256 milestone,
+        uint256 reward
+    );
+
+    event StreakBonus(
+        address indexed user,
+        uint256 consecutiveWeeks,
+        uint256 multiplier
+    );
+
+    event PenaltyApplied(
+        address indexed user,
+        uint256 daysLate,
+        uint256 penaltyRate,
+        uint256 pointsLost,
+        bool streakReset
+    );
+
+    event LevelUp(
+        address indexed user,
+        uint256 previousLevel,
+        uint256 newLevel,
+        uint256 totalPoints
+    );
 
     // ==================== CONSTRUCTOR ====================
 
@@ -89,9 +108,11 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
         seasonStartTime = block.timestamp;
     }
 
-    function tokenURI(uint256) public view virtual override returns (string memory) {
+    function tokenURI(
+        uint256
+    ) public view virtual override returns (string memory) {
         return
-        "https://scarlet-implicit-seahorse-694.mypinata.cloud/ipfs/bafkreigcz7at4vvsb27zzl4njmplthcdzn5vgtblv4akne2mr3aarsarqy";
+            "https://scarlet-implicit-seahorse-694.mypinata.cloud/ipfs/bafkreigcz7at4vvsb27zzl4njmplthcdzn5vgtblv4akne2mr3aarsarqy";
     }
 
     // ==================== MAIN CLAIM FUNCTIONS ====================
@@ -102,10 +123,11 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
      * @param tier The delegation tier (0=Asteroid, 1=Comet, 2=Star, 3=Galaxy)
      * @param amount The delegation amount in wei
      */
-    function claimQualification(Proof calldata, address claimant, uint256 tier, uint256 amount)
-        external
-        onlyVerified(prover, OrbitProver.proveQualification.selector)
-    {
+    function claimQualification(
+        address claimant,
+        uint256 tier,
+        uint256 amount
+    ) external {
         DelegationTier delegationTier = tier.validateAndConvertTier();
         _claimQualification(claimant, delegationTier, amount);
     }
@@ -116,10 +138,11 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
      * @param tier The verified tier (same as requested in prover)
      * @param amount The delegation amount in wei
      */
-    function claimSpecificTier(Proof calldata, address claimant, uint256 tier, uint256 amount)
-        external
-        onlyVerified(prover, OrbitProver.proveSpecificTier.selector)
-    {
+    function claimSpecificTier(
+        address claimant,
+        uint256 tier,
+        uint256 amount
+    ) external {
         DelegationTier delegationTier = tier.validateAndConvertTier();
         _claimQualification(claimant, delegationTier, amount);
     }
@@ -130,10 +153,11 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
      * @param tier The delegation tier
      * @param amount The current delegation amount
      */
-    function verifyLoyalty(Proof calldata, address claimant, uint256 tier, uint256 amount)
-        external
-        onlyVerified(prover, OrbitProver.proveQualification.selector)
-    {
+    function verifyLoyalty(
+        address claimant,
+        uint256 tier,
+        uint256 amount
+    ) external {
         if (claimant != msg.sender) {
             revert UnauthorizedClaimant(claimant, msg.sender);
         }
@@ -146,13 +170,21 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
         }
 
         // Check if staking amount significantly decreased (penalty: >20% decrease)
-        if (amount < (loyalty.currentAmount * TierConstants.STAKING_DECREASE_THRESHOLD) / 100) {
+        if (
+            amount <
+            (loyalty.currentAmount * TierConstants.STAKING_DECREASE_THRESHOLD) /
+                100
+        ) {
             revert StakingAmountDecreased(loyalty.currentAmount, amount);
         }
 
         DelegationTier delegationTier = tier.validateAndConvertTier();
-        (uint256 pointsEarned, uint256[4] memory penaltyInfo, uint256 previousLevel, uint256 newLevel) =
-            LoyaltySystem.updateLoyaltyData(loyalty, delegationTier, amount);
+        (
+            uint256 pointsEarned,
+            uint256[4] memory penaltyInfo,
+            uint256 previousLevel,
+            uint256 newLevel
+        ) = LoyaltySystem.updateLoyaltyData(loyalty, delegationTier, amount);
 
         // Update seasonal points
         seasonalPoints[claimant] += pointsEarned;
@@ -171,7 +203,12 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
 
         // Emit level up event if applicable
         if (newLevel > previousLevel) {
-            emit LevelUp(claimant, previousLevel, newLevel, loyalty.totalPoints);
+            emit LevelUp(
+                claimant,
+                previousLevel,
+                newLevel,
+                loyalty.totalPoints
+            );
         }
 
         // Emit events
@@ -184,7 +221,8 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
     function claimLoyaltyBonus() external {
         ILoyaltySystem.LoyaltyInfo storage loyalty = loyaltyStatus[msg.sender];
 
-        (bool eligible, uint256 timeRemaining,) = LoyaltySystem.getLoyaltyBonusEligibility(loyalty);
+        (bool eligible, uint256 timeRemaining, ) = LoyaltySystem
+            .getLoyaltyBonusEligibility(loyalty);
 
         if (!eligible) {
             if (timeRemaining > 0) {
@@ -197,11 +235,17 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
         loyalty.bonusClaimed = true;
 
         // Update loyalty multiplier
-        loyaltyMultiplier[msg.sender] = LoyaltySystem.updateLoyaltyMultiplier(loyaltyMultiplier[msg.sender]);
+        loyaltyMultiplier[msg.sender] = LoyaltySystem.updateLoyaltyMultiplier(
+            loyaltyMultiplier[msg.sender]
+        );
 
         // Mint special loyalty NFT
-        uint256 bonusTokenId =
-            LoyaltySystem.generateTokenId("loyalty_bonus_", msg.sender, DelegationTier.Galaxy, loyalty.currentAmount);
+        uint256 bonusTokenId = LoyaltySystem.generateTokenId(
+            "loyalty_bonus_",
+            msg.sender,
+            DelegationTier.Galaxy,
+            loyalty.currentAmount
+        );
 
         _safeMint(msg.sender, bonusTokenId);
 
@@ -210,7 +254,11 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
         tokenAmount[bonusTokenId] = loyalty.currentAmount;
         tokenClaimant[bonusTokenId] = msg.sender;
 
-        emit LoyaltyBonusClaimed(msg.sender, loyaltyMultiplier[msg.sender], bonusTokenId);
+        emit LoyaltyBonusClaimed(
+            msg.sender,
+            loyaltyMultiplier[msg.sender],
+            bonusTokenId
+        );
     }
 
     // ==================== INTERNAL FUNCTIONS ====================
@@ -221,7 +269,11 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
      * @param tier The delegation tier
      * @param amount The delegation amount
      */
-    function _claimQualification(address claimant, DelegationTier tier, uint256 amount) internal {
+    function _claimQualification(
+        address claimant,
+        DelegationTier tier,
+        uint256 amount
+    ) internal {
         // Security validations
         if (claimant != msg.sender) {
             revert UnauthorizedClaimant(claimant, msg.sender);
@@ -230,7 +282,12 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
         if (claimedEthAddresses[claimant]) revert AlreadyClaimed(claimant);
 
         // Generate unique token ID
-        uint256 tokenId = LoyaltySystem.generateTokenId("qualification_", claimant, tier, amount);
+        uint256 tokenId = LoyaltySystem.generateTokenId(
+            "qualification_",
+            claimant,
+            tier,
+            amount
+        );
 
         // Ensure token doesn't already exist
         if (_ownerOf(tokenId) != address(0)) {
@@ -255,7 +312,12 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
 
         emit QualificationClaimed(claimant, tokenId, tier, amount);
         emit LoyaltyVerified(
-            claimant, 1, loyalty.totalPoints, loyalty.totalPoints, loyalty.currentLevel, block.timestamp
+            claimant,
+            1,
+            loyalty.totalPoints,
+            loyalty.totalPoints,
+            loyalty.currentLevel,
+            block.timestamp
         );
     }
 
@@ -265,21 +327,36 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
      * @param loyalty The loyalty info
      * @param pointsEarned Points earned this verification
      */
-    function _emitLoyaltyEvents(address user, ILoyaltySystem.LoyaltyInfo storage loyalty, uint256 pointsEarned)
-        internal
-    {
+    function _emitLoyaltyEvents(
+        address user,
+        ILoyaltySystem.LoyaltyInfo storage loyalty,
+        uint256 pointsEarned
+    ) internal {
         emit LoyaltyVerified(
-            user, loyalty.verificationCount, pointsEarned, loyalty.totalPoints, loyalty.currentLevel, block.timestamp
+            user,
+            loyalty.verificationCount,
+            pointsEarned,
+            loyalty.totalPoints,
+            loyalty.currentLevel,
+            block.timestamp
         );
 
         // Milestone events
         if (loyalty.verificationCount % 3 == 0) {
-            emit LoyaltyMilestoneReached(user, loyalty.verificationCount, pointsEarned);
+            emit LoyaltyMilestoneReached(
+                user,
+                loyalty.verificationCount,
+                pointsEarned
+            );
         }
 
         // Streak bonus event
         if (loyalty.consecutiveWeeks > 1) {
-            emit StreakBonus(user, loyalty.consecutiveWeeks, TierUtils.getStreakMultiplier(loyalty.consecutiveWeeks));
+            emit StreakBonus(
+                user,
+                loyalty.consecutiveWeeks,
+                TierUtils.getStreakMultiplier(loyalty.consecutiveWeeks)
+            );
         }
     }
 
@@ -288,10 +365,17 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
     /**
      * @notice Get NFT metadata by token ID
      */
-    function getTokenMetadata(uint256 tokenId)
+    function getTokenMetadata(
+        uint256 tokenId
+    )
         external
         view
-        returns (DelegationTier tier, uint256 amount, string memory tierName, address claimant)
+        returns (
+            DelegationTier tier,
+            uint256 amount,
+            string memory tierName,
+            address claimant
+        )
     {
         if (_ownerOf(tokenId) == address(0)) revert TokenNotFound(tokenId);
 
@@ -304,7 +388,9 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
     /**
      * @notice Get user's loyalty status and progress
      */
-    function getLoyaltyStatus(address user)
+    function getLoyaltyStatus(
+        address user
+    )
         external
         view
         returns (
@@ -330,21 +416,25 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
     /**
      * @notice Check when user can next verify their loyalty
      */
-    function getNextVerificationTime(address user)
-        external
-        view
-        returns (bool canVerify, uint256 nextVerificationTime)
-    {
+    function getNextVerificationTime(
+        address user
+    ) external view returns (bool canVerify, uint256 nextVerificationTime) {
         return LoyaltySystem.getNextVerificationTime(loyaltyStatus[user]);
     }
 
     /**
      * @notice Get loyalty bonus eligibility information
      */
-    function getLoyaltyBonusEligibility(address user)
+    function getLoyaltyBonusEligibility(
+        address user
+    )
         external
         view
-        returns (bool eligible, uint256 timeRemaining, uint256 verificationsNeeded)
+        returns (
+            bool eligible,
+            uint256 timeRemaining,
+            uint256 verificationsNeeded
+        )
     {
         return LoyaltySystem.getLoyaltyBonusEligibility(loyaltyStatus[user]);
     }
@@ -352,7 +442,9 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
     /**
      * @notice Get user's effective loyalty multiplier
      */
-    function getLoyaltyMultiplier(address user) external view returns (uint256 multiplier) {
+    function getLoyaltyMultiplier(
+        address user
+    ) external view returns (uint256 multiplier) {
         return loyaltyMultiplier[user] == 0 ? 100 : loyaltyMultiplier[user];
     }
 
@@ -366,7 +458,9 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
     /**
      * @notice Get tier name as string
      */
-    function getTierName(uint256 tier) external pure returns (string memory name) {
+    function getTierName(
+        uint256 tier
+    ) external pure returns (string memory name) {
         return tier.validateAndConvertTier().getTierName();
     }
 
@@ -376,8 +470,16 @@ contract OrbitVerifier is Verifier, ERC721, IOrbitVerifier {
     function getLoyaltyConstants()
         external
         pure
-        returns (uint256 verificationInterval, uint256 loyaltyPeriod, uint256 minimumVerifications)
+        returns (
+            uint256 verificationInterval,
+            uint256 loyaltyPeriod,
+            uint256 minimumVerifications
+        )
     {
-        return (TierConstants.VERIFICATION_INTERVAL, TierConstants.LOYALTY_PERIOD, TierConstants.MINIMUM_VERIFICATIONS);
+        return (
+            TierConstants.VERIFICATION_INTERVAL,
+            TierConstants.LOYALTY_PERIOD,
+            TierConstants.MINIMUM_VERIFICATIONS
+        );
     }
 }

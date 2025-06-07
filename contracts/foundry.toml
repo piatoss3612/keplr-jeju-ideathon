@@ -1,7 +1,7 @@
 [profile.default]
 src = "src"
 out = "out"
-libs = ["lib", "dependencies"]
+libs = ["lib"]
 fs_permissions = [
     { access = "read", path = "./testdata" },
     { access = "read-write", path = "./result.json" },
@@ -13,15 +13,3 @@ base-sepolia = "https://sepolia.base.org"
 
 [etherscan]
 base-sepolia = { key = "${ETHERSCAN_API_KEY}" }
-
-[dependencies]
-"@openzeppelin-contracts" = "5.0.1"
-forge-std = "1.9.4"
-risc0-ethereum = { version = "2.0.0", url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.0.0-soldeer/contracts.zip" }
-vlayer = "1.0.2"
-
-[soldeer]
-# whether soldeer manages remappings
-remappings_generate = false
-# whether soldeer re-generates all remappings when installing, updating or uninstalling deps
-remappings_regenerate = false
