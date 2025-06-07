@@ -7,6 +7,7 @@ import {
   OwnershipTransferRequested,
   OwnershipTransferred,
   RequestFulfilled,
+  RequestProcessed,
   RequestSent,
   ScoreCalculated,
   ScoreExpired,
@@ -161,6 +162,34 @@ export function createRequestFulfilledEvent(id: Bytes): RequestFulfilled {
   )
 
   return requestFulfilledEvent
+}
+
+export function createRequestProcessedEvent(
+  user: Address,
+  requestId: Bytes,
+  isVerification: boolean
+): RequestProcessed {
+  let requestProcessedEvent = changetype<RequestProcessed>(newMockEvent())
+
+  requestProcessedEvent.parameters = new Array()
+
+  requestProcessedEvent.parameters.push(
+    new ethereum.EventParam("user", ethereum.Value.fromAddress(user))
+  )
+  requestProcessedEvent.parameters.push(
+    new ethereum.EventParam(
+      "requestId",
+      ethereum.Value.fromFixedBytes(requestId)
+    )
+  )
+  requestProcessedEvent.parameters.push(
+    new ethereum.EventParam(
+      "isVerification",
+      ethereum.Value.fromBoolean(isVerification)
+    )
+  )
+
+  return requestProcessedEvent
 }
 
 export function createRequestSentEvent(id: Bytes): RequestSent {

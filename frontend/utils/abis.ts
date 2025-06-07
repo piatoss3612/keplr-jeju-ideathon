@@ -78,6 +78,13 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
+    name: "fulfilledResults",
+    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+    outputs: [{ name: "", type: "bytes", internalType: "bytes" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "gasLimit",
     inputs: [],
     outputs: [{ name: "", type: "uint32", internalType: "uint32" }],
@@ -211,6 +218,20 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
+    name: "isRequestFulfilled",
+    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "isRequestReadyToProcess",
+    inputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "isVerificationRequest",
     inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
     outputs: [{ name: "", type: "bool", internalType: "bool" }],
@@ -238,8 +259,30 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
+    name: "previewRequestResult",
+    inputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    outputs: [
+      { name: "amount", type: "uint256", internalType: "uint256" },
+      {
+        name: "tier",
+        type: "uint8",
+        internalType: "enum DelegationTier",
+      },
+      { name: "isVerification", type: "bool", internalType: "bool" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "processExpiredScores",
     inputs: [{ name: "users", type: "address[]", internalType: "address[]" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "processRequest",
+    inputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -523,6 +566,31 @@ export const OrbitRewardsAbi = [
         type: "bytes32",
         indexed: true,
         internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "RequestProcessed",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "requestId",
+        type: "bytes32",
+        indexed: true,
+        internalType: "bytes32",
+      },
+      {
+        name: "isVerification",
+        type: "bool",
+        indexed: false,
+        internalType: "bool",
       },
     ],
     anonymous: false,

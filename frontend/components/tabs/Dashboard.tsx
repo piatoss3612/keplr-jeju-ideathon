@@ -3,8 +3,9 @@
 import React from "react";
 import { useKeplrContext } from "@/context/KeplrProvider";
 import { useOrbitRewards } from "@/context/OrbitRewardsProvider";
-import { useRequestStatus } from "@/hooks/useRequestStatus";
+import { usePendingRequests } from "@/hooks/useRequestStatus";
 import { getTierName, getTierEmoji } from "@/utils/tierUtils";
+import RequestStatusIndicator from "@/components/orbit/RequestStatusIndicator";
 
 interface DashboardData {
   totalPoints: number;
@@ -32,11 +33,9 @@ export default function Dashboard({
   const { userStatus, isLoadingStatus, refreshUserStatus } = useOrbitRewards();
 
   // GraphQL data for request status
-  const {
-    summary: requestSummary,
-    isLoading: isLoadingRequests,
-    refetch: refetchRequests,
-  } = useRequestStatus(address);
+  // Check for ready-to-process requests
+  const { readyToProcessRequests, hasReadyToProcess } =
+    usePendingRequests(address);
 
   if (!bothConnected) {
     return (
@@ -85,6 +84,17 @@ export default function Dashboard({
         <p className="text-cyan-300 text-sm">
           Go to 🔗 Connect tab to connect your wallets
         </p>
+
+        {/* Request Status는 연결된 후 확인 가능하다는 안내 */}
+        <div className="mt-8 bg-slate-900/30 border border-gray-600/30 rounded-xl p-4">
+          <h3 className="text-gray-300 font-medium mb-2">
+            📊 Request Status Monitor
+          </h3>
+          <p className="text-gray-400 text-sm">
+            Connect your wallet to view and manage your OrbitRewards request
+            status in real-time.
+          </p>
+        </div>
       </div>
     );
   }
@@ -140,6 +150,11 @@ export default function Dashboard({
         <p className="text-cyan-300 text-sm">
           Click above to go to the Register tab and get started!
         </p>
+
+        {/* Request Status - NFT가 없어도 확인 가능 */}
+        <div className="mt-8">
+          <RequestStatusIndicator userAddress={address} />
+        </div>
       </div>
     );
   }
@@ -283,143 +298,26 @@ export default function Dashboard({
         </div>
       )}
 
-      {/* Request Status Section */}
-      <div className="bg-slate-900/50 border border-green-400/40 rounded-xl p-4 lg:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-green-300 font-orbitron font-medium text-lg">
-            🔄 Request Status
-          </h3>
-          <button
-            onClick={refetchRequests}
-            disabled={isLoadingRequests}
-            className="px-3 py-1 bg-green-600/50 hover:bg-green-600/70 text-green-200 rounded-lg transition-all duration-300 text-sm font-medium disabled:opacity-50"
-          >
-            {isLoadingRequests ? "..." : "🔄"}
-          </button>
+      {/* Request Status Overview - 공통 컴포넌트 사용 */}
+      <RequestStatusIndicator userAddress={address} />
+
+      {/* Ready to Process Alert */}
+      {hasReadyToProcess && (
+        <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 border border-orange-400/30 rounded-xl p-4 lg:p-6 mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="text-2xl">⚡</div>
+            <div>
+              <h3 className="text-orange-300 font-orbitron font-medium">
+                Action Required!
+              </h3>
+              <p className="text-orange-200 text-sm">
+                You have {readyToProcessRequests.length} request(s) that are
+                ready to be processed. Check the detailed monitor below.
+              </p>
+            </div>
+          </div>
         </div>
-
-        {isLoadingRequests ? (
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full"></div>
-            <span className="text-green-300 text-sm">
-              Loading request status...
-            </span>
-          </div>
-        ) : requestSummary ? (
-          <div className="space-y-4">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-green-900/30 p-3 rounded-lg">
-                <div className="text-xl font-bold text-green-400">
-                  {requestSummary.totalRequests}
-                </div>
-                <div className="text-xs text-green-300">Total Requests</div>
-              </div>
-              <div className="bg-green-900/30 p-3 rounded-lg">
-                <div className="text-xl font-bold text-green-400">
-                  {requestSummary.totalFulfillments}
-                </div>
-                <div className="text-xs text-green-300">Fulfilled</div>
-              </div>
-            </div>
-
-            {/* Status Indicator */}
-            <div className="flex items-center space-x-3">
-              <div
-                className={`w-3 h-3 rounded-full ${
-                  requestSummary.hasPendingRequests
-                    ? "bg-yellow-400 animate-pulse"
-                    : "bg-green-400"
-                }`}
-              ></div>
-              <span
-                className={`font-medium ${
-                  requestSummary.hasPendingRequests
-                    ? "text-yellow-400"
-                    : "text-green-400"
-                }`}
-              >
-                {requestSummary.hasPendingRequests
-                  ? "Requests Pending"
-                  : "All Requests Fulfilled"}
-              </span>
-            </div>
-
-            {/* Pending Requests */}
-            {requestSummary.pendingRequests.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-yellow-400 font-medium text-sm">
-                  Pending Requests:
-                </h4>
-                {requestSummary.pendingRequests.slice(0, 3).map((request) => (
-                  <div
-                    key={request.id}
-                    className="bg-yellow-900/20 border border-yellow-400/20 p-3 rounded-lg"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-yellow-300 text-sm font-mono">
-                          ID: {request.requestId}
-                        </p>
-                        <p className="text-yellow-200 text-xs">
-                          {new Date(
-                            parseInt(request.blockTimestamp) * 1000
-                          ).toLocaleString()}
-                        </p>
-                      </div>
-                      <a
-                        href={`https://basescan.org/tx/${request.transactionHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-yellow-400 hover:text-yellow-300 text-xs underline"
-                      >
-                        View ↗
-                      </a>
-                    </div>
-                  </div>
-                ))}
-                {requestSummary.pendingRequests.length > 3 && (
-                  <p className="text-yellow-300 text-xs">
-                    ...and {requestSummary.pendingRequests.length - 3} more
-                    pending
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Latest Fulfillment */}
-            {requestSummary.latestFulfillment && (
-              <div className="bg-green-900/20 border border-green-400/20 p-3 rounded-lg">
-                <h4 className="text-green-400 font-medium text-sm mb-2">
-                  Latest Fulfillment:
-                </h4>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-gray-400">Tier:</span>
-                    <span className="text-green-300 ml-1">
-                      {requestSummary.latestFulfillment.newTier}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Score:</span>
-                    <span className="text-green-300 ml-1">
-                      {requestSummary.latestFulfillment.currentScore}
-                    </span>
-                  </div>
-                </div>
-                <p className="text-green-200 text-xs mt-1">
-                  {new Date(
-                    parseInt(requestSummary.latestFulfillment.blockTimestamp) *
-                      1000
-                  ).toLocaleString()}
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-gray-400 text-sm">No request data available</p>
-        )}
-      </div>
+      )}
     </div>
   );
 }

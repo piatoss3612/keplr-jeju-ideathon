@@ -92,6 +92,11 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
     // Core tracking
     mapping(bytes32 => address) public requestToSender;
     mapping(bytes32 => bool) public isVerificationRequest;
+
+    // Fulfilled request results - 가스 최적화를 위해 결과만 저장
+    mapping(bytes32 => bytes) public fulfilledResults;
+    mapping(bytes32 => bool) public isRequestFulfilled;
+
     mapping(address => bool) public hasNFT;
     mapping(address => UserData) public userData;
 
@@ -145,6 +150,13 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
         uint256 totalPoints,
         uint256 bonus,
         uint256 specialNftId
+    );
+
+    // 새로운 이벤트 - 2단계 처리 시스템용
+    event RequestProcessed(
+        address indexed user,
+        bytes32 indexed requestId,
+        bool isVerification
     );
 
     // ==================== ERRORS ====================
@@ -258,7 +270,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
     }
 
     /**
-     * @notice Chainlink Functions 응답 처리
+     * @notice Chainlink Functions 응답 처리 - 가스 절약을 위해 결과만 저장
      */
     function fulfillRequest(
         bytes32 requestId,
@@ -267,19 +279,34 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
     ) internal override {
         if (err.length > 0) return;
 
-        address claimant = requestToSender[requestId];
+        // 가스 절약을 위해 결과만 저장하고 실제 처리는 별도 함수에서
+        fulfilledResults[requestId] = response;
+        isRequestFulfilled[requestId] = true;
+
+        emit RequestFulfilled(requestId);
+    }
+
+    /**
+     * @notice fulfilled 된 요청 결과를 처리 (사용자가 직접 호출)
+     */
+    function processRequest(bytes32 requestId) external {
+        require(isRequestFulfilled[requestId], "Request not fulfilled yet");
+        require(requestToSender[requestId] == msg.sender, "Not request owner");
+
+        bytes memory response = fulfilledResults[requestId];
         string memory amountString = abi.decode(response, (string));
         uint256 amount = ValidationUtils.validateAndParseAmount(amountString);
         DelegationTier tier = amount.getTierForAmount();
 
-        if (isVerificationRequest[requestId]) {
-            _processLoyaltyVerification(claimant, tier, amount);
+        bool isVerification = isVerificationRequest[requestId];
+
+        if (isVerification) {
+            _processLoyaltyVerification(msg.sender, tier, amount);
         } else {
-            _mintInitialNFT(claimant, tier, amount);
+            _mintInitialNFT(msg.sender, tier, amount);
         }
 
-        delete requestToSender[requestId];
-        delete isVerificationRequest[requestId];
+        emit RequestProcessed(msg.sender, requestId, isVerification);
     }
 
     // ==================== SEASONAL FUNCTIONS ====================
@@ -423,6 +450,37 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner {
      */
     function getNFTContract() external view returns (address) {
         return address(nftContract);
+    }
+
+    /**
+     * @notice 특정 요청이 fulfill되었지만 아직 처리되지 않았는지 확인
+     */
+    function isRequestReadyToProcess(
+        bytes32 requestId
+    ) external view returns (bool) {
+        return
+            isRequestFulfilled[requestId] &&
+            requestToSender[requestId] != address(0);
+    }
+
+    /**
+     * @notice 특정 요청의 결과 미리보기 (처리하지 않고 결과만 확인)
+     */
+    function previewRequestResult(
+        bytes32 requestId
+    )
+        external
+        view
+        returns (uint256 amount, DelegationTier tier, bool isVerification)
+    {
+        require(isRequestFulfilled[requestId], "Request not fulfilled yet");
+        require(requestToSender[requestId] == msg.sender, "Not request owner");
+
+        bytes memory response = fulfilledResults[requestId];
+        string memory amountString = abi.decode(response, (string));
+        amount = ValidationUtils.validateAndParseAmount(amountString);
+        tier = amount.getTierForAmount();
+        isVerification = isVerificationRequest[requestId];
     }
 
     // ==================== INTERNAL FUNCTIONS ====================

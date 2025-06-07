@@ -1,3 +1,7 @@
+import { gql } from "@apollo/client";
+
+// GraphQL endpoint configuration moved to apollo.ts
+
 export interface LoyaltyVerificationRequested {
   id: string;
   user: string;
@@ -27,18 +31,62 @@ export interface InitialQualificationClaimed {
   transactionHash: string;
 }
 
-export interface UserRequestStatus {
-  loyaltyVerificationRequesteds: LoyaltyVerificationRequested[];
-  loyaltyVerifieds: LoyaltyVerified[];
-  initialQualificationClaimeds: InitialQualificationClaimed[];
+export interface RequestSent {
+  id: string;
+  internal_id: string;
+  blockTimestamp: string;
+  transactionHash: string;
 }
 
-import { gql } from "@apollo/client";
+export interface RequestFulfilled {
+  id: string;
+  internal_id: string;
+  blockTimestamp: string;
+  transactionHash: string;
+}
+
+export interface RequestProcessed {
+  id: string;
+  user: string;
+  requestId: string;
+  isVerification: boolean;
+  blockTimestamp: string;
+  transactionHash: string;
+}
+
+export interface UserRequestStatus {
+  requestSents?: RequestSent[];
+  requestFulfilleds?: RequestFulfilled[];
+  requestProcesseds?: RequestProcessed[];
+  loyaltyVerifieds?: LoyaltyVerified[];
+  initialQualificationClaimeds?: InitialQualificationClaimed[];
+}
 
 // GraphQL 쿼리들
 export const GET_USER_REQUEST_STATUS = gql`
   query GetUserRequestStatus($userAddress: String!) {
-    loyaltyVerificationRequesteds(
+    # 모든 RequestSent 이벤트들 (초기 등록 + loyalty 갱신 모두 포함)
+    requestSents(orderBy: blockTimestamp, orderDirection: desc, first: 100) {
+      id
+      internal_id
+      blockTimestamp
+      transactionHash
+    }
+
+    # 모든 RequestFulfilled 이벤트들
+    requestFulfilleds(
+      orderBy: blockTimestamp
+      orderDirection: desc
+      first: 100
+    ) {
+      id
+      internal_id
+      blockTimestamp
+      transactionHash
+    }
+
+    # 사용자별 처리된 요청들
+    requestProcesseds(
       where: { user: $userAddress }
       orderBy: blockTimestamp
       orderDirection: desc
@@ -46,10 +94,12 @@ export const GET_USER_REQUEST_STATUS = gql`
       id
       user
       requestId
+      isVerification
       blockTimestamp
       transactionHash
     }
 
+    # 사용자별 최종 검증 완료
     loyaltyVerifieds(
       where: { user: $userAddress }
       orderBy: blockTimestamp
@@ -65,6 +115,7 @@ export const GET_USER_REQUEST_STATUS = gql`
       transactionHash
     }
 
+    # 초기 등록 확인용
     initialQualificationClaimeds(
       where: { user: $userAddress }
       orderBy: blockTimestamp
@@ -81,76 +132,21 @@ export const GET_USER_REQUEST_STATUS = gql`
   }
 `;
 
-export const GET_USER_LATEST_REQUEST_STATUS = gql`
-  query GetUserLatestRequestStatus($userAddress: String!) {
-    loyaltyVerificationRequesteds(
-      first: 1
-      where: { user: $userAddress }
-      orderBy: blockTimestamp
-      orderDirection: desc
-    ) {
-      id
-      user
-      requestId
-      blockTimestamp
-      transactionHash
-    }
-
-    loyaltyVerifieds(
-      first: 1
-      where: { user: $userAddress }
-      orderBy: blockTimestamp
-      orderDirection: desc
-    ) {
-      id
-      user
-      newTier
-      newAmount
-      blockTimestamp
-      transactionHash
-    }
-  }
-`;
-
-export const GET_USER_REQUESTS_AFTER_TIME = gql`
-  query GetUserRequestsAfterTime($userAddress: String!, $timestamp: String!) {
-    loyaltyVerificationRequesteds(
-      where: { user: $userAddress, blockTimestamp_gte: $timestamp }
-      orderBy: blockTimestamp
-      orderDirection: desc
-    ) {
-      id
-      user
-      requestId
-      blockTimestamp
-      transactionHash
-    }
-
-    loyaltyVerifieds(
-      where: { user: $userAddress, blockTimestamp_gte: $timestamp }
-      orderBy: blockTimestamp
-      orderDirection: desc
-    ) {
-      id
-      user
-      newTier
-      newAmount
-      blockTimestamp
-      transactionHash
-    }
-  }
-`;
+// 이제 GET_USER_REQUEST_STATUS 하나만 사용합니다!
 
 // 유틸리티 함수들
 export function hasRequestBeenFulfilled(
-  requests: LoyaltyVerificationRequested[],
-  fulfillments: LoyaltyVerified[]
+  requests: LoyaltyVerificationRequested[] | undefined,
+  fulfillments: LoyaltyVerified[] | undefined
 ): boolean {
-  if (requests.length === 0) return false;
-  if (fulfillments.length === 0) return false;
+  const safeRequests = requests || [];
+  const safeFulfillments = fulfillments || [];
 
-  const latestRequest = requests[0];
-  const latestFulfillment = fulfillments[0];
+  if (safeRequests.length === 0) return false;
+  if (safeFulfillments.length === 0) return false;
+
+  const latestRequest = safeRequests[0];
+  const latestFulfillment = safeFulfillments[0];
 
   // 최근 fulfillment가 최근 request보다 나중인지 확인
   return (
@@ -160,12 +156,15 @@ export function hasRequestBeenFulfilled(
 }
 
 export function getPendingRequests(
-  requests: LoyaltyVerificationRequested[],
-  fulfillments: LoyaltyVerified[]
+  requests: LoyaltyVerificationRequested[] | undefined,
+  fulfillments: LoyaltyVerified[] | undefined
 ): LoyaltyVerificationRequested[] {
-  return requests.filter((request) => {
+  const safeRequests = requests || [];
+  const safeFulfillments = fulfillments || [];
+
+  return safeRequests.filter((request) => {
     // 이 request보다 나중에 fulfill된 것이 있는지 확인
-    const hasLaterFulfillment = fulfillments.some(
+    const hasLaterFulfillment = safeFulfillments.some(
       (fulfillment) =>
         parseInt(fulfillment.blockTimestamp) > parseInt(request.blockTimestamp)
     );
@@ -173,26 +172,119 @@ export function getPendingRequests(
   });
 }
 
+// 1. Pending: LoyaltyVerificationRequested가 RequestSent에 있지만 RequestFulfilled에 없는 요청들
+export function getPendingRequestsSentNotFulfilled(
+  userRequests: LoyaltyVerificationRequested[] | undefined,
+  sentRequests: RequestSent[] | undefined,
+  fulfilledRequests: RequestFulfilled[] | undefined
+): LoyaltyVerificationRequested[] {
+  const safeUserRequests = userRequests || [];
+  const safeSentRequests = sentRequests || [];
+  const safeFulfilledRequests = fulfilledRequests || [];
+
+  return safeUserRequests.filter((request) => {
+    // 이 요청이 sent 되었는지 확인
+    const isSent = safeSentRequests.some(
+      (sent) => sent.internal_id === request.requestId
+    );
+
+    // 이 요청이 fulfilled 되었는지 확인
+    const isFulfilled = safeFulfilledRequests.some(
+      (fulfilled) => fulfilled.internal_id === request.requestId
+    );
+
+    return isSent && !isFulfilled;
+  });
+}
+
+// 2. Ready to Process: RequestFulfilled에 있지만 RequestProcessed에 없는 요청들
+export function getReadyToProcessRequestsFulfilledNotProcessed(
+  userRequests: LoyaltyVerificationRequested[] | undefined,
+  fulfilledRequests: RequestFulfilled[] | undefined,
+  processedRequests: RequestProcessed[] | undefined
+): LoyaltyVerificationRequested[] {
+  const safeUserRequests = userRequests || [];
+  const safeFulfilledRequests = fulfilledRequests || [];
+  const safeProcessedRequests = processedRequests || [];
+
+  return safeUserRequests.filter((request) => {
+    // 이 요청이 fulfilled 되었는지 확인
+    const isFulfilled = safeFulfilledRequests.some(
+      (fulfilled) => fulfilled.internal_id === request.requestId
+    );
+
+    // 이 요청이 이미 처리되었는지 확인
+    const isProcessed = safeProcessedRequests.some(
+      (processed) => processed.requestId === request.requestId
+    );
+
+    return isFulfilled && !isProcessed;
+  });
+}
+
+// 기존 유틸리티 - 호환성 유지
+export function getReadyToProcessRequests(
+  userRequests: LoyaltyVerificationRequested[] | undefined,
+  fulfilledRequests: RequestFulfilled[] | undefined,
+  processedRequests: RequestProcessed[] | undefined
+): LoyaltyVerificationRequested[] {
+  return getReadyToProcessRequestsFulfilledNotProcessed(
+    userRequests,
+    fulfilledRequests,
+    processedRequests
+  );
+}
+
 export function getRequestStatusSummary(data: UserRequestStatus) {
   const {
-    loyaltyVerificationRequesteds,
+    requestSents,
+    requestFulfilleds,
+    requestProcesseds,
     loyaltyVerifieds,
     initialQualificationClaimeds,
   } = data;
 
+  // 안전한 배열 접근을 위한 기본값 설정
+  const safeSents = requestSents || [];
+  const safeFulfilleds = requestFulfilleds || [];
+  const safeProcessed = requestProcesseds || [];
+  const safeVerifieds = loyaltyVerifieds || [];
+  const safeInitialClaims = initialQualificationClaimeds || [];
+
+  // RequestSents 중심의 간단한 3단계 처리 로직
+  // 1. Pending: RequestSents but not RequestFulfilled
+  const pendingRequests = safeSents.filter((sentRequest) => {
+    const isFulfilled = safeFulfilleds.some(
+      (fulfilled) => fulfilled.internal_id === sentRequest.internal_id
+    );
+    return !isFulfilled;
+  });
+
+  // 2. Ready to Process: RequestFulfilled but not RequestProcessed
+  const readyToProcessRequests = safeSents.filter((sentRequest) => {
+    const isFulfilled = safeFulfilleds.some(
+      (fulfilled) => fulfilled.internal_id === sentRequest.internal_id
+    );
+    const isProcessed = safeProcessed.some(
+      (processed) => processed.requestId === sentRequest.internal_id
+    );
+    return isFulfilled && !isProcessed;
+  });
+
   return {
-    hasInitialQualification: initialQualificationClaimeds.length > 0,
-    totalRequests: loyaltyVerificationRequesteds.length,
-    totalFulfillments: loyaltyVerifieds.length,
-    hasPendingRequests: !hasRequestBeenFulfilled(
-      loyaltyVerificationRequesteds,
-      loyaltyVerifieds
-    ),
-    pendingRequests: getPendingRequests(
-      loyaltyVerificationRequesteds,
-      loyaltyVerifieds
-    ),
-    latestRequest: loyaltyVerificationRequesteds[0] || null,
-    latestFulfillment: loyaltyVerifieds[0] || null,
+    hasInitialQualification: safeInitialClaims.length > 0,
+    totalRequests: safeSents.length,
+    totalFulfillments: safeFulfilleds.length,
+    totalProcessed: safeProcessed.length,
+    totalVerified: safeVerifieds.length,
+    hasPendingRequests: pendingRequests.length > 0,
+    hasReadyToProcessRequests: readyToProcessRequests.length > 0,
+    pendingRequests: pendingRequests,
+    readyToProcessRequests: readyToProcessRequests,
+    completedRequests: safeProcessed,
+    latestSent: safeSents[0] || null,
+    latestFulfillment: safeFulfilleds[0] || null,
+    latestProcessed: safeProcessed[0] || null,
+    latestVerified: safeVerifieds[0] || null,
   };
 }

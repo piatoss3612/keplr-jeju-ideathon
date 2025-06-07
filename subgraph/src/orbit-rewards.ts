@@ -5,6 +5,7 @@ import {
   OwnershipTransferRequested as OwnershipTransferRequestedEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
   RequestFulfilled as RequestFulfilledEvent,
+  RequestProcessed as RequestProcessedEvent,
   RequestSent as RequestSentEvent,
   ScoreCalculated as ScoreCalculatedEvent,
   ScoreExpired as ScoreExpiredEvent,
@@ -20,6 +21,7 @@ import {
   OwnershipTransferRequested,
   OwnershipTransferred,
   RequestFulfilled,
+  RequestProcessed,
   RequestSent,
   ScoreCalculated,
   ScoreExpired,
@@ -117,6 +119,21 @@ export function handleRequestFulfilled(event: RequestFulfilledEvent): void {
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
   entity.internal_id = event.params.id
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleRequestProcessed(event: RequestProcessedEvent): void {
+  let entity = new RequestProcessed(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.user = event.params.user
+  entity.requestId = event.params.requestId
+  entity.isVerification = event.params.isVerification
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp

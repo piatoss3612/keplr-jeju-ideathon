@@ -8,9 +8,9 @@ dataSources:
     name: OrbitRewards
     network: base-sepolia
     source:
-      address: "0x3ef54615e0FB1DA461f19962246A8441b4D83FD6"
+      address: "0x0e3Bad7d5e076788B8535E6b9fAB5D5FF9868cAb"
       abi: OrbitRewards
-      startBlock: 26753702
+      startBlock: 26756742
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -22,6 +22,7 @@ dataSources:
         - OwnershipTransferRequested
         - OwnershipTransferred
         - RequestFulfilled
+        - RequestProcessed
         - RequestSent
         - ScoreCalculated
         - ScoreExpired
@@ -45,6 +46,8 @@ dataSources:
           handler: handleOwnershipTransferred
         - event: RequestFulfilled(indexed bytes32)
           handler: handleRequestFulfilled
+        - event: RequestProcessed(indexed address,indexed bytes32,bool)
+          handler: handleRequestProcessed
         - event: RequestSent(indexed bytes32)
           handler: handleRequestSent
         - event: ScoreCalculated(indexed address,uint256,uint256,bool)

@@ -56,6 +56,16 @@ type RequestFulfilled @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type RequestProcessed @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  requestId: Bytes! # bytes32
+  isVerification: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type RequestSent @entity(immutable: true) {
   id: Bytes!
   internal_id: Bytes! # bytes32

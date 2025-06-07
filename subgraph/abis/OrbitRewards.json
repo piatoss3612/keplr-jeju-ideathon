@@ -205,6 +205,31 @@
     "anonymous": false
   },
   {
+    "name": "RequestProcessed",
+    "type": "event",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "isVerification",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
     "name": "RequestSent",
     "type": "event",
     "inputs": [
@@ -433,6 +458,13 @@
     "stateMutability": "nonpayable"
   },
   {
+    "name": "fulfilledResults",
+    "type": "function",
+    "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bytes", "internalType": "bytes" }],
+    "stateMutability": "view"
+  },
+  {
     "name": "gasLimit",
     "type": "function",
     "inputs": [],
@@ -566,6 +598,22 @@
     "stateMutability": "view"
   },
   {
+    "name": "isRequestFulfilled",
+    "type": "function",
+    "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "name": "isRequestReadyToProcess",
+    "type": "function",
+    "inputs": [
+      { "name": "requestId", "type": "bytes32", "internalType": "bytes32" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
     "name": "isVerificationRequest",
     "type": "function",
     "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
@@ -593,10 +641,36 @@
     "stateMutability": "view"
   },
   {
+    "name": "previewRequestResult",
+    "type": "function",
+    "inputs": [
+      { "name": "requestId", "type": "bytes32", "internalType": "bytes32" }
+    ],
+    "outputs": [
+      { "name": "amount", "type": "uint256", "internalType": "uint256" },
+      {
+        "name": "tier",
+        "type": "uint8",
+        "internalType": "enum DelegationTier"
+      },
+      { "name": "isVerification", "type": "bool", "internalType": "bool" }
+    ],
+    "stateMutability": "view"
+  },
+  {
     "name": "processExpiredScores",
     "type": "function",
     "inputs": [
       { "name": "users", "type": "address[]", "internalType": "address[]" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "processRequest",
+    "type": "function",
+    "inputs": [
+      { "name": "requestId", "type": "bytes32", "internalType": "bytes32" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
