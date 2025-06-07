@@ -4,6 +4,7 @@ import { Orbitron, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import RainbowKitProvider from "@/context/RainbowKitProvider";
 import { KeplrProvider } from "@/context/KeplrProvider";
+import { ProofGenerationProvider } from "@/context/ProofGenerationProvider";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -34,7 +35,9 @@ export default async function RootLayout({
         className={`${orbitron.variable} ${jetBrainsMono.variable} antialiased`}
       >
         <RainbowKitProvider cookies={cookies}>
-          <KeplrProvider>{children}</KeplrProvider>
+          <KeplrProvider>
+            <ProofGenerationProvider>{children}</ProofGenerationProvider>
+          </KeplrProvider>
         </RainbowKitProvider>
       </body>
     </html>

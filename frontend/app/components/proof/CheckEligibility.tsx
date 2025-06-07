@@ -1,43 +1,36 @@
 "use client";
 
-import { useState } from "react";
 import { useKeplrContext } from "@/context/KeplrProvider";
 import { formatUnits } from "viem";
 import {
-  getTierForAmount,
   getTierName,
-  getTierEmoji,
-  getTierColorClass,
   getNextTierInfo,
   formatInitAmount as formatTierAmount,
 } from "../../utils/tierUtils";
+import {
+  useProofGeneration,
+  EligibilityData,
+  ErrorData,
+} from "../../../context/ProofGenerationProvider";
 
 interface CheckEligibilityProps {
   onEligibilityConfirmed: () => void;
-}
-
-interface EligibilityData {
-  bech32Address: string;
-  hexAddress: string;
-  delegationAmount: string;
-  requiredAmount: string;
-  isQualified: boolean;
-  timestamp: string;
-}
-
-interface ErrorData {
-  error: string;
-  message: string;
 }
 
 export default function CheckEligibility({
   onEligibilityConfirmed,
 }: CheckEligibilityProps) {
   const keplr = useKeplrContext();
-  const [isChecking, setIsChecking] = useState(false);
-  const [eligibilityData, setEligibilityData] =
-    useState<EligibilityData | null>(null);
-  const [errorData, setErrorData] = useState<ErrorData | null>(null);
+  const {
+    eligibilityData,
+    setEligibilityData,
+    errorData,
+    setErrorData,
+    isChecking,
+    setIsChecking,
+    tierInfo,
+    clearAll,
+  } = useProofGeneration();
 
   const formatInitAmount = (amount: string) => {
     return formatUnits(BigInt(amount), 6).toString();
@@ -51,8 +44,7 @@ export default function CheckEligibility({
 
     try {
       setIsChecking(true);
-      setErrorData(null); // Clear previous errors
-      setEligibilityData(null); // Clear previous results
+      clearAll(); // Clear previous state
 
       const response = await fetch(
         `https://keplr-ideathon.vercel.app/verify?address=${keplr.account.address}`
@@ -273,64 +265,43 @@ export default function CheckEligibility({
             </div>
 
             <div className="text-center mb-4">
-              {(() => {
-                try {
-                  const currentTier = getTierForAmount(
-                    eligibilityData.delegationAmount
-                  );
-                  const tierName = getTierName(currentTier);
-                  const tierEmoji = getTierEmoji(currentTier);
-                  const tierColorClass = getTierColorClass(currentTier);
-                  const nextTierInfo = getNextTierInfo(
-                    eligibilityData.delegationAmount
-                  );
-
-                  return (
-                    <>
-                      <div
-                        className={`text-lg font-orbitron mb-1 ${tierColorClass}`}
-                      >
-                        {tierEmoji} Tier: {tierName}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        Current delegation:{" "}
-                        {formatTierAmount(eligibilityData.delegationAmount)}{" "}
-                        INIT
-                      </div>
-                      {nextTierInfo.nextTier && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Next tier ({getTierName(nextTierInfo.nextTier)}):{" "}
-                          {formatTierAmount(nextTierInfo.remainingAmount || 0)}{" "}
-                          INIT more needed
-                        </div>
-                      )}
-                    </>
-                  );
-                } catch {
-                  // Fallback for amounts too low for any tier
-                  return (
-                    <>
-                      <div className="text-lg font-orbitron text-gray-400 mb-1">
-                        ❓ Tier: Not Qualified
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        Minimum requirement: {formatTierAmount("5000000")} INIT
-                        (Asteroid tier)
-                      </div>
-                    </>
-                  );
-                }
-              })()}
+              {tierInfo ? (
+                <>
+                  <div
+                    className={`text-lg font-orbitron mb-1 ${tierInfo.tierColorClass}`}
+                  >
+                    {tierInfo.tierEmoji} Tier: {tierInfo.tierName}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Current delegation:{" "}
+                    {formatTierAmount(eligibilityData.delegationAmount)} INIT
+                  </div>
+                  {tierInfo.nextTier && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Next tier ({getTierName(tierInfo.nextTier)}):{" "}
+                      {formatTierAmount(tierInfo.remainingAmount || 0)} INIT
+                      more needed
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="text-lg font-orbitron text-gray-400 mb-1">
+                    ❓ Tier: Not Qualified
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Minimum requirement: {formatTierAmount("5000000")} INIT
+                    (Asteroid tier)
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex space-x-3">
             <button
-              onClick={() => {
-                setEligibilityData(null);
-                setErrorData(null);
-              }}
+              onClick={clearAll}
               className="px-6 py-3 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-xl transition-all duration-300"
             >
               Check Again
