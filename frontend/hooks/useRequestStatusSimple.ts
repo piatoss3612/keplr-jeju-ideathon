@@ -78,17 +78,22 @@ interface UseRequestStatusSimpleReturn {
   stats: UserRequestStats;
   isLoading: boolean;
   error?: string;
+  refetch: () => void;
+  isRefetching: boolean;
 }
 
 export function useRequestStatusSimple(
   userAddress?: string
 ): UseRequestStatusSimpleReturn {
-  const { data, loading, error } = useQuery(GET_USER_SPECIFIC_REQUESTS, {
-    variables: { userAddress: userAddress?.toLowerCase() },
-    skip: !userAddress,
-    errorPolicy: "all",
-    fetchPolicy: "cache-and-network",
-  });
+  const { data, loading, error, refetch } = useQuery(
+    GET_USER_SPECIFIC_REQUESTS,
+    {
+      variables: { userAddress: userAddress?.toLowerCase() },
+      skip: !userAddress,
+      errorPolicy: "all",
+      fetchPolicy: "cache-and-network",
+    }
+  );
 
   // 기본 통계
   const defaultStats: UserRequestStats = {
@@ -98,11 +103,17 @@ export function useRequestStatusSimple(
     readyToProcessCount: 0,
   };
 
+  const handleRefetch = () => {
+    refetch();
+  };
+
   if (loading || error || !data) {
     return {
       stats: defaultStats,
       isLoading: loading,
       error: error?.message,
+      refetch: handleRefetch,
+      isRefetching: false,
     };
   }
 
@@ -165,5 +176,7 @@ export function useRequestStatusSimple(
     stats,
     isLoading: false,
     error: undefined,
+    refetch: handleRefetch,
+    isRefetching: loading,
   };
 }

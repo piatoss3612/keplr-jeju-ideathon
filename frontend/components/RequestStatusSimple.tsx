@@ -10,7 +10,8 @@ export default function RequestStatusSimple({
   userAddress,
   className = "",
 }: RequestStatusSimpleProps) {
-  const { stats, isLoading, error } = useRequestStatusSimple(userAddress);
+  const { stats, isLoading, error, refetch, isRefetching } =
+    useRequestStatusSimple(userAddress);
 
   if (!userAddress || isLoading) {
     return (
@@ -45,9 +46,50 @@ export default function RequestStatusSimple({
     <div
       className={`bg-slate-900/50 border border-blue-400/40 rounded-xl p-4 ${className}`}
     >
-      <h3 className="text-blue-300 font-orbitron font-medium text-lg mb-4">
-        📊 Request Status
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-blue-300 font-orbitron font-medium text-lg">
+          📊 Request Status
+        </h3>
+        <button
+          onClick={refetch}
+          disabled={isRefetching}
+          className="group relative px-4 py-2 bg-blue-900/30 
+                     hover:bg-blue-800/40 disabled:bg-gray-600/20
+                     border border-blue-400/40 hover:border-blue-400/60 
+                     disabled:border-gray-500/40 rounded-lg 
+                     text-blue-300 hover:text-blue-200 disabled:text-gray-400 
+                     text-sm font-semibold transition-all duration-300
+                     disabled:cursor-not-allowed
+                     shadow-lg hover:shadow-blue-400/20 hover:shadow-xl
+                     transform hover:scale-105 disabled:hover:scale-100
+                     backdrop-blur-sm"
+        >
+          {isRefetching && (
+            <div className="absolute -top-7 left-1/2 transform -translate-x-1/2">
+              <div
+                className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full 
+                              shadow-lg shadow-blue-400/50"
+              ></div>
+            </div>
+          )}
+          <div className="flex items-center space-x-2">
+            <span
+              className={`text-base transition-transform duration-300 ${
+                isRefetching ? "animate-spin" : "group-hover:rotate-180"
+              }`}
+            >
+              🔄
+            </span>
+            <span className="font-orbitron">Refresh</span>
+          </div>
+          {/* Hover glow effect */}
+          <div
+            className="absolute inset-0 rounded-lg bg-blue-400/0 
+                          group-hover:bg-blue-400/10 
+                          transition-all duration-300 pointer-events-none"
+          ></div>
+        </button>
+      </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4 mb-4">

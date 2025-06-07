@@ -234,9 +234,26 @@ export default function Dashboard({
               <div className="flex space-x-3 mt-4">
                 <button
                   onClick={refreshUserStatus}
-                  className="px-4 py-2 bg-purple-600/50 hover:bg-purple-600/70 text-purple-200 rounded-lg transition-all duration-300 text-sm font-medium flex-1"
+                  className="group relative px-4 py-2 bg-blue-900/30 
+                             hover:bg-blue-800/40 border border-blue-400/40 
+                             hover:border-blue-400/60 rounded-lg 
+                             text-blue-300 hover:text-blue-200 
+                             text-sm font-semibold transition-all duration-300
+                             shadow-lg hover:shadow-blue-400/20 hover:shadow-xl
+                             transform hover:scale-105 backdrop-blur-sm flex-1"
                 >
-                  🔄 Refresh Status
+                  <div className="flex items-center justify-center space-x-2">
+                    <span className="text-base transition-transform duration-300 group-hover:rotate-180">
+                      🔄
+                    </span>
+                    <span className="font-orbitron">Refresh Status</span>
+                  </div>
+                  {/* Hover glow effect */}
+                  <div
+                    className="absolute inset-0 rounded-lg bg-blue-400/0 
+                                  group-hover:bg-blue-400/10 
+                                  transition-all duration-300 pointer-events-none"
+                  ></div>
                 </button>
               </div>
             </div>
