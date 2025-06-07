@@ -7,27 +7,25 @@ import TabNavigation, { Tab } from "./TabNavigation";
 import CyberpunkCard from "../card/CyberpunkCard";
 import ConnectWallets from "./ConnectWallets";
 import Dashboard, { DashboardData } from "./Dashboard";
-import ProofGeneration from "../proof/ProofGeneration";
-import { ProofStep } from "../proof/ProgressIndicator";
+import OrbitRewardsFlow from "../orbit/OrbitRewardsFlow";
 import {
-  ProofGenerationProvider,
-  useProofGeneration,
-} from "../../../context/ProofGenerationProvider";
-import { useKeplrVerificationProof } from "@/hooks/useProof";
+  OrbitRewardsProvider,
+  useOrbitRewards,
+} from "@/context/OrbitRewardsProvider";
 
 function OrbitRewardsCardContent() {
   const { address, isConnected } = useAccount();
   const keplr = useKeplrContext();
-  const { getCurrentTierValue, eligibilityData } = useProofGeneration();
-
   const {
-    requestWebProof,
-    hash,
-    isPending: isWebProofPending,
-  } = useKeplrVerificationProof(keplr.account?.address ?? "");
+    registrationStep,
+    setRegistrationStep,
+    isRegistering,
+    registrationHash,
+    registerOrUpdate,
+    clearAll,
+  } = useOrbitRewards();
 
   const [activeTab, setActiveTab] = useState<Tab>("connect");
-  const [step, setStep] = useState<ProofStep>("check");
 
   // Mock dashboard data
   const dashboardData: DashboardData = {
@@ -46,41 +44,22 @@ function OrbitRewardsCardContent() {
     ],
   };
 
-  const handleGenerateProof = async () => {
+  const handleRegisterOrUpdate = async () => {
     if (!keplr.isConnected || !keplr.account) {
-      alert("Keplr 지갑을 먼저 연결해주세요");
-      return;
-    }
-
-    if (!eligibilityData) {
-      alert("먼저 자격 확인을 완료해주세요");
-      return;
-    }
-
-    const tierValue = getCurrentTierValue();
-    if (tierValue === null) {
-      alert("유효한 티어 정보를 찾을 수 없습니다");
+      alert("Keplr wallet must be connected first");
       return;
     }
 
     try {
-      requestWebProof();
+      await registerOrUpdate(keplr.account.address);
     } catch (error) {
-      console.error("Failed to call prover:", error);
-      alert(
-        `Failed to generate proof: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      console.error("Failed to register/update:", error);
     }
   };
 
-  const handleVerifyProof = () => {
-    alert("Proof verified successfully! 🎉");
-  };
-
   const resetCard = () => {
-    setStep("check");
+    clearAll();
+    setRegistrationStep("check");
   };
 
   return (
@@ -98,18 +77,18 @@ function OrbitRewardsCardContent() {
             isConnected={isConnected}
             address={address}
             keplr={keplr}
+            onSwitchToRegister={() => setActiveTab("proof")}
           />
         )}
 
         {activeTab === "proof" && (
-          <ProofGeneration
-            step={step}
-            setStep={setStep}
-            isGeneratingProof={isWebProofPending}
-            proof={hash ?? null}
+          <OrbitRewardsFlow
+            step={registrationStep}
+            setStep={setRegistrationStep}
+            isRegistering={isRegistering}
+            registrationHash={registrationHash}
             keplr={keplr}
-            onGenerateProof={handleGenerateProof}
-            onVerifyProof={handleVerifyProof}
+            onRegisterOrUpdate={handleRegisterOrUpdate}
             onReset={resetCard}
           />
         )}
@@ -120,8 +99,8 @@ function OrbitRewardsCardContent() {
 
 export default function OrbitRewardsCard() {
   return (
-    <ProofGenerationProvider>
+    <OrbitRewardsProvider>
       <OrbitRewardsCardContent />
-    </ProofGenerationProvider>
+    </OrbitRewardsProvider>
   );
 }

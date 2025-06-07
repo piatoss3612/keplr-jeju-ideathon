@@ -19,7 +19,7 @@ export default function CyberpunkCard({ children }: CyberpunkCardProps) {
       <div className="absolute inset-px bg-gradient-to-br from-cyan-500/5 to-pink-500/5 rounded-2xl"></div>
 
       {/* 컨텐츠 */}
-      <div className="p-8 relative z-10">{children}</div>
+      <div className="p-6 lg:p-8 relative z-10">{children}</div>
     </div>
   );
 }

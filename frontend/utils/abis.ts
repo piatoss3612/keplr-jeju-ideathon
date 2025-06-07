@@ -1,0 +1,760 @@
+export const OrbitRewardsAbi = [
+  {
+    type: "constructor",
+    inputs: [
+      {
+        name: "_subscriptionId",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      { name: "_source", type: "string", internalType: "string" },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "acceptOwnership",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "calculateCurrentScore",
+    inputs: [{ name: "user", type: "address", internalType: "address" }],
+    outputs: [
+      {
+        name: "currentScore",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      { name: "isActive", type: "bool", internalType: "bool" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "checkAndEndSeason",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "claimSeasonReward",
+    inputs: [
+      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "currentSeason",
+    inputs: [],
+    outputs: [
+      {
+        name: "seasonNumber",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      { name: "startTime", type: "uint256", internalType: "uint256" },
+      { name: "endTime", type: "uint256", internalType: "uint256" },
+      { name: "active", type: "bool", internalType: "bool" },
+      {
+        name: "totalParticipants",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "endCurrentSeason",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "gasLimit",
+    inputs: [],
+    outputs: [{ name: "", type: "uint32", internalType: "uint32" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCurrentSeasonInfo",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "tuple",
+        internalType: "struct OrbitRewards.SeasonInfo",
+        components: [
+          {
+            name: "seasonNumber",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "startTime",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          { name: "endTime", type: "uint256", internalType: "uint256" },
+          { name: "active", type: "bool", internalType: "bool" },
+          {
+            name: "totalParticipants",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getNFTContract",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getUserSeasonPoints",
+    inputs: [
+      { name: "user", type: "address", internalType: "address" },
+      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "points", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getUserStatus",
+    inputs: [{ name: "user", type: "address", internalType: "address" }],
+    outputs: [
+      {
+        name: "info",
+        type: "tuple",
+        internalType: "struct OrbitRewards.UserStatusInfo",
+        components: [
+          { name: "hasUserNFT", type: "bool", internalType: "bool" },
+          { name: "tokenId", type: "uint256", internalType: "uint256" },
+          {
+            name: "tier",
+            type: "uint8",
+            internalType: "enum DelegationTier",
+          },
+          { name: "amount", type: "uint256", internalType: "uint256" },
+          {
+            name: "currentScore",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "boostPoints",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          { name: "scoreActive", type: "bool", internalType: "bool" },
+          {
+            name: "nextVerificationTime",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "verificationCount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "seasonPoints",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "seasonMilestones",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "seasonsCompleted",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "handleOracleFulfillment",
+    inputs: [
+      { name: "requestId", type: "bytes32", internalType: "bytes32" },
+      { name: "response", type: "bytes", internalType: "bytes" },
+      { name: "err", type: "bytes", internalType: "bytes" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "hasNFT",
+    inputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "isVerificationRequest",
+    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "nftContract",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract OrbitRewardsNFT",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "owner",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "processExpiredScores",
+    inputs: [{ name: "users", type: "address[]", internalType: "address[]" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "requestDelegationTier",
+    inputs: [{ name: "bech32Address", type: "string", internalType: "string" }],
+    outputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "requestLoyaltyVerification",
+    inputs: [{ name: "bech32Address", type: "string", internalType: "string" }],
+    outputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "requestToSender",
+    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "seasonRewardClaimed",
+    inputs: [
+      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "", type: "address", internalType: "address" },
+    ],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "source",
+    inputs: [],
+    outputs: [{ name: "", type: "string", internalType: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "startNewSeason",
+    inputs: [],
+    outputs: [
+      {
+        name: "newSeasonNumber",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "subscriptionId",
+    inputs: [],
+    outputs: [{ name: "", type: "uint64", internalType: "uint64" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "transferOwnership",
+    inputs: [{ name: "to", type: "address", internalType: "address" }],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateChainlinkConfig",
+    inputs: [
+      {
+        name: "_subscriptionId",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      { name: "_gasLimit", type: "uint32", internalType: "uint32" },
+      { name: "_source", type: "string", internalType: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "userData",
+    inputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [
+      { name: "nftTokenId", type: "uint256", internalType: "uint256" },
+      {
+        name: "mintTimestamp",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "lastVerificationTime",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "currentScore",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      { name: "boostPoints", type: "uint256", internalType: "uint256" },
+      {
+        name: "currentTier",
+        type: "uint8",
+        internalType: "enum DelegationTier",
+      },
+      {
+        name: "currentAmount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "verificationCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      { name: "isActive", type: "bool", internalType: "bool" },
+      {
+        name: "seasonPoints",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "seasonMilestones",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "seasonsCompleted",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "userSeasonPoints",
+    inputs: [
+      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "", type: "address", internalType: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "InitialQualificationClaimed",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "tier",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum DelegationTier",
+      },
+      {
+        name: "amount",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "LoyaltyVerificationRequested",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "requestId",
+        type: "bytes32",
+        indexed: true,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "LoyaltyVerified",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "newTier",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum DelegationTier",
+      },
+      {
+        name: "newAmount",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "boostPoints",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "currentScore",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "OwnershipTransferRequested",
+    inputs: [
+      {
+        name: "from",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "OwnershipTransferred",
+    inputs: [
+      {
+        name: "from",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "RequestFulfilled",
+    inputs: [
+      {
+        name: "id",
+        type: "bytes32",
+        indexed: true,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "RequestSent",
+    inputs: [
+      {
+        name: "id",
+        type: "bytes32",
+        indexed: true,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ScoreCalculated",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "score",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "seasonalPoints",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "isActive",
+        type: "bool",
+        indexed: false,
+        internalType: "bool",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ScoreExpired",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "expiredScore",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SeasonEnded",
+    inputs: [
+      {
+        name: "seasonNumber",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "endTime",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SeasonMilestoneReached",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "seasonNumber",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "milestone",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "bonus",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SeasonRewardClaimed",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "seasonNumber",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "totalPoints",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "bonus",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "specialNftId",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SeasonStarted",
+    inputs: [
+      {
+        name: "seasonNumber",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "startTime",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "AlreadyHasNFT",
+    inputs: [{ name: "user", type: "address", internalType: "address" }],
+  },
+  { type: "error", name: "EmptyArgs", inputs: [] },
+  { type: "error", name: "EmptySource", inputs: [] },
+  {
+    type: "error",
+    name: "InvalidAmountString",
+    inputs: [{ name: "invalidAmount", type: "string", internalType: "string" }],
+  },
+  {
+    type: "error",
+    name: "InvalidBech32Address",
+    inputs: [
+      { name: "invalidAddress", type: "string", internalType: "string" },
+    ],
+  },
+  { type: "error", name: "InvalidClaimantAddress", inputs: [] },
+  { type: "error", name: "NoInlineSecrets", inputs: [] },
+  {
+    type: "error",
+    name: "NoNFTFound",
+    inputs: [{ name: "user", type: "address", internalType: "address" }],
+  },
+  { type: "error", name: "NotEligibleForSeasonReward", inputs: [] },
+  { type: "error", name: "OnlyRouterCanFulfill", inputs: [] },
+  {
+    type: "error",
+    name: "SeasonNotEnded",
+    inputs: [
+      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
+    ],
+  },
+  {
+    type: "error",
+    name: "SeasonRewardAlreadyClaimed",
+    inputs: [
+      { name: "seasonNumber", type: "uint256", internalType: "uint256" },
+    ],
+  },
+  {
+    type: "error",
+    name: "UnauthorizedClaimant",
+    inputs: [
+      { name: "expected", type: "address", internalType: "address" },
+      { name: "actual", type: "address", internalType: "address" },
+    ],
+  },
+  {
+    type: "error",
+    name: "VerificationTooEarly",
+    inputs: [
+      {
+        name: "timeRemaining",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+] as const;

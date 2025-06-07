@@ -1,0 +1,126 @@
+type InitialQualificationClaimed @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  tokenId: BigInt! # uint256
+  tier: Int! # uint8
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LoyaltyVerificationRequested @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  requestId: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LoyaltyVerified @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  newTier: Int! # uint8
+  newAmount: BigInt! # uint256
+  boostPoints: BigInt! # uint256
+  currentScore: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferRequested @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes! # address
+  to: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes! # address
+  to: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RequestFulfilled @entity(immutable: true) {
+  id: Bytes!
+  internal_id: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RequestSent @entity(immutable: true) {
+  id: Bytes!
+  internal_id: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ScoreCalculated @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  score: BigInt! # uint256
+  seasonalPoints: BigInt! # uint256
+  isActive: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ScoreExpired @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  expiredScore: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SeasonEnded @entity(immutable: true) {
+  id: Bytes!
+  seasonNumber: BigInt! # uint256
+  endTime: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SeasonMilestoneReached @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  seasonNumber: BigInt! # uint256
+  milestone: BigInt! # uint256
+  bonus: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SeasonRewardClaimed @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  seasonNumber: BigInt! # uint256
+  totalPoints: BigInt! # uint256
+  bonus: BigInt! # uint256
+  specialNftId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SeasonStarted @entity(immutable: true) {
+  id: Bytes!
+  seasonNumber: BigInt! # uint256
+  startTime: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

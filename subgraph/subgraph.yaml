@@ -1,0 +1,62 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: OrbitRewards
+    network: base-sepolia
+    source:
+      address: "0x3ef54615e0FB1DA461f19962246A8441b4D83FD6"
+      abi: OrbitRewards
+      startBlock: 26753702
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - InitialQualificationClaimed
+        - LoyaltyVerificationRequested
+        - LoyaltyVerified
+        - OwnershipTransferRequested
+        - OwnershipTransferred
+        - RequestFulfilled
+        - RequestSent
+        - ScoreCalculated
+        - ScoreExpired
+        - SeasonEnded
+        - SeasonMilestoneReached
+        - SeasonRewardClaimed
+        - SeasonStarted
+      abis:
+        - name: OrbitRewards
+          file: ./abis/OrbitRewards.json
+      eventHandlers:
+        - event: InitialQualificationClaimed(indexed address,indexed uint256,uint8,uint256)
+          handler: handleInitialQualificationClaimed
+        - event: LoyaltyVerificationRequested(indexed address,indexed bytes32)
+          handler: handleLoyaltyVerificationRequested
+        - event: LoyaltyVerified(indexed address,uint8,uint256,uint256,uint256)
+          handler: handleLoyaltyVerified
+        - event: OwnershipTransferRequested(indexed address,indexed address)
+          handler: handleOwnershipTransferRequested
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RequestFulfilled(indexed bytes32)
+          handler: handleRequestFulfilled
+        - event: RequestSent(indexed bytes32)
+          handler: handleRequestSent
+        - event: ScoreCalculated(indexed address,uint256,uint256,bool)
+          handler: handleScoreCalculated
+        - event: ScoreExpired(indexed address,uint256)
+          handler: handleScoreExpired
+        - event: SeasonEnded(indexed uint256,uint256)
+          handler: handleSeasonEnded
+        - event: SeasonMilestoneReached(indexed address,indexed uint256,uint256,uint256)
+          handler: handleSeasonMilestoneReached
+        - event: SeasonRewardClaimed(indexed address,indexed uint256,uint256,uint256,uint256)
+          handler: handleSeasonRewardClaimed
+        - event: SeasonStarted(indexed uint256,uint256)
+          handler: handleSeasonStarted
+      file: ./src/orbit-rewards.ts

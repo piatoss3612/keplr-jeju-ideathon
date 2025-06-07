@@ -8,8 +8,7 @@ import {
   getTierEmoji,
   getTierColorClass,
   getNextTierInfo,
-} from "../app/utils/tierUtils";
-import { ProofEnv, ProofProvider } from "@vlayer/react";
+} from "@/utils/tierUtils";
 
 // EligibilityData interface
 export interface EligibilityData {
@@ -125,16 +124,9 @@ export function ProofGenerationProvider({
   };
 
   return (
-    <ProofProvider
-      config={{
-        token: process.env.NEXT_PUBLIC_VLAYER_API_TOKEN,
-        env: ProofEnv.DEV,
-      }}
-    >
-      <ProofGenerationContext.Provider value={value}>
-        {children}
-      </ProofGenerationContext.Provider>
-    </ProofProvider>
+    <ProofGenerationContext.Provider value={value}>
+      {children}
+    </ProofGenerationContext.Provider>
   );
 }
 
