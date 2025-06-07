@@ -18,18 +18,43 @@ Experience seamless delegation verification with live dashboard tracking, NFT re
 ### 📋 **3-Stage Request Processing Flow**
 
 ```mermaid
-graph LR
-    A[User Request] --> B[RequestSent]
-    B --> C[Chainlink Processing]
-    C --> D[RequestFulfilled]
-    D --> E[User Action Required]
-    E --> F[RequestProcessed]
-    F --> G[Verified ✅]
+graph TB
+    subgraph "Frontend (UI)"
+        A[User Clicks Verify] --> B[Call Smart Contract]
+    end
+
+    subgraph "Base Sepolia Blockchain"
+        B --> C[OrbitRewards.sol]
+        C --> D[RequestSent Event]
+        H --> I[RequestFulfilled Event]
+        J --> K[RequestProcessed Event]
+    end
+
+    subgraph "Chainlink DON Network"
+        D --> E[DON Detects Event]
+        E --> F[Execute verifier-api]
+        F --> G[Fetch Cosmos Data]
+        G --> H[Fulfill to Contract]
+    end
+
+    subgraph "The Graph Indexer"
+        D --> L[Index RequestSent]
+        I --> M[Index RequestFulfilled]
+        K --> N[Index RequestProcessed]
+        N --> O[Update Dashboard]
+    end
+
+    subgraph "User Action"
+        I --> J[User Calls processRequest]
+    end
 ```
 
-1. **RequestSent**: User initiates delegation verification
-2. **RequestFulfilled**: Chainlink Functions processes the request
-3. **RequestProcessed**: User completes verification (Manual trigger)
+**Detailed Architecture Flow:**
+
+1. **RequestSent**: User calls `requestDelegationTier()` on Base Sepolia contract
+2. **Chainlink Processing**: DON network executes `verifier-api` to fetch Cosmos delegation data
+3. **RequestFulfilled**: Chainlink fulfills result back to smart contract
+4. **User Processing**: User manually calls `processRequest()` to complete verification
 
 ### 🔧 **Smart Contract System**
 
@@ -169,41 +194,60 @@ if (timeUntilNext === 0) {
 - **🟠 Ready**: Fulfilled, awaiting user action
 - **🟢 Verified**: Successfully completed
 
-## 📁 Project Structure
+## 📁 Architecture & Project Structure
+
+### 🏗️ **System Architecture Overview**
+
+OrbitRewards implements a **decentralized verification system** using Chainlink Functions as an oracle bridge between Cosmos and EVM ecosystems.
+
+### 📂 **Directory-Based Architecture**
 
 ```
 keplr-ideathon/
-├── 📄 LICENSE                    # MIT License
-├── 📄 README.md                  # Project documentation
-├── 📂 contracts/                 # Smart contracts (Foundry)
-│   ├── 📂 src/                   # Contract source files
-│   │   ├── OrbitRewards.sol      # Main loyalty contract
-│   │   └── OrbitRewardsNFT.sol   # Soulbound NFT contract
-│   ├── 📂 script/                # Deployment scripts
-│   ├── 📂 test/                  # Contract tests
-│   └── 📂 lib/                   # Dependencies (Chainlink, OpenZeppelin)
-├── 📂 frontend/                  # Next.js Web3 frontend
-│   ├── 📂 app/                   # Next.js App Router
-│   ├── 📂 components/            # React components
-│   │   ├── 📂 orbit/             # Orbit-specific components
-│   │   ├── 📂 tabs/              # Tab navigation
-│   │   └── NFTDisplay.tsx        # SVG NFT renderer
-│   ├── 📂 hooks/                 # Custom React hooks
-│   │   ├── useOrbitRewardsData.ts # Main data hook
-│   │   └── useRequestStatus.ts    # Request monitoring
-│   ├── 📂 context/               # React context providers
-│   └── 📂 utils/                 # Utilities and constants
-├── 📂 subgraph/                  # The Graph indexer
-│   ├── 📂 src/                   # GraphQL mapping functions
-│   ├── schema.graphql            # Data schema
-│   └── subgraph.yaml            # Configuration
-└── 📂 verifier-api/             # Vercel API backend
-    ├── 📂 api/                   # API endpoints
-    │   ├── verify.ts             # Delegation verification
-    │   └── health.ts             # Health check
-    └── 📂 src/                   # Business logic
-        └── delegation-service.ts  # Cosmos API integration
+├── 📄 LICENSE & README.md
+├── 📂 contracts/                 # 🔷 Base Sepolia Smart Contracts
+│   ├── 📂 src/
+│   │   ├── OrbitRewards.sol      # → Main contract with Chainlink integration
+│   │   └── OrbitRewardsNFT.sol   # → Soulbound NFT minting & metadata
+│   ├── 📂 script/                # → Foundry deployment scripts
+│   └── 📂 lib/                   # → Chainlink & OpenZeppelin dependencies
+│
+├── 📂 verifier-api/              # 🌐 Chainlink DON Execution Environment
+│   ├── 📂 api/
+│   │   └── verify.ts             # → Core verification logic (DON executes this)
+│   └── 📂 src/
+│       └── delegation-service.ts # → Cosmos RPC integration
+│
+├── 📂 subgraph/                  # 📊 The Graph Protocol Indexer
+│   ├── schema.graphql            # → Event data schema
+│   ├── src/orbit-rewards.ts      # → Event mapping functions
+│   └── subgraph.yaml            # → Contract ABI & event configuration
+│
+└── 📂 frontend/                  # 💻 Next.js Web3 Frontend
+    ├── 📂 components/orbit/      # → Registration & verification flows
+    ├── 📂 hooks/
+    │   ├── useOrbitRewardsData.ts # → Live contract data fetching
+    │   └── useRequestStatus.ts    # → Real-time request monitoring
+    ├── 📂 context/               # → Wallet & contract state management
+    └── 📂 utils/                 # → ABIs, constants, tier logic
 ```
+
+### 🔄 **Data Flow Architecture**
+
+| Component           | Role                                | Technology Stack              |
+| ------------------- | ----------------------------------- | ----------------------------- |
+| **Frontend**        | User Interface & Wallet Integration | Next.js, wagmi, Keplr SDK     |
+| **Smart Contracts** | State Management & Event Emission   | Solidity, Chainlink Functions |
+| **Verifier API**    | External Data Fetching              | TypeScript, Cosmos SDK        |
+| **Subgraph**        | Event Indexing & Query Layer        | AssemblyScript, GraphQL       |
+| **Chainlink DON**   | Decentralized Oracle Network        | Functions runtime             |
+
+### 🎯 **Cross-Chain Integration**
+
+- **EVM Side**: Base Sepolia smart contracts handle state & payments
+- **Cosmos Side**: Initia blockchain delegation data via RPC
+- **Oracle Bridge**: Chainlink Functions connects both ecosystems
+- **Data Layer**: The Graph indexes all contract events for UI
 
 ## 🛠️ Technical Stack
 
