@@ -14,9 +14,8 @@
       "dest": "/api/config"
     },
     {
-      "src": "/",
+      "src": "/api-docs",
       "dest": "/api/index"
     }
   ]
 }
- 

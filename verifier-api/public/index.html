@@ -3,81 +3,280 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Initia Verifier API</title>
+    <title>OrbitChronicle 발표 슬라이드</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      /* 폰트 임포트 */
+      @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap");
+
+      /* 기본 스타일 */
       body {
-        font-family: system-ui, -apple-system, sans-serif;
-        line-height: 1.6;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-        background: #f5f5f5;
+        font-family: "Inter", sans-serif;
+        background-color: #0a0e27; /* 다크 네이비 배경 */
+        color: #e0e0e0; /* 연한 회색 텍스트 */
+        overflow: hidden; /* 슬라이드 전환 시 스크롤 방지 */
       }
-      .container {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-      .header {
+
+      /* 슬라이드 컨테이너 스타일 */
+      .slide-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
         text-align: center;
-        color: #333;
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out; /* 부드러운 전환 효과 */
+        background-size: cover;
+        background-position: center;
+        /* 배경 이미지 및 오버레이 제거 */
       }
-      .api-link {
-        display: inline-block;
-        margin: 0.5rem;
-        padding: 0.8rem 1.5rem;
-        background: #0070f3;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        transition: background 0.2s;
+
+      /* 활성 슬라이드 스타일 */
+      .slide-container.active {
+        opacity: 1;
+        position: relative; /* 활성 슬라이드는 flow에 포함 */
       }
-      .api-link:hover {
-        background: #0051a2;
+
+      /* 슬라이드 제목 스타일 (Orbitron 폰트, 사이안 색상, 글로우 효과) */
+      .slide-title {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 3.5rem;
+        color: #00d4ff; /* 사이안 주색상 */
+        text-shadow: 0 0 15px rgba(0, 212, 255, 0.6); /* 글로우 효과 */
       }
-      code {
-        background: #f4f4f4;
-        padding: 0.2rem 0.4rem;
-        border-radius: 3px;
+
+      /* 슬라이드 부제목 스타일 (퍼플 보조색) */
+      .slide-subtitle {
+        font-size: 1.8rem;
+        color: #8b5cf6; /* 퍼플 보조색 */
+      }
+
+      /* 슬라이드 내용 스타일 */
+      .slide-content {
+        font-size: 1.5rem;
+        margin-top: 1rem;
+        max-width: 80%;
+        line-height: 1.6;
+        color: #e0e0e0; /* 연한 회색 텍스트 */
+      }
+
+      /* 리스트 아이템 스타일 */
+      .slide-content ul {
+        list-style: none; /* 기본 리스트 마커 제거 */
+        padding: 0;
+      }
+      .slide-content li {
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* 리스트 마커 커스텀 (핑크 보조색) */
+      .slide-content li::before {
+        content: "•";
+        color: #ec4899; /* 핑크 보조색 */
+        font-size: 1.5em;
+        line-height: 1;
+        margin-right: 0.5em;
+      }
+
+      /* 네비게이션 버튼 컨테이너 */
+      .navigation-buttons {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 1.5rem;
+        z-index: 100;
+      }
+
+      /* 네비게이션 버튼 스타일 */
+      .nav-button {
+        background-color: #00d4ff; /* 사이안 주색상 */
+        color: #0a0e27; /* 다크 네이비 텍스트 */
+        padding: 0.8rem 2rem;
+        border-radius: 9999px; /* 완전한 둥근 모서리 */
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease,
+          box-shadow 0.3s ease;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.4); /* 버튼 글로우 효과 */
+      }
+
+      /* 네비게이션 버튼 호버 효과 */
+      .nav-button:hover {
+        background-color: #8b5cf6; /* 호버 시 퍼플 색상 */
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+      }
+
+      /* 네비게이션 버튼 클릭 효과 */
+      .nav-button:active {
+        transform: translateY(0);
+      }
+
+      /* 반응형 조정 (모바일 기준) */
+      @media (max-width: 768px) {
+        .slide-title {
+          font-size: 2.5rem;
+        }
+        .slide-subtitle {
+          font-size: 1.2rem;
+        }
+        .slide-content {
+          font-size: 1.1rem;
+          max-width: 90%;
+        }
+        .slide-content li::before {
+          font-size: 1.2em;
+        }
+        .nav-button {
+          padding: 0.6rem 1.5rem;
+          font-size: 0.9rem;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <h1>🚀 Initia Verifier API</h1>
-        <p>Vercel에서 실행되는 무료 delegation 검증 API</p>
+    <!-- 슬라이드 1: 타이틀 슬라이드 -->
+    <div id="slide1" class="slide-container active">
+      <h1 class="slide-title">🪐 OrbitChronicle</h1>
+      <h2 class="slide-subtitle mt-4">LOYALTY ACROSS THE COSMOS</h2>
+      <div class="slide-content mt-8 text-white">
+        <p>Cross-Chain Loyalty System</p>
+        <p>Keplr Ideathon 2025</p>
       </div>
+    </div>
 
-      <h2>📡 API 엔드포인트</h2>
-      <div>
-        <a href="/health" class="api-link">🏥 Health Check</a>
-        <a href="/config" class="api-link">⚙️ Config</a>
-        <a
-          href="/verify?address=init10alvsy3f0a6vsr7ghjh3rtygrhygavsk3tscgz"
-          class="api-link"
-          >🔍 Verify (예시)</a
-        >
+    <!-- 슬라이드 2: 엔터테인먼트 비전 -->
+    <div id="slide2" class="slide-container">
+      <h2 class="slide-title" style="color: #ec4899">
+        🎮 KEPLR 사용자들을 위한
+      </h2>
+      <ul class="slide-content mt-8">
+        <li>🌌 스테이킹 → 우주 모험</li>
+        <li>🎨 게임화된 로열티 시스템</li>
+        <li>🏆 NFT 수집과 다양한 혜택</li>
+        <li>✨ 재미있는 DeFi 경험</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 3: 경험 흐름 -->
+    <div id="slide3" class="slide-container">
+      <h2 class="slide-title" style="color: #8b5cf6">🎮 ORBITCHRONICLE 경험</h2>
+      <div class="slide-content mt-8 flex flex-col items-center">
+        <p>🔗 Chainlink Magic</p>
+        <p class="text-xl my-2">↓</p>
+        <p>🌌 자동 델리게이션 확인</p>
+        <p class="text-xl my-2">↓</p>
+        <p>🪐 우주 등급 NFT 발급</p>
+        <p class="text-xl my-2">↓</p>
+        <p>🎁 즉시 우주 혜택!</p>
+        <p class="text-sm italic mt-6 text-gray-400">
+          "단순한 스테이킹 → 우주 모험으로 변신!"
+        </p>
       </div>
+    </div>
 
-      <h2>🧪 사용 예시</h2>
-      <p><strong>Delegation 검증:</strong></p>
-      <code>/verify?address=YOUR_INIT_ADDRESS</code>
-
-      <p><strong>상태 확인:</strong></p>
-      <code>/health</code>
-
-      <p><strong>설정 보기:</strong></p>
-      <code>/config</code>
-
-      <h2>📖 문서</h2>
-      <p>상세한 API 문서는 <a href="/api">여기</a>에서 확인하세요.</p>
-
-      <hr />
-      <p style="text-align: center; color: #666; font-size: 0.9rem">
-        Powered by <strong>Vercel</strong> - 완전 무료 🎉
+    <!-- 슬라이드 4: 주요 기능 -->
+    <div id="slide4" class="slide-container">
+      <h2 class="slide-title" style="color: #00d4ff">🌟 주요 기능</h2>
+      <ul class="slide-content mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <li>🎨 사이버펑크 UI</li>
+        <li>🔄 실시간 트래킹</li>
+        <li>🪐 다이나믹 NFT</li>
+        <li>⚡ 즉시 보상</li>
+      </ul>
+      <p class="slide-content mt-6 text-gray-300">
+        🪨 Asteroid (5 INIT) → 🌌 Galaxy (1000 INIT)
       </p>
     </div>
+
+    <!-- 슬라이드 5: 게임화 -->
+    <div id="slide5" class="slide-container">
+      <h2 class="slide-title" style="color: #8b5cf6">🏆 게임화</h2>
+      <ul class="slide-content mt-8">
+        <li>🎮 게임화된 충성도 시스템</li>
+        <li>Cosmos 스테이킹 시스템 활용</li>
+        <li>기간 기반 신뢰 시스템</li>
+        <li>향후 파트너십 & 혜택 확장 계획</li>
+      </ul>
+    </div>
+
+    <!-- 슬라이드 6: 감사 및 마무리 -->
+    <div id="slide6" class="slide-container">
+      <h2 class="slide-title" style="color: #ec4899">🚀 지금 경험하세요!</h2>
+      <p class="slide-content mt-8 text-white text-3xl">
+        <a
+          href="https://keplr-ideathon.vercel.app"
+          target="_blank"
+          class="text-blue-400 hover:underline"
+          >keplr-ideathon.vercel.app</a
+        >
+      </p>
+    </div>
+
+    <!-- 네비게이션 버튼 -->
+    <div class="navigation-buttons">
+      <button id="prevBtn" class="nav-button">이전</button>
+      <button id="nextBtn" class="nav-button">다음</button>
+    </div>
+
+    <script>
+      // 모든 슬라이드 요소 가져오기
+      const slides = document.querySelectorAll(".slide-container");
+      let currentSlide = 0; // 현재 슬라이드 인덱스
+
+      /**
+       * 특정 인덱스의 슬라이드를 표시합니다.
+       * @param {number} index - 표시할 슬라이드의 인덱스
+       */
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          if (i === index) {
+            slide.classList.add("active"); // 활성 클래스 추가
+          } else {
+            slide.classList.remove("active"); // 비활성 클래스 제거
+          }
+        });
+      }
+
+      // '다음' 버튼 클릭 이벤트 리스너
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        currentSlide = (currentSlide + 1) % slides.length; // 다음 슬라이드로 이동 (순환)
+        showSlide(currentSlide);
+      });
+
+      // '이전' 버튼 클릭 이벤트 리스너
+      document.getElementById("prevBtn").addEventListener("click", () => {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length; // 이전 슬라이드로 이동 (순환)
+        showSlide(currentSlide);
+      });
+
+      // 키보드 네비게이션 (좌우 화살표 키)
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") {
+          // 오른쪽 화살표
+          currentSlide = (currentSlide + 1) % slides.length;
+          showSlide(currentSlide);
+        } else if (e.key === "ArrowLeft") {
+          // 왼쪽 화살표
+          currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+          showSlide(currentSlide);
+        }
+      });
+
+      // 초기 슬라이드 표시
+      showSlide(currentSlide);
+    </script>
   </body>
 </html>

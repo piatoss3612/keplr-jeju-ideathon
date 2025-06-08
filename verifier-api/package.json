@@ -13,7 +13,7 @@
     "api",
     "blockchain"
   ],
-  "author": "Your Name",
+  "author": "piatoss3612",
   "scripts": {
     "build": "tsc && echo 'Vercel build completed'",
     "deploy": "vercel --prod",
