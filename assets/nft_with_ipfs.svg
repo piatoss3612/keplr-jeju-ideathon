@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+<defs>
+<radialGradient id="bg" cx="50%" cy="30%" r="70%">
+<stop offset="0%" style="stop-color:#8A2BE2;stop-opacity:0.9"/>
+<stop offset="100%" style="stop-color:#0d0d1a;stop-opacity:1"/>
+</radialGradient>
+</defs>
+
+<!-- Background -->
+<rect width="400" height="400" fill="url(#bg)" rx="24"/>
+
+<!-- IPFS 링크로 이미지 불러오기 -->
+<image href="https://ipfs.io/ipfs/bafkreigcz7at4vvsb27zzl4njmplthcdzn5vgtblv4akne2mr3aarsarqy" 
+       x="170" y="110" width="60" height="60"/>
+
+<!-- 만약 IPFS 실패 시 대체 그래픽 -->
+<circle cx="200" cy="140" r="25" fill="#8A2BE2" opacity="0.5"/>
+<circle cx="200" cy="140" r="15" fill="white" opacity="0.8"/>
+
+<!-- NFT 정보 -->
+<text x="200" y="195" text-anchor="middle" fill="white" font-size="20" font-weight="bold">GALAXY</text>
+<text x="200" y="220" text-anchor="middle" fill="#8A2BE2" font-size="14">1500 INIT</text>
+
+</svg> 

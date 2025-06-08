@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+<defs>
+<radialGradient id="bg" cx="50%" cy="30%" r="70%">
+<stop offset="0%" style="stop-color:#8A2BE2;stop-opacity:0.9"/>
+<stop offset="100%" style="stop-color:#0d0d1a;stop-opacity:1"/>
+</radialGradient>
+</defs>
+
+<!-- Background -->
+<rect width="400" height="400" fill="url(#bg)" rx="24"/>
+
+<!-- Data URI로 이미지 임베딩 (작은 아이콘 예시) -->
+<image href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjUiIGZpbGw9IiM4QTJCRTIiLz4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMTUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjgiLz4KPC9zdmc+" 
+       x="170" y="110" width="60" height="60"/>
+
+<!-- NFT 정보 -->
+<text x="200" y="195" text-anchor="middle" fill="white" font-size="20" font-weight="bold">GALAXY</text>
+<text x="200" y="220" text-anchor="middle" fill="#8A2BE2" font-size="14">1500 INIT</text>
+
+</svg> 

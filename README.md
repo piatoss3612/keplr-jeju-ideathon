@@ -1,352 +1,89 @@
-# 🪐 OrbitRewards: Stellar Loyalty Verification System
+# 🪐 OrbitRewards: Cross-Chain Loyalty System
 
-## 🚀 Overview
+**Revolutionary blockchain loyalty system connecting Cosmos and EVM ecosystems using Chainlink Functions**
 
-**OrbitRewards** is a revolutionary blockchain loyalty system for Cosmos ecosystem using **Chainlink Functions**, **Real-time GraphQL**, and **Soulbound NFT Technology**.
-
-Experience seamless delegation verification with live dashboard tracking, NFT rewards, and automated scoring! 🌌
+Experience delegation verification with live tracking, IPFS-enhanced NFTs, and instant rewards! 🌌
 
 ## ⭐ Key Features
 
-- 🔗 **Chainlink Functions**: Automated delegation verification via external APIs
-- 🎨 **Soulbound NFTs**: Tier-based non-transferable tokens with dynamic SVG designs
-- 📊 **Real-time Dashboard**: Live contract data and request status monitoring
-- 🌐 **Web3 Integration**: Seamless EVM + Cosmos wallet connectivity
+- 🔗 **Chainlink Oracle**: Automated cross-chain delegation verification
+- 🎨 **Dynamic NFTs**: Tier-based soulbound tokens with IPFS graphics
+- 📊 **Live Dashboard**: Real-time status and benefit tracking
+- ⚡ **Instant Rewards**: Weekly benefits and immediate gratification
 
-## 🏗️ Technical Architecture
-
-### 📋 Request Processing Flow
+## 🚀 How It Works
 
 ```mermaid
-graph TB
-    subgraph "Frontend (UI)"
-        A[User Clicks Verify] --> B[Call Smart Contract]
-    end
-
-    subgraph "Base Sepolia Blockchain"
-        B --> C[OrbitRewards.sol]
-        C --> D[RequestSent Event]
-        H --> I[RequestFulfilled Event]
-        J --> K[RequestProcessed Event]
-    end
-
-    subgraph "Chainlink DON Network"
-        D --> E[DON Detects Event]
-        E --> F[Execute verifier-api]
-        F --> G[Fetch Cosmos Data]
-        G --> H[Fulfill to Contract]
-    end
-
-    subgraph "The Graph Indexer"
-        D --> L[Index RequestSent]
-        I --> M[Index RequestFulfilled]
-        K --> N[Index RequestProcessed]
-        N --> O[Update Dashboard]
-    end
-
-    subgraph "User Action"
-        I --> J[User Calls processRequest]
-    end
+graph LR
+    A[👤 User] --> B[📝 Request Verification]
+    B --> C[🔗 Chainlink Functions]
+    C --> D[🌌 Cosmos Data]
+    D --> E[✅ Mint/Update NFT]
+    E --> F[🎁 Earn Rewards]
 ```
 
-**Detailed Architecture Flow:**
+1. **Connect** both EVM and Cosmos wallets
+2. **Verify** your delegation status via Chainlink oracle
+3. **Receive** tier-based soulbound NFT
+4. **Enjoy** weekly benefits and instant rewards
 
-1. **RequestSent**: User calls `requestDelegationTier()` on Base Sepolia contract
-2. **Chainlink Processing**: DON network executes `verifier-api` to fetch Cosmos delegation data
-3. **RequestFulfilled**: Chainlink fulfills result back to smart contract
-4. **User Processing**: User manually calls `processRequest()` to complete verification
+## 🏆 Delegation Tiers
 
-### 🔧 **Smart Contract System**
+| 🪨 Asteroid   | ☄️ Comet      | ⭐ Star       | 🌌 Galaxy     |
+| ------------- | ------------- | ------------- | ------------- |
+| 5+ INIT       | 20+ INIT      | 100+ INIT     | 1000+ INIT    |
+| Basic rewards | 2x multiplier | 3x multiplier | 5x multiplier |
 
-#### OrbitRewards.sol - Main Contract
+## 🎨 Galaxy NFT Example
 
-```solidity
-// Request delegation verification (for the first time)
-function requestDelegationTier(string calldata bech32Address) external returns (bytes32 requestId)
+<div align="center">
+  <img src="assets/galaxy_nft_with_ipfs.svg" alt="Galaxy Tier NFT" width="300">
+</div>
 
-// Request loyalty verification (for the second and later times)
-function requestLoyaltyVerification(string calldata bech32Address) external returns (bytes32 requestId)
+**Features**: IPFS graphics • Rounded clipping • Glow effects • On-chain fallback
 
-// Process fulfilled requests
-function processRequest(bytes32 requestId) external
+## 🛠️ Tech Stack
 
-// Get user status
-function getUserStatus(address user) external view returns (UserStatusInfo)
-```
+- **Contracts**: Solidity on Base Sepolia
+- **Oracle**: Chainlink Functions
+- **Frontend**: Next.js + wagmi + Keplr
+- **Indexing**: The Graph Protocol
+- **Storage**: IPFS for premium graphics
 
-#### OrbitRewardsNFT.sol - NFT Contract
+## 🌟 Live Demo
 
-```solidity
-// Mint soulbound NFT
-function mintNFT(address to, DelegationTier tier, uint256 amount) external returns (uint256)
+- **App**: [keplr-ideathon.vercel.app](https://keplr-ideathon.vercel.app)
+- **Contracts**: Base Sepolia
+  - OrbitRewards: `0x905330700Ceb47D1121ef6e9BdB248F18375ebca`
+  - OrbitRewardsNFT: `0xf8078A3AD0E897D2164F7816D17F575d72a79C41`
 
-// Get NFT metadata with SVG
-function tokenURI(uint256 tokenId) external view returns (string)
-
-// Update NFT data
-function updateTokenMetadata(uint256 tokenId, DelegationTier tier, uint256 amount) external
-```
-
-### 🌐 **Frontend Architecture**
-
-#### Real-time Data Hooks
-
-```typescript
-// Main data hook
-const orbitData = useOrbitRewardsData();
-
-// Request status tracking
-const { stats } = useRequestStatusSimple(address);
-
-// Contract interactions
-const { requestVerification, processRequest } = useOrbitRewards();
-```
-
-#### Key Components
-
-- **Dashboard**: Real-time user status and NFT display
-- **NFTDisplay**: Dynamic SVG rendering with fallback
-- **RequestStatusSimple**: Live request tracking with 3-stage visualization
-- **OrbitRewardsFlow**: Step-by-step verification process
-
-## 🎯 User Experience Flow
-
-### 1. **Initial Registration**
-
-```javascript
-// Check eligibility
-const canRegister = await checkDelegationEligibility(cosmosAddress);
-
-// Register and mint NFT
-if (canRegister) {
-  const requestId = await requestDelegationTier();
-  // Wait for Chainlink processing...
-  await processRequest(requestId);
-  // NFT minted with tier-based design!
-}
-```
-
-### 2. **Ongoing Verification**
-
-```javascript
-// Check verification timing
-const timeUntilNext = await getNextVerificationTime();
-
-// Request verification (every 7-14 days)
-if (timeUntilNext === 0) {
-  const requestId = await requestDelegationTier();
-  // Process when fulfilled
-  await processRequest(requestId);
-}
-```
-
-### 3. **Dashboard Monitoring**
-
-- **Live NFT Display**: See your soulbound NFT with SVG graphics
-- **Real-time Stats**: Current score, boost points, verification count
-- **Request Tracking**: Monitor pending/fulfilled/processed requests
-- **Tier Progress**: Track delegation tier and scoring status
-
-## 📊 Scoring & Rewards System
-
-### 🏆 **Delegation Tiers**
-
-| Tier        | Min Delegation | Base Score    | NFT Design            |
-| ----------- | -------------- | ------------- | --------------------- |
-| 🪨 Asteroid | 5 INIT         | 1 point/day   | Gray rocky design     |
-| ☄️ Comet    | 20 INIT        | 3 points/day  | Blue icy design       |
-| ⭐ Star     | 100 INIT       | 8 points/day  | Golden stellar design |
-| 🌌 Galaxy   | 1000 INIT      | 20 points/day | Purple cosmic design  |
-
-### 🎯 **Scoring Mechanics**
-
-- **Daily Points**: Earned automatically when score is active
-- **Verification Cycles**: 21-day scoring windows, 14-day verification cycles
-- **Boost Multipliers**: Special events and achievements
-- **Penalty System**: Score deactivation for missed verifications
-
-### 🎨 **NFT Rewards**
-
-- **Dynamic SVG**: On-chain generated graphics based on tier
-- **Soulbound**: Non-transferable, representing loyalty commitment
-- **Upgradeable**: Tier changes update NFT metadata automatically
-- **Collectible**: Season-end special NFTs for active participants
-
-## 🔍 Real-time Request Monitoring
-
-### Request Status Dashboard
-
-```
-📊 Request Status
-┌─────────┬─────────┬──────────┐
-│  Total  │ Pending │ Verified │
-│    5    │    1    │     4    │
-└─────────┴─────────┴──────────┘
-
-🟡 1 request(s) pending Chainlink fulfillment
-🟢 All other requests completed
-```
-
-### Status Indicators
-
-- **🔵 Total**: All user requests ever made
-- **🟡 Pending**: Waiting for Chainlink Functions processing
-- **🟠 Ready**: Fulfilled, awaiting user action
-- **🟢 Verified**: Successfully completed
-
-## 📁 Architecture & Project Structure
-
-### 🏗️ **System Architecture Overview**
-
-OrbitRewards implements a **decentralized verification system** using Chainlink Functions as an oracle bridge between Cosmos and EVM ecosystems.
-
-### 📂 **Directory-Based Architecture**
+## 📁 Project Structure
 
 ```
 keplr-ideathon/
-├── 📄 LICENSE & README.md
-├── 📂 contracts/                 # 🔷 Base Sepolia Smart Contracts
-│   ├── 📂 src/
-│   │   ├── OrbitRewards.sol      # → Main contract with Chainlink integration
-│   │   └── OrbitRewardsNFT.sol   # → Soulbound NFT minting & metadata
-│   ├── 📂 script/                # → Foundry deployment scripts
-│   └── 📂 lib/                   # → Chainlink & OpenZeppelin dependencies
-│
-├── 📂 verifier-api/              # 🌐 Chainlink DON Execution Environment
-│   ├── 📂 api/
-│   │   └── verify.ts             # → Core verification logic (DON executes this)
-│   └── 📂 src/
-│       └── delegation-service.ts # → Cosmos RPC integration
-│
-├── 📂 subgraph/                  # 📊 The Graph Protocol Indexer
-│   ├── schema.graphql            # → Event data schema
-│   ├── src/orbit-rewards.ts      # → Event mapping functions
-│   └── subgraph.yaml            # → Contract ABI & event configuration
-│
-└── 📂 frontend/                  # 💻 Next.js Web3 Frontend
-    ├── 📂 components/orbit/      # → Registration & verification flows
-    ├── 📂 hooks/
-    │   ├── useOrbitRewardsData.ts # → Live contract data fetching
-    │   └── useRequestStatus.ts    # → Real-time request monitoring
-    ├── 📂 context/               # → Wallet & contract state management
-    └── 📂 utils/                 # → ABIs, constants, tier logic
+├── assets/          # 🎨 NFT designs & examples
+├── contracts/       # 🔷 Solidity smart contracts
+├── verifier-api/    # 🌐 Chainlink Functions runtime
+├── subgraph/        # 📊 The Graph indexer
+└── frontend/        # 💻 Next.js web app
 ```
 
-### 🔄 **Data Flow Architecture**
+## 🎯 Design Philosophy
 
-| Component           | Role                                | Technology Stack              |
-| ------------------- | ----------------------------------- | ----------------------------- |
-| **Frontend**        | User Interface & Wallet Integration | Next.js, wagmi, Keplr SDK     |
-| **Smart Contracts** | State Management & Event Emission   | Solidity, Chainlink Functions |
-| **Verifier API**    | External Data Fetching              | TypeScript, Cosmos SDK        |
-| **Subgraph**        | Event Indexing & Query Layer        | AssemblyScript, GraphQL       |
-| **Chainlink DON**   | Decentralized Oracle Network        | Functions runtime             |
+**Trust Cosmos's Built-in Mechanisms**
 
-### 🎯 **Cross-Chain Integration**
+Instead of complex enforcement, we leverage:
 
-- **EVM Side**: Base Sepolia smart contracts handle state & payments
-- **Cosmos Side**: Initia blockchain delegation data via RPC
-- **Oracle Bridge**: Chainlink Functions connects both ecosystems
-- **Data Layer**: The Graph indexes all contract events for UI
+- ⏳ 21-day unbonding period (natural commitment)
+- 🔒 Redelegation cooldowns (anti-gaming)
+- 📸 Moment-in-time verification (achievement recognition)
 
-## 🛠️ Technical Stack
+**Focus on Immediate Value**
 
-### **Blockchain**
-
-- **Contracts**: Solidity on Base Sepolia
-- **Oracle**: Chainlink Functions for external API calls
-- **NFTs**: ERC-721 soulbound tokens with on-chain SVG
-
-### **Backend**
-
-- **API**: Vercel serverless functions
-- **Database**: GraphQL with The Graph protocol
-- **External APIs**: Cosmos/Initia delegation data
-
-### **Frontend**
-
-- **Framework**: Next.js 14 with TypeScript
-- **Web3**: wagmi + viem for Ethereum interaction
-- **Cosmos**: Keplr wallet integration
-- **UI**: TailwindCSS with custom cyberpunk theme
-- **State**: React hooks with real-time updates
-
-## 🌟 Live Deployment
-
-### **Production URLs**
-
-- **Frontend**: `https://keplr-ideathon.vercel.app`
-- **API**: `https://keplr-ideathon.vercel.app/api/verify`
-- **GraphQL**: Real-time request monitoring
-
-### **Contract Addresses (Base Sepolia)**
-
-- **OrbitRewards**: `0x905330700Ceb47D1121ef6e9BdB248F18375ebca`
-- **OrbitRewardsNFT**: `0xf8078A3AD0E897D2164F7816D17F575d72a79C41`
-
-## 🏆 Loyalty Philosophy & Gaming Considerations
-
-### 🎯 **Design Philosophy**
-
-OrbitRewards focuses on **symbolic loyalty recognition** rather than enforcement. The system acknowledges that delegation flexibility is essential for DeFi users.
-
-### 🤔 **Known Limitations**
-
-**Cosmos SDK Constraints**: Unlike some DeFi protocols, Cosmos staking doesn't support delegation lock-up mechanisms beyond the standard 21-day unbonding period.
-
-**Post-Verification Flexibility**: Users can unstake or redelegate after verification, which reflects Cosmos's design philosophy of delegation flexibility.
-
-**Cosmos Built-in Protections**:
-
-- ⏳ **21-day Unbonding**: Natural commitment period prevents instant unstaking
-- 🔒 **Redelegation Cooldown**: 21-day lock after redelegation prevents gaming
-- 💸 **Oracle Costs**: Cross-chain verification expensive for frequent monitoring
-- 🤝 **Trust Model**: Cosmos philosophy emphasizes validator choice freedom
-
-### 🌟 **Why Trust Works**
-
-Cosmos already provides natural anti-gaming mechanisms:
-
-- **Unstaking requires 21 days** → Users can't instantly manipulate delegation status
-- **Redelegation locks for 21 days** → Prevents quick validator switching games
-- **Significant unbonding period** → Creates real skin-in-the-game commitment
-
-Instead of adding costly enforcement layers, we leverage these existing protections:
-
-- 📸 **Moment-in-Time Verification**: Capture delegation commitment at verification points
-- 🎖️ **Achievement Recognition**: Celebrate reaching delegation milestones
-- 🏅 **Community Trust**: Respect Cosmos's validator choice freedom philosophy
-
-### 🤝 **Cosmos-Aligned Incentives**
-
-- 📈 **Streak Bonuses**: Consecutive verification periods earn multipliers
-- 🔄 **Honor System**: Self-reported commitment with social verification
-- ⏳ **Unbonding Respect**: Additional rewards for maintaining delegation beyond unbonding period
-
-#### **Social Mechanisms**
-
-- 🌐 **Community Recognition**: Public leaderboards and achievements
-- 🤝 **Peer Validation**: Community-driven reputation system
-- 📱 **Social Sharing**: NFT status as social proof of Keplr support
-
-### 🎪 **Future Enhancements**
-
-#### **Cosmos-Native Incentives**
-
-- ⏳ **Unbonding Awareness**: Respect 21-day unbonding period as natural commitment window
-- 🎯 **Milestone Rewards**: Special NFTs for consecutive verification streaks
-- 🏆 **Delegation Consistency**: Bonus points for maintaining delegation over time
-
-#### **Community Governance**
-
-- 🗳️ **DAO Voting**: Loyal delegators get voting rights in ecosystem decisions
-- 💡 **Proposal Influence**: Tier-based influence in governance proposals
-- 🏛️ **Council Participation**: Premium access to Keplr validator council
-
-## 📄 License
-
-- [MIT License](LICENSE)
+- 🎁 Weekly benefits over long-term accumulation
+- ⚡ Instant rewards and tier upgrades
+- 🏆 Active participation over passive holding
 
 ---
 
-**🪐 Built for Keplr Ideathon** | **✨ Powered by Chainlink Functions**
+**🪐 Built for Keplr Ideathon** | **✨ Powered by Chainlink Functions** | **📄 [MIT License](LICENSE)**

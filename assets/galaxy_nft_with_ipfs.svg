@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+<defs>
+<radialGradient id="bg" cx="50%" cy="30%" r="70%">
+<stop offset="0%" style="stop-color:#8A2BE2;stop-opacity:0.9"/>
+<stop offset="50%" style="stop-color:#1a1a2e;stop-opacity:0.8"/>
+<stop offset="100%" style="stop-color:#0d0d1a;stop-opacity:1"/>
+</radialGradient>
+<linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#8A2BE2;stop-opacity:0.3"/>
+<stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.1"/>
+</linearGradient>
+<linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#FFD700"/>
+<stop offset="50%" style="stop-color:#FFA500"/>
+<stop offset="100%" style="stop-color:#FF8C00"/>
+</linearGradient>
+<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+<feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+<feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
+<filter id="specialGlow" x="-50%" y="-50%" width="200%" height="200%">
+<feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+<feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
+<clipPath id="roundedClip">
+<circle cx="200" cy="140" r="30"/>
+</clipPath>
+</defs>
+
+<!-- Background Elements -->
+<rect width="400" height="400" fill="url(#bg)" rx="24"/>
+<rect x="8" y="8" width="384" height="384" fill="url(#cardGrad)" rx="20" opacity="0.5"/>
+<rect x="4" y="4" width="392" height="392" fill="none" stroke="url(#goldGrad)" stroke-width="3" rx="22" filter="url(#specialGlow)"/>
+
+<!-- Star Field -->
+<circle cx="80" cy="80" r="1" fill="white" opacity="0.6"/>
+<circle cx="320" cy="120" r="0.8" fill="white" opacity="0.4"/>
+<circle cx="150" cy="300" r="1.2" fill="white" opacity="0.7"/>
+<circle cx="350" cy="280" r="0.6" fill="white" opacity="0.5"/>
+<circle cx="60" cy="250" r="1" fill="white" opacity="0.6"/>
+<circle cx="300" cy="60" r="0.8" fill="white" opacity="0.4"/>
+
+<!-- Main Orb (4 layers) -->
+<circle cx="200" cy="140" r="65" fill="#8A2BE2" opacity="0.2" filter="url(#specialGlow)"/>
+<circle cx="200" cy="140" r="50" fill="#8A2BE2" opacity="0.4" filter="url(#specialGlow)"/>
+<circle cx="200" cy="140" r="35" fill="white" opacity="0.9" filter="url(#specialGlow)"/>
+<circle cx="200" cy="140" r="25" fill="#8A2BE2" opacity="0.8" filter="url(#specialGlow)"/>
+
+<!-- Orbit Rings -->
+<circle cx="200" cy="140" r="80" fill="none" stroke="#8A2BE2" stroke-width="1" opacity="0.3" stroke-dasharray="5,5"/>
+<circle cx="200" cy="140" r="95" fill="none" stroke="white" stroke-width="0.5" opacity="0.2" stroke-dasharray="3,7"/>
+
+<!-- IPFS 이미지로 중앙 아이콘 교체! (둥근 테두리 + 높은 z-index) -->
+<image href="https://ipfs.io/ipfs/bafkreigcz7at4vvsb27zzl4njmplthcdzn5vgtblv4akne2mr3aarsarqy" 
+       x="170" y="110" width="60" height="60" clip-path="url(#roundedClip)" filter="url(#specialGlow)"/>
+
+<!-- 둥근 테두리 추가 -->
+<circle cx="200" cy="140" r="30" fill="none" stroke="#8A2BE2" stroke-width="3" opacity="0.8"/>
+
+<!-- 대체 그래픽 (IPFS 로딩 실패 시, 뒤쪽 레이어) -->
+<circle cx="200" cy="140" r="18" fill="rgba(255,255,255,0.1)" stroke="#8A2BE2" stroke-width="2" opacity="0.3"/>
+
+<!-- Tier Text -->
+<text x="200" y="195" text-anchor="middle" fill="white" font-size="20" font-weight="bold" letter-spacing="2px">GALAXY</text>
+<text x="200" y="220" text-anchor="middle" fill="#8A2BE2" font-size="14" opacity="0.9">1500 INIT</text>
+
+<!-- Tier Badge -->
+<rect x="170" y="230" width="60" height="20" rx="10" fill="#8A2BE2" opacity="0.3"/>
+<text x="200" y="243" text-anchor="middle" fill="white" font-size="10" font-weight="bold">TIER 4</text>
+
+<!-- Score Card -->
+<rect x="120" y="265" width="160" height="35" rx="17" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+<text x="200" y="280" text-anchor="middle" fill="white" font-size="12" opacity="0.8">SCORE</text>
+<text x="200" y="295" text-anchor="middle" fill="white" font-size="18" font-weight="bold">1850</text>
+
+<!-- Status Indicator -->
+<rect x="150" y="315" width="100" height="25" rx="12" fill="#1B5E20" opacity="0.8"/>
+<circle cx="170" cy="327" r="4" fill="#00E676" filter="url(#glow)"/>
+<text x="200" y="332" text-anchor="middle" fill="#00E676" font-size="11" font-weight="bold">ACTIVE</text>
+
+<!-- Footer Elements -->
+<line x1="80" y1="360" x2="320" y2="360" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+<text x="200" y="380" text-anchor="middle" fill="white" font-size="9" opacity="0.6" letter-spacing="1px">SOULBOUND NFT</text>
+<text x="200" y="395" text-anchor="middle" fill="white" font-size="8" opacity="0.4">ORBIT REWARDS</text>
+
+</svg> 
