@@ -8,9 +8,9 @@ dataSources:
     name: OrbitChronicle
     network: base-sepolia
     source:
-      address: "0xDAbe163E6A1f87e5611b12Da548443aa63889C1F"
+      address: "0x5F131D2C6ea405d8e57845a409CcE5B168176634"
       abi: OrbitChronicle
-      startBlock: 26791563
+      startBlock: 26794925
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

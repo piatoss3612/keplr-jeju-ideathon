@@ -56,6 +56,10 @@ graph LR
 - **Styling**: Tailwind CSS with cyberpunk theme
 - **Animations**: Advanced CSS effects and transitions
 
+### 🔄 Technical Evolution
+
+Initially planned to use **vlayer** for on-chain ZK proof verification, but switched to **Chainlink Functions** due to service stability issues. This pivot enabled more reliable cross-chain delegation verification while maintaining the same user experience.
+
 ## 🎨 UI Features
 
 ### **Cyberpunk Aesthetic**
@@ -76,8 +80,8 @@ graph LR
 
 - **App**: [keplr-ideathon.vercel.app](https://keplr-ideathon.vercel.app)
 - **Contracts**: Base Sepolia
-  - OrbitChronicle: `0x905330700Ceb47D1121ef6e9BdB248F18375ebca`
-- OrbitChronicleNFT: `0xf8078A3AD0E897D2164F7816D17F575d72a79C41`
+  - OrbitChronicle: [0x5F131D2C6ea405d8e57845a409CcE5B168176634](https://sepolia.basescan.org/address/0x5F131D2C6ea405d8e57845a409CcE5B168176634)
+  - OrbitChronicleNFT: [0x3D14794D6bC6B67E4C335F922AE0DeBfE4dFC648](https://sepolia.basescan.org/address/0x3D14794D6bC6B67E4C335F922AE0DeBfE4dFC648)
 
 ## 📁 Project Structure
 

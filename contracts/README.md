@@ -74,5 +74,5 @@ $ forge inspect OrbitNft abi --json > OrbitNft.json
 
 ## Deployed Contracts
 
-- OrbitChronicle: 0xDAbe163E6A1f87e5611b12Da548443aa63889C1F
-- OrbitNft: 0xE9C076E693506f41a219c8285C3070DEec8f07E8
+- OrbitChronicle: 0x5F131D2C6ea405d8e57845a409CcE5B168176634
+- OrbitNft: 0x3D14794D6bC6B67E4C335F922AE0DeBfE4dFC648

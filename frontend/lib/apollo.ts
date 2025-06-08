@@ -4,7 +4,7 @@ import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 const httpLink = createHttpLink({
   uri:
     process.env.NEXT_PUBLIC_SUBGRAPH_URL ||
-    "https://api.studio.thegraph.com/query/71401/orbit-rewards/version/latest",
+    "https://api.studio.thegraph.com/query/71401/orbit-chronicle/version/latest",
 });
 
 // Apollo Client instance
