@@ -2,14 +2,14 @@
 
 import React from "react";
 import { useKeplrContext } from "@/context/KeplrProvider";
-import { useOrbitRewards } from "@/context/OrbitRewardsProvider";
 
 import { getTierName, getTierEmoji } from "@/utils/tierUtils";
 import {
   UserOrbitData,
   formatTimeRemaining,
   formatAmount,
-} from "@/hooks/useOrbitRewardsData";
+  useOrbitChronicleRefetch,
+} from "@/hooks/useOrbitChronicleData";
 import NFTDisplay from "@/components/NFTDisplay";
 import RequestStatusSimple from "@/components/RequestStatusSimple";
 
@@ -37,7 +37,7 @@ export default function Dashboard({
   onSwitchToRegister,
 }: DashboardProps) {
   const bothConnected = isConnected && keplr.isConnected;
-  const { refreshUserStatus } = useOrbitRewards();
+  const { refetchAll } = useOrbitChronicleRefetch();
 
   if (!bothConnected) {
     return (
@@ -49,7 +49,7 @@ export default function Dashboard({
             DASHBOARD LOCKED
           </h2>
           <p className="text-cyan-200/80 text-lg mb-8">
-            Connect both protocols to access your Orbit Rewards status
+            Connect both protocols to access your Orbit Chronicle status
           </p>
 
           {/* Enhanced Connection Status */}
@@ -126,7 +126,7 @@ export default function Dashboard({
               </h3>
             </div>
             <p className="text-gray-400">
-              Real-time OrbitRewards request tracking will be available after
+              Real-time OrbitChronicle request tracking will be available after
               wallet connection
             </p>
             <div className="flex justify-center mt-4 space-x-1">
@@ -168,7 +168,7 @@ export default function Dashboard({
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-green-300 text-sm font-orbitron">
-                  Connecting to OrbitRewards Protocol
+                  Connecting to OrbitChronicle Protocol
                 </span>
               </div>
               <div className="flex items-center space-x-3">
@@ -198,7 +198,7 @@ export default function Dashboard({
         <div className="relative z-10">
           <div className="text-7xl mb-6 animate-bounce">🚀</div>
           <h2 className="text-3xl font-bold font-orbitron bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent mb-4">
-            WELCOME TO ORBITREWARDS
+            WELCOME TO ORBITCHRONICLE
           </h2>
           <p className="text-cyan-200/80 text-lg mb-8">
             Initialize your loyalty protocol and unlock exclusive NFTs across
@@ -259,7 +259,7 @@ export default function Dashboard({
                 🚀
               </span>
               <span className="font-orbitron tracking-wider text-lg">
-                INITIALIZE ORBITREWARDS
+                INITIALIZE ORBITCHRONICLE
               </span>
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
@@ -329,7 +329,7 @@ export default function Dashboard({
                 </div>
                 <div>
                   <h3 className="text-purple-300 font-orbitron font-bold text-xl lg:text-2xl tracking-wider">
-                    ORBITREWARDS NFT
+                    ORBITCHRONICLE NFT
                   </h3>
                   <p className="text-purple-200/80 text-sm font-orbitron">
                     TOKEN #{orbitData.tokenId.toString()}
@@ -392,7 +392,7 @@ export default function Dashboard({
 
               <div className="mt-6">
                 <button
-                  onClick={refreshUserStatus}
+                  onClick={refetchAll}
                   className="group relative w-full overflow-hidden bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-purple-500/20 
                            hover:from-blue-400/30 hover:via-cyan-400/30 hover:to-purple-400/30
                            border border-blue-400/50 hover:border-blue-300/70 

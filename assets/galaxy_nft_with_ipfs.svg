@@ -81,6 +81,6 @@
 <!-- Footer Elements -->
 <line x1="80" y1="360" x2="320" y2="360" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 <text x="200" y="380" text-anchor="middle" fill="white" font-size="9" opacity="0.6" letter-spacing="1px">SOULBOUND NFT</text>
-<text x="200" y="395" text-anchor="middle" fill="white" font-size="8" opacity="0.4">ORBIT REWARDS</text>
+<text x="200" y="395" text-anchor="middle" fill="white" font-size="8" opacity="0.4">ORBIT CHRONICLE</text>
 
 </svg> 

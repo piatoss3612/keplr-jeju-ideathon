@@ -5,19 +5,20 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: OrbitRewards
+    name: OrbitChronicle
     network: base-sepolia
     source:
-      address: "0x44e302d85EF36c363191A7535481Bd27ec887a10"
-      abi: OrbitRewards
-      startBlock: 26786855
+      address: "0xDAbe163E6A1f87e5611b12Da548443aa63889C1F"
+      abi: OrbitChronicle
+      startBlock: 26791563
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
+        - ChainlinkConfigUpdated
+        - GasLimitUpdated
         - InitialQualificationClaimed
-        - LoyaltyVerificationRequested
         - LoyaltyVerified
         - OwnershipTransferRequested
         - OwnershipTransferred
@@ -27,15 +28,20 @@ dataSources:
         - RequestSent
         - ScoreCalculated
         - ScoreExpired
+        - SourceCodeUpdated
+        - SubscriptionIdUpdated
         - Unpaused
+        - UserRequestSent
       abis:
-        - name: OrbitRewards
-          file: ./abis/OrbitRewards.json
+        - name: OrbitChronicle
+          file: ./abis/OrbitChronicle.json
       eventHandlers:
+        - event: ChainlinkConfigUpdated(uint64,uint32,string)
+          handler: handleChainlinkConfigUpdated
+        - event: GasLimitUpdated(uint32)
+          handler: handleGasLimitUpdated
         - event: InitialQualificationClaimed(indexed address,indexed uint256,uint8,uint256)
           handler: handleInitialQualificationClaimed
-        - event: LoyaltyVerificationRequested(indexed address,indexed bytes32)
-          handler: handleLoyaltyVerificationRequested
         - event: LoyaltyVerified(indexed address,uint8,uint256,uint256,uint256)
           handler: handleLoyaltyVerified
         - event: OwnershipTransferRequested(indexed address,indexed address)
@@ -54,6 +60,12 @@ dataSources:
           handler: handleScoreCalculated
         - event: ScoreExpired(indexed address,uint256)
           handler: handleScoreExpired
+        - event: SourceCodeUpdated(string)
+          handler: handleSourceCodeUpdated
+        - event: SubscriptionIdUpdated(uint64)
+          handler: handleSubscriptionIdUpdated
         - event: Unpaused(address)
           handler: handleUnpaused
-      file: ./src/orbit-rewards.ts
+        - event: UserRequestSent(indexed address,indexed bytes32,bool)
+          handler: handleUserRequestSent
+      file: ./src/orbit-chronicle.ts

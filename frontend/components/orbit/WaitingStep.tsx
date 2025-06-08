@@ -142,28 +142,6 @@ export default function WaitingStep({
               </div>
             </div>
           </div>
-
-          <div className="bg-black/40 backdrop-blur-md border border-orange-400/30 rounded-2xl p-6 mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-orange-300 font-orbitron text-sm tracking-wider">
-                OVERALL PROGRESS
-              </span>
-              <span className="text-orange-300 font-bold">0%</span>
-            </div>
-
-            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-orange-400 to-red-400 rounded-full shadow-lg shadow-orange-400/30 animate-pulse"
-                style={{ width: "0%" }}
-              />
-            </div>
-
-            <div className="text-center mt-3">
-              <span className="text-orange-200/60 text-xs font-orbitron">
-                Waiting for wallet approval...
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -179,7 +157,7 @@ export default function WaitingStep({
             PROCESSING TRANSACTION{loadingDots}
           </h2>
           <p className="text-cyan-200/80 text-lg">
-            OrbitRewards protocol initialization in progress
+            OrbitChronicle protocol initialization in progress
           </p>
           {transactionHash && (
             <p className="text-cyan-300/60 text-sm font-mono mt-2">
@@ -336,44 +314,6 @@ export default function WaitingStep({
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-black/40 backdrop-blur-md border border-purple-400/30 rounded-2xl p-6 mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-purple-300 font-orbitron text-sm tracking-wider">
-              OVERALL PROGRESS
-            </span>
-            <span className="text-purple-300 font-bold">
-              {currentStep >= 0
-                ? Math.round(((currentStep + 1) / steps.length) * 100)
-                : 0}
-              %
-            </span>
-          </div>
-
-          <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-full transition-all duration-1000 shadow-lg shadow-purple-400/30"
-              style={{
-                width:
-                  currentStep >= 0
-                    ? `${((currentStep + 1) / steps.length) * 100}%`
-                    : "0%",
-              }}
-            />
-          </div>
-
-          <div className="text-center mt-3">
-            <span className="text-purple-200/60 text-xs font-orbitron">
-              {transactionStatus === "submitted" &&
-                "Broadcasting to network..."}
-              {transactionStatus === "confirming" &&
-                "Awaiting block confirmation..."}
-              {transactionStatus === "verifying" &&
-                "Chainlink verification in progress..."}
-              {!transactionStatus && "Preparing transaction..."}
-            </span>
           </div>
         </div>
 

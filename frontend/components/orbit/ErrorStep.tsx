@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useOrbitRewards } from "@/context/OrbitRewardsProvider";
+import { useOrbitChronicle } from "@/context/OrbitChronicleProvider";
 
 interface ErrorStepProps {
   onReset: () => void;
 }
 
 export default function ErrorStep({ onReset }: ErrorStepProps) {
-  const { errorData } = useOrbitRewards();
+  const { errorData } = useOrbitChronicle();
   const [glitchEffect, setGlitchEffect] = useState(false);
 
   // Glitch effect animation

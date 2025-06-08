@@ -1,0 +1,92 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="url(#background)"/>
+  
+  <!-- Glow effect -->
+  <circle cx="256" cy="256" r="220" fill="url(#glow)" opacity="0.3"/>
+  
+  <!-- Outer orbit ring -->
+  <circle cx="256" cy="256" r="190" stroke="url(#ring1)" stroke-width="8" fill="none" opacity="0.9"/>
+  
+  <!-- Second orbit ring -->
+  <circle cx="256" cy="256" r="160" stroke="url(#ring2)" stroke-width="6" fill="none" opacity="0.7"/>
+  
+  <!-- Third orbit ring -->
+  <circle cx="256" cy="256" r="130" stroke="url(#ring3)" stroke-width="4" fill="none" opacity="0.6"/>
+  
+  <!-- Inner orbit ring -->
+  <circle cx="256" cy="256" r="100" stroke="url(#ring4)" stroke-width="3" fill="none" opacity="0.4"/>
+  
+  <!-- Central planet -->
+  <circle cx="256" cy="256" r="50" fill="url(#planet)" stroke="url(#planetStroke)" stroke-width="3"/>
+  <circle cx="256" cy="256" r="42" fill="url(#planetInner)" opacity="0.8"/>
+  
+  <!-- Orbiting satellites -->
+  <circle cx="346" cy="256" r="8" fill="#06b6d4" opacity="0.9">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="166" cy="256" r="6" fill="#ec4899" opacity="0.8">
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="256" cy="146" r="5" fill="#8b5cf6" opacity="0.7">
+    <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Background gradients and effects -->
+  <defs>
+    <!-- Background -->
+    <radialGradient id="background" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="70%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    
+    <!-- Glow effect -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    
+    <!-- Ring gradients -->
+    <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="33%" stop-color="#8b5cf6"/>
+      <stop offset="66%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    
+    <linearGradient id="ring2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="50%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    
+    <linearGradient id="ring3" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    
+    <linearGradient id="ring4" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    
+    <!-- Planet gradients -->
+    <radialGradient id="planet" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#0891b2"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </radialGradient>
+    
+    <radialGradient id="planetInner" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    
+    <linearGradient id="planetStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+</svg> 

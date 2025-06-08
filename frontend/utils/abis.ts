@@ -1,4 +1,4 @@
-export const OrbitRewardsNFTAbi = [
+export const OrbitNftAbi = [
   {
     type: "constructor",
     inputs: [
@@ -225,7 +225,7 @@ export const OrbitRewardsNFTAbi = [
   },
   {
     type: "function",
-    name: "orbitRewardsContract",
+    name: "orbitChronicleContract",
     inputs: [],
     outputs: [
       {
@@ -339,19 +339,6 @@ export const OrbitRewardsNFTAbi = [
         name: "approved",
         type: "bool",
         internalType: "bool",
-      },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "setOrbitRewardsContract",
-    inputs: [
-      {
-        name: "_orbitRewardsContract",
-        type: "address",
-        internalType: "address",
       },
     ],
     outputs: [],
@@ -840,7 +827,7 @@ export const OrbitRewardsNFTAbi = [
   },
   {
     type: "error",
-    name: "OnlyOrbitRewards",
+    name: "OnlyOrbitChronicle",
     inputs: [],
   },
   {
@@ -883,7 +870,7 @@ export const OrbitRewardsNFTAbi = [
   },
 ] as const;
 
-export const OrbitRewardsAbi = [
+export const OrbitChronicleAbi = [
   {
     type: "constructor",
     inputs: [
@@ -1037,7 +1024,7 @@ export const OrbitRewardsAbi = [
       {
         name: "info",
         type: "tuple",
-        internalType: "struct OrbitRewards.UserStatusInfo",
+        internalType: "struct OrbitChronicle.UserStatusInfo",
         components: [
           {
             name: "hasUserNFT",
@@ -1225,7 +1212,7 @@ export const OrbitRewardsAbi = [
       {
         name: "",
         type: "address",
-        internalType: "contract OrbitRewardsNFT",
+        internalType: "contract OrbitNft",
       },
     ],
     stateMutability: "view",
@@ -1613,25 +1600,6 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "event",
-    name: "LoyaltyVerificationRequested",
-    inputs: [
-      {
-        name: "user",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "requestId",
-        type: "bytes32",
-        indexed: true,
-        internalType: "bytes32",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
     name: "LoyaltyVerified",
     inputs: [
       {
@@ -1848,6 +1816,31 @@ export const OrbitRewardsAbi = [
         type: "address",
         indexed: false,
         internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "UserRequestSent",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "requestId",
+        type: "bytes32",
+        indexed: true,
+        internalType: "bytes32",
+      },
+      {
+        name: "isVerification",
+        type: "bool",
+        indexed: false,
+        internalType: "bool",
       },
     ],
     anonymous: false,

@@ -8,14 +8,14 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 import {DelegationTier, TierUtils} from "./libraries/OrbitUtils.sol";
 import {ValidationUtils} from "./libraries/ValidationUtils.sol";
-import {OrbitRewardsNFT} from "./OrbitRewardsNFT.sol";
+import {OrbitNft} from "./OrbitNft.sol";
 
 /**
  * @title OrbitRewards - Delegation Rewards System
  * @notice Dynamic short-term rewards with 7-day scoring windows, 3-day verification cycles, and immediate benefits
  * @dev Main contract that manages immediate rewards and interacts with separate NFT contract
  */
-contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
+contract OrbitChronicle is FunctionsClient, ConfirmedOwner, Pausable {
     using ValidationUtils for uint256;
     using ValidationUtils for string;
     using TierUtils for DelegationTier;
@@ -71,7 +71,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     string public source;
 
     // NFT contract
-    OrbitRewardsNFT public nftContract;
+    OrbitNft public nftContract;
 
     // Core tracking
     mapping(bytes32 => address) public requestToSender;
@@ -148,7 +148,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
         source = _source;
 
         // NFT 컨트랙트 배포
-        nftContract = new OrbitRewardsNFT(address(this));
+        nftContract = new OrbitNft(address(this));
     }
 
     // ==================== MAIN FUNCTIONS ====================

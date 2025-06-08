@@ -9,11 +9,11 @@ import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {DelegationTier, TierUtils} from "./libraries/OrbitUtils.sol";
 
 /**
- * @title OrbitRewardsNFT - Soulbound NFT for Orbit Rewards System
+ * @title OrbitNft - Soulbound NFT for Orbit Chronicle System
  * @notice ERC721 implementation with soulbound features and dynamic metadata
  * @dev Controlled by OrbitRewards main contract
  */
-contract OrbitRewardsNFT is ERC721, Ownable {
+contract OrbitNft is ERC721, Ownable {
     using TierUtils for DelegationTier;
     using TierUtils for uint256;
     using Strings for uint256;
@@ -40,7 +40,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
     mapping(uint256 => TokenData) public tokenData;
     mapping(address => UserScoreData) public userScores; // 메인 컨트랙트에서 업데이트
 
-    address public orbitRewardsContract; // 메인 컨트랙트 주소
+    address public immutable orbitChronicleContract; // 메인 컨트랙트 주소
 
     uint256 private _tokenIdCounter = 1;
 
@@ -64,20 +64,22 @@ contract OrbitRewardsNFT is ERC721, Ownable {
     // ==================== ERRORS ====================
 
     error SoulboundToken();
-    error OnlyOrbitRewards();
+    error OnlyOrbitChronicle();
     error TokenNotFound(uint256 tokenId);
 
     // ==================== MODIFIERS ====================
 
-    modifier onlyOrbitRewards() {
-        if (msg.sender != orbitRewardsContract) revert OnlyOrbitRewards();
+    modifier onlyOrbitChronicle() {
+        if (msg.sender != orbitChronicleContract) revert OnlyOrbitChronicle();
         _;
     }
 
     // ==================== CONSTRUCTOR ====================
 
-    constructor(address _owner) ERC721("OrbitRewards", "ORB") Ownable(_owner) {
-        orbitRewardsContract = _owner; // 처음에는 deployer가 메인 컨트랙트
+    constructor(
+        address _owner
+    ) ERC721("OrbitChronicle", "ORB") Ownable(_owner) {
+        orbitChronicleContract = _owner; // 처음에는 deployer가 메인 컨트랙트
     }
 
     // ==================== SOULBOUND OVERRIDES ====================
@@ -106,7 +108,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
         address to,
         DelegationTier tier,
         uint256 amount
-    ) external onlyOrbitRewards returns (uint256 tokenId) {
+    ) external onlyOrbitChronicle returns (uint256 tokenId) {
         tokenId = _tokenIdCounter++;
 
         _safeMint(to, tokenId);
@@ -132,7 +134,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
         DelegationTier tier,
         uint256 amount,
         uint256 seasonNumber
-    ) external onlyOrbitRewards returns (uint256 tokenId) {
+    ) external onlyOrbitChronicle returns (uint256 tokenId) {
         tokenId = _tokenIdCounter++;
 
         _safeMint(to, tokenId);
@@ -157,7 +159,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
         uint256 tokenId,
         DelegationTier newTier,
         uint256 newAmount
-    ) external onlyOrbitRewards {
+    ) external onlyOrbitChronicle {
         if (tokenData[tokenId].tokenOwner == address(0))
             revert TokenNotFound(tokenId);
 
@@ -174,7 +176,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
         uint256 seasonPoints,
         uint256 seasonsCompleted,
         bool isActive
-    ) external onlyOrbitRewards {
+    ) external onlyOrbitChronicle {
         userScores[user] = UserScoreData({
             currentScore: currentScore,
             seasonPoints: seasonPoints,
@@ -261,7 +263,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                 )
             )
             : string(
-                abi.encodePacked("Orbit Rewards - ", data.tier.getTierName())
+                abi.encodePacked("Orbit Chronicle - ", data.tier.getTierName())
             );
 
         string memory description = string(
@@ -742,7 +744,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                 abi.encodePacked(
                     '<line x1="80" y1="360" x2="320" y2="360" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>',
                     '<text x="200" y="380" text-anchor="middle" fill="white" font-size="9" opacity="0.6" letter-spacing="1px">SOULBOUND NFT</text>',
-                    '<text x="200" y="395" text-anchor="middle" fill="white" font-size="8" opacity="0.4">ORBIT REWARDS</text>'
+                    '<text x="200" y="395" text-anchor="middle" fill="white" font-size="8" opacity="0.4">ORBIT CHRONICLE</text>'
                 )
             );
     }
@@ -892,17 +894,6 @@ contract OrbitRewardsNFT is ERC721, Ownable {
         if (tier == DelegationTier.Star) return ("#FFD700"); // 골든 컬러
         if (tier == DelegationTier.Comet) return ("#00BFFF"); // 더 밝은 블루
         return ("#32CD32"); // 더 밝은 그린
-    }
-
-    // ==================== ADMIN FUNCTIONS ====================
-
-    /**
-     * @notice 메인 컨트랙트 주소 설정 (owner만 가능)
-     */
-    function setOrbitRewardsContract(
-        address _orbitRewardsContract
-    ) external onlyOwner {
-        orbitRewardsContract = _orbitRewardsContract;
     }
 
     /**

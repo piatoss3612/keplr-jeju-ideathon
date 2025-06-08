@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {OrbitRewards} from "src/OrbitRewards.sol";
+import {OrbitChronicle} from "src/OrbitChronicle.sol";
 
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 
@@ -41,13 +41,13 @@ contract OrbitScript is Script {
 
         vm.startBroadcast();
 
-        OrbitRewards rewards = new OrbitRewards(subscriptionId, sourceCode);
+        OrbitChronicle rewards = new OrbitChronicle(subscriptionId, sourceCode);
 
         vm.stopBroadcast();
 
         address nftContract = rewards.getNFTContract();
 
-        console.log("OrbitRewards deployed to:", address(rewards));
-        console.log("OrbitRewardsNFT deployed to:", nftContract);
+        console.log("OrbitChronicle deployed to:", address(rewards));
+        console.log("OrbitNft deployed to:", nftContract);
     }
 }

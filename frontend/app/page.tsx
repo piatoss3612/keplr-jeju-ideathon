@@ -30,7 +30,7 @@ export default function Home() {
                   className="bg-gradient-to-r from-pink-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent 
                                drop-shadow-lg animate-pulse delay-200"
                 >
-                  REWARDS
+                  CHRONICLE
                 </span>
 
                 {/* Glitch effect overlay */}
@@ -40,7 +40,7 @@ export default function Home() {
                 >
                   ORBIT
                   <br />
-                  REWARDS
+                  CHRONICLE
                 </div>
               </h1>
             </div>
@@ -51,7 +51,7 @@ export default function Home() {
                 className="text-cyan-200/80 text-base lg:text-lg font-orbitron tracking-wide px-4 py-2 
                            bg-black/20 backdrop-blur-sm rounded-full border border-cyan-400/20"
               >
-                ENTER THE BLOCKCHAIN ORBIT
+                LOYALTY ACROSS THE COSMOS
               </p>
               <div className="h-px w-12 lg:w-24 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
             </div>
@@ -67,7 +67,7 @@ export default function Home() {
           <div className="flex justify-center items-center">
             <div className="flex items-center space-x-4">
               <p className="text-gray-500 text-sm font-orbitron tracking-wide">
-                © 2025 ORBITREWARDS
+                © 2025 ORBITCHRONICLE
               </p>
               <div className="flex space-x-1">
                 <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"></div>

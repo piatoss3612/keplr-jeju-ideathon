@@ -28,7 +28,7 @@ export default function ConnectWallets({
           Connect Your Wallets
         </h2>
         <p className="text-cyan-200/80 text-lg">
-          Connect both wallets to access Orbit Rewards
+          Connect both wallets to access Orbit Chronicle
         </p>
 
         {/* Compact Cyberpunk Status Bar */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { RegistrationStep } from "@/context/OrbitRewardsProvider";
+import { RegistrationStep } from "@/context/OrbitChronicleProvider";
 
 export interface ProgressIndicatorProps {
   currentStep: RegistrationStep;

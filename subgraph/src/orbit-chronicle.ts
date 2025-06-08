@@ -1,6 +1,7 @@
 import {
+  ChainlinkConfigUpdated as ChainlinkConfigUpdatedEvent,
+  GasLimitUpdated as GasLimitUpdatedEvent,
   InitialQualificationClaimed as InitialQualificationClaimedEvent,
-  LoyaltyVerificationRequested as LoyaltyVerificationRequestedEvent,
   LoyaltyVerified as LoyaltyVerifiedEvent,
   OwnershipTransferRequested as OwnershipTransferRequestedEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
@@ -10,11 +11,15 @@ import {
   RequestSent as RequestSentEvent,
   ScoreCalculated as ScoreCalculatedEvent,
   ScoreExpired as ScoreExpiredEvent,
-  Unpaused as UnpausedEvent
-} from "../generated/OrbitRewards/OrbitRewards"
+  SourceCodeUpdated as SourceCodeUpdatedEvent,
+  SubscriptionIdUpdated as SubscriptionIdUpdatedEvent,
+  Unpaused as UnpausedEvent,
+  UserRequestSent as UserRequestSentEvent
+} from "../generated/OrbitChronicle/OrbitChronicle"
 import {
+  ChainlinkConfigUpdated,
+  GasLimitUpdated,
   InitialQualificationClaimed,
-  LoyaltyVerificationRequested,
   LoyaltyVerified,
   OwnershipTransferRequested,
   OwnershipTransferred,
@@ -24,8 +29,41 @@ import {
   RequestSent,
   ScoreCalculated,
   ScoreExpired,
-  Unpaused
+  SourceCodeUpdated,
+  SubscriptionIdUpdated,
+  Unpaused,
+  UserRequestSent
 } from "../generated/schema"
+
+export function handleChainlinkConfigUpdated(
+  event: ChainlinkConfigUpdatedEvent
+): void {
+  let entity = new ChainlinkConfigUpdated(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.subscriptionId = event.params.subscriptionId
+  entity.gasLimit = event.params.gasLimit
+  entity.source = event.params.source
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleGasLimitUpdated(event: GasLimitUpdatedEvent): void {
+  let entity = new GasLimitUpdated(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.newGasLimit = event.params.newGasLimit
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
 
 export function handleInitialQualificationClaimed(
   event: InitialQualificationClaimedEvent
@@ -37,22 +75,6 @@ export function handleInitialQualificationClaimed(
   entity.tokenId = event.params.tokenId
   entity.tier = event.params.tier
   entity.amount = event.params.amount
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleLoyaltyVerificationRequested(
-  event: LoyaltyVerificationRequestedEvent
-): void {
-  let entity = new LoyaltyVerificationRequested(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.user = event.params.user
-  entity.requestId = event.params.requestId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -193,11 +215,54 @@ export function handleScoreExpired(event: ScoreExpiredEvent): void {
   entity.save()
 }
 
+export function handleSourceCodeUpdated(event: SourceCodeUpdatedEvent): void {
+  let entity = new SourceCodeUpdated(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.newSource = event.params.newSource
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleSubscriptionIdUpdated(
+  event: SubscriptionIdUpdatedEvent
+): void {
+  let entity = new SubscriptionIdUpdated(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.newSubscriptionId = event.params.newSubscriptionId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
 export function handleUnpaused(event: UnpausedEvent): void {
   let entity = new Unpaused(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
   entity.account = event.params.account
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleUserRequestSent(event: UserRequestSentEvent): void {
+  let entity = new UserRequestSent(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.user = event.params.user
+  entity.requestId = event.params.requestId
+  entity.isVerification = event.params.isVerification
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp

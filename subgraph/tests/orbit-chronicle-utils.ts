@@ -1,8 +1,9 @@
 import { newMockEvent } from "matchstick-as"
-import { ethereum, Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { ethereum, BigInt, Address, Bytes } from "@graphprotocol/graph-ts"
 import {
+  ChainlinkConfigUpdated,
+  GasLimitUpdated,
   InitialQualificationClaimed,
-  LoyaltyVerificationRequested,
   LoyaltyVerified,
   OwnershipTransferRequested,
   OwnershipTransferred,
@@ -12,8 +13,57 @@ import {
   RequestSent,
   ScoreCalculated,
   ScoreExpired,
-  Unpaused
-} from "../generated/OrbitRewards/OrbitRewards"
+  SourceCodeUpdated,
+  SubscriptionIdUpdated,
+  Unpaused,
+  UserRequestSent
+} from "../generated/OrbitChronicle/OrbitChronicle"
+
+export function createChainlinkConfigUpdatedEvent(
+  subscriptionId: BigInt,
+  gasLimit: BigInt,
+  source: string
+): ChainlinkConfigUpdated {
+  let chainlinkConfigUpdatedEvent =
+    changetype<ChainlinkConfigUpdated>(newMockEvent())
+
+  chainlinkConfigUpdatedEvent.parameters = new Array()
+
+  chainlinkConfigUpdatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "subscriptionId",
+      ethereum.Value.fromUnsignedBigInt(subscriptionId)
+    )
+  )
+  chainlinkConfigUpdatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "gasLimit",
+      ethereum.Value.fromUnsignedBigInt(gasLimit)
+    )
+  )
+  chainlinkConfigUpdatedEvent.parameters.push(
+    new ethereum.EventParam("source", ethereum.Value.fromString(source))
+  )
+
+  return chainlinkConfigUpdatedEvent
+}
+
+export function createGasLimitUpdatedEvent(
+  newGasLimit: BigInt
+): GasLimitUpdated {
+  let gasLimitUpdatedEvent = changetype<GasLimitUpdated>(newMockEvent())
+
+  gasLimitUpdatedEvent.parameters = new Array()
+
+  gasLimitUpdatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "newGasLimit",
+      ethereum.Value.fromUnsignedBigInt(newGasLimit)
+    )
+  )
+
+  return gasLimitUpdatedEvent
+}
 
 export function createInitialQualificationClaimedEvent(
   user: Address,
@@ -46,28 +96,6 @@ export function createInitialQualificationClaimedEvent(
   )
 
   return initialQualificationClaimedEvent
-}
-
-export function createLoyaltyVerificationRequestedEvent(
-  user: Address,
-  requestId: Bytes
-): LoyaltyVerificationRequested {
-  let loyaltyVerificationRequestedEvent =
-    changetype<LoyaltyVerificationRequested>(newMockEvent())
-
-  loyaltyVerificationRequestedEvent.parameters = new Array()
-
-  loyaltyVerificationRequestedEvent.parameters.push(
-    new ethereum.EventParam("user", ethereum.Value.fromAddress(user))
-  )
-  loyaltyVerificationRequestedEvent.parameters.push(
-    new ethereum.EventParam(
-      "requestId",
-      ethereum.Value.fromFixedBytes(requestId)
-    )
-  )
-
-  return loyaltyVerificationRequestedEvent
 }
 
 export function createLoyaltyVerifiedEvent(
@@ -257,6 +285,38 @@ export function createScoreExpiredEvent(
   return scoreExpiredEvent
 }
 
+export function createSourceCodeUpdatedEvent(
+  newSource: string
+): SourceCodeUpdated {
+  let sourceCodeUpdatedEvent = changetype<SourceCodeUpdated>(newMockEvent())
+
+  sourceCodeUpdatedEvent.parameters = new Array()
+
+  sourceCodeUpdatedEvent.parameters.push(
+    new ethereum.EventParam("newSource", ethereum.Value.fromString(newSource))
+  )
+
+  return sourceCodeUpdatedEvent
+}
+
+export function createSubscriptionIdUpdatedEvent(
+  newSubscriptionId: BigInt
+): SubscriptionIdUpdated {
+  let subscriptionIdUpdatedEvent =
+    changetype<SubscriptionIdUpdated>(newMockEvent())
+
+  subscriptionIdUpdatedEvent.parameters = new Array()
+
+  subscriptionIdUpdatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "newSubscriptionId",
+      ethereum.Value.fromUnsignedBigInt(newSubscriptionId)
+    )
+  )
+
+  return subscriptionIdUpdatedEvent
+}
+
 export function createUnpausedEvent(account: Address): Unpaused {
   let unpausedEvent = changetype<Unpaused>(newMockEvent())
 
@@ -267,4 +327,32 @@ export function createUnpausedEvent(account: Address): Unpaused {
   )
 
   return unpausedEvent
+}
+
+export function createUserRequestSentEvent(
+  user: Address,
+  requestId: Bytes,
+  isVerification: boolean
+): UserRequestSent {
+  let userRequestSentEvent = changetype<UserRequestSent>(newMockEvent())
+
+  userRequestSentEvent.parameters = new Array()
+
+  userRequestSentEvent.parameters.push(
+    new ethereum.EventParam("user", ethereum.Value.fromAddress(user))
+  )
+  userRequestSentEvent.parameters.push(
+    new ethereum.EventParam(
+      "requestId",
+      ethereum.Value.fromFixedBytes(requestId)
+    )
+  )
+  userRequestSentEvent.parameters.push(
+    new ethereum.EventParam(
+      "isVerification",
+      ethereum.Value.fromBoolean(isVerification)
+    )
+  )
+
+  return userRequestSentEvent
 }

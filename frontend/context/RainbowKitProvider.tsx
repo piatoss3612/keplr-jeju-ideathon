@@ -21,7 +21,7 @@ if (!projectId) {
 const queryClient = new QueryClient();
 
 const config = getDefaultConfig({
-  appName: "Orbit Rewards",
+  appName: "Orbit Chronicle",
   projectId: projectId,
   chains: [baseSepolia],
   ssr: true, // If your dApp uses server side rendering (SSR)

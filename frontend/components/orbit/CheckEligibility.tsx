@@ -6,7 +6,8 @@ import {
   getTierName,
   formatInitAmount as formatTierAmount,
 } from "@/utils/tierUtils";
-import { useOrbitRewards } from "@/context/OrbitRewardsProvider";
+import { useOrbitChronicle } from "@/context/OrbitChronicleProvider";
+import { useOrbitChronicleData } from "@/hooks/useOrbitChronicleData";
 
 interface CheckEligibilityProps {
   onEligibilityConfirmed: () => void;
@@ -21,11 +22,10 @@ export default function CheckEligibility({
     errorData,
     isChecking,
     tierInfo,
-    userStatus,
-    isLoadingStatus,
     checkEligibility,
     clearAll,
-  } = useOrbitRewards();
+  } = useOrbitChronicle();
+  const orbitData = useOrbitChronicleData();
 
   const formatInitAmount = (amount: string) => {
     return formatUnits(BigInt(amount), 6).toString();
@@ -116,7 +116,7 @@ export default function CheckEligibility({
       </div>
 
       {/* Enhanced Current NFT Status */}
-      {!isLoadingStatus && userStatus && (
+      {!orbitData.isLoading && (
         <div className="bg-black/40 backdrop-blur-md border border-purple-400/50 hover:border-purple-400/70 rounded-2xl p-6 transition-all duration-300 shadow-lg shadow-purple-500/20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5"></div>
           <div className="relative z-10">
@@ -130,7 +130,7 @@ export default function CheckEligibility({
               </h3>
             </div>
 
-            {userStatus.hasUserNFT ? (
+            {orbitData.hasNFT ? (
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-purple-500/10 rounded-xl border border-purple-400/20">
                   <span className="text-purple-200/80 text-sm font-orbitron tracking-wider">
@@ -145,7 +145,7 @@ export default function CheckEligibility({
                     CURRENT SCORE:
                   </span>
                   <span className="text-purple-300 font-bold">
-                    {userStatus.currentScore.toString()} PTS
+                    {orbitData.currentScore.toString()} PTS
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-purple-500/10 rounded-xl border border-purple-400/20">
@@ -154,20 +154,20 @@ export default function CheckEligibility({
                   </span>
                   <span
                     className={`font-bold font-orbitron ${
-                      userStatus.scoreActive
+                      orbitData.scoreActive
                         ? "text-green-400"
                         : "text-orange-400"
                     }`}
                   >
-                    {userStatus.scoreActive ? "ACTIVE" : "INACTIVE"}
+                    {orbitData.scoreActive ? "ACTIVE" : "INACTIVE"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-purple-500/10 rounded-xl border border-purple-400/20">
                   <span className="text-purple-200/80 text-sm font-orbitron tracking-wider">
-                    SEASONS:
+                    VERIFICATIONS:
                   </span>
                   <span className="text-purple-300 font-bold">
-                    {userStatus.seasonsCompleted.toString()}
+                    {orbitData.verificationCount.toString()}
                   </span>
                 </div>
               </div>

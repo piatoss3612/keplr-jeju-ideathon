@@ -9,12 +9,16 @@ export interface UserRequestStats {
   pendingCount: number;
   verifiedCount: number;
   readyToProcessCount: number;
+  readyToProcessRequests: UserRequestSent[];
+  pendingRequests: UserRequestSent[];
 }
 
 // 타입 정의
-interface RequestSent {
+interface UserRequestSent {
   id: string;
-  internal_id: string;
+  user: string;
+  requestId: string;
+  isVerification: boolean;
   blockTimestamp: string;
   transactionHash: string;
 }
@@ -38,10 +42,16 @@ interface RequestProcessed {
 // 사용자별 요청 상태를 정확히 추적하기 위한 쿼리
 const GET_USER_SPECIFIC_REQUESTS = gql`
   query GetUserSpecificRequests($userAddress: String!) {
-    # 1. 모든 RequestSent (전체 시스템에서 가져와서 사용자 것만 필터링)
-    requestSents(orderBy: blockTimestamp, orderDirection: desc, first: 1000) {
+    # 1. 사용자가 시작한 모든 요청들 (UserRequestSent)
+    userRequestSents(
+      where: { user: $userAddress }
+      orderBy: blockTimestamp
+      orderDirection: desc
+    ) {
       id
-      internal_id
+      user
+      requestId
+      isVerification
       blockTimestamp
       transactionHash
     }
@@ -101,6 +111,8 @@ export function useRequestStatusSimple(
     pendingCount: 0,
     verifiedCount: 0,
     readyToProcessCount: 0,
+    readyToProcessRequests: [],
+    pendingRequests: [],
   };
 
   const handleRefetch = () => {
@@ -118,48 +130,40 @@ export function useRequestStatusSimple(
   }
 
   const {
-    requestSents = [],
+    userRequestSents = [],
     requestFulfilleds = [],
     requestProcesseds = [],
   } = data;
 
   // 타입 캐스팅
-  const typedSents = requestSents as RequestSent[];
+  const typedUserRequests = userRequestSents as UserRequestSent[];
   const typedFulfilleds = requestFulfilleds as RequestFulfilled[];
   const typedProcesseds = requestProcesseds as RequestProcessed[];
 
-  // 1. 사용자의 requestProcesseds에서 requestId들 추출 (사용자가 관련된 요청들)
-  const userRequestIds = new Set(typedProcesseds.map((req) => req.requestId));
-
-  // 2. 사용자와 관련된 requestSents만 필터링 (Total)
-  const userSentRequests = typedSents.filter((sent) =>
-    userRequestIds.has(sent.internal_id)
-  );
-
-  // 3. fulfilled된 요청 ID들
+  // 1. fulfilled된 요청 ID들
   const fulfilledRequestIds = new Set(
     typedFulfilleds.map((req) => req.internal_id)
   );
 
-  // 4. processed된 요청 ID들
+  // 2. processed된 요청 ID들
   const processedRequestIds = new Set(
     typedProcesseds.map((req) => req.requestId)
   );
 
   // 계산
-  // Total: 사용자의 전체 요청 수
-  const totalRequests = userSentRequests.length;
+  // Total: 사용자가 시작한 전체 요청 수
+  const totalRequests = typedUserRequests.length;
 
-  // Pending: requestSents 중에서 requestFulfilleds에 없는 것들 (체인링크 대기)
-  const pendingRequests = userSentRequests.filter(
-    (sent) => !fulfilledRequestIds.has(sent.internal_id)
+  // Pending: UserRequestSent는 있지만 RequestFulfilled가 없는 것들 (체인링크 대기)
+  const pendingRequests = typedUserRequests.filter(
+    (userReq) => !fulfilledRequestIds.has(userReq.requestId)
   );
 
-  // Ready to Process: requestFulfilleds 중에서 requestProcesseds에 없는 것들 (사용자 액션 대기)
-  const readyToProcessRequests = userSentRequests.filter(
-    (sent) =>
-      fulfilledRequestIds.has(sent.internal_id) &&
-      !processedRequestIds.has(sent.internal_id)
+  // Ready to Process: UserRequestSent가 있고 RequestFulfilled도 있지만 RequestProcessed가 없는 것들 (사용자 액션 대기)
+  const readyToProcessRequests = typedUserRequests.filter(
+    (userReq) =>
+      fulfilledRequestIds.has(userReq.requestId) &&
+      !processedRequestIds.has(userReq.requestId)
   );
 
   // Verified: requestProcesseds 수 (사용자가 최종 처리 완료)
@@ -170,6 +174,8 @@ export function useRequestStatusSimple(
     pendingCount: pendingRequests.length,
     verifiedCount,
     readyToProcessCount: readyToProcessRequests.length,
+    readyToProcessRequests,
+    pendingRequests,
   };
 
   return {

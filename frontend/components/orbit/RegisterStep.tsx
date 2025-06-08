@@ -1,7 +1,8 @@
 "use client";
 
 import { useKeplrContext } from "@/context/KeplrProvider";
-import { useOrbitRewards } from "@/context/OrbitRewardsProvider";
+import { useOrbitChronicle } from "@/context/OrbitChronicleProvider";
+import { useOrbitChronicleData } from "@/hooks/useOrbitChronicleData";
 
 interface RegisterStepProps {
   keplr: ReturnType<typeof useKeplrContext>;
@@ -15,8 +16,9 @@ export default function RegisterStep({
   onRegisterOrUpdate,
   onBackToCheck,
 }: RegisterStepProps) {
-  const { eligibilityData, tierInfo, userStatus, canRegister, canUpdate } =
-    useOrbitRewards();
+  const { eligibilityData, tierInfo, canRegister, canUpdate } =
+    useOrbitChronicle();
+  const orbitData = useOrbitChronicleData();
 
   if (!eligibilityData || !tierInfo) {
     return (
@@ -55,10 +57,10 @@ export default function RegisterStep({
     );
   }
 
-  const isUpdate = userStatus?.hasUserNFT;
+  const isUpdate = orbitData.hasNFT;
   const actionText = isUpdate
     ? "UPDATE LOYALTY STATUS"
-    : "REGISTER FOR ORBITREWARDS";
+    : "REGISTER FOR ORBITCHRONICLE";
   const descriptionText = isUpdate
     ? "Refresh loyalty verification to continue earning rewards"
     : "Initialize with current delegation tier to start earning rewards";
@@ -125,7 +127,7 @@ export default function RegisterStep({
       </div>
 
       {/* Enhanced Current Status (for updates) */}
-      {isUpdate && userStatus && (
+      {isUpdate && orbitData && (
         <div className="bg-black/40 backdrop-blur-md border border-cyan-400/50 hover:border-cyan-400/70 rounded-2xl p-6 transition-all duration-300 shadow-lg shadow-cyan-500/20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5"></div>
           <div className="relative z-10">
@@ -145,7 +147,7 @@ export default function RegisterStep({
                   TOKEN ID
                 </span>
                 <p className="text-cyan-300 font-bold">
-                  #{userStatus.tokenId.toString()}
+                  #{orbitData.tokenId.toString()}
                 </p>
               </div>
               <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-4 text-center">
@@ -153,7 +155,7 @@ export default function RegisterStep({
                   CURRENT SCORE
                 </span>
                 <p className="text-cyan-300 font-bold">
-                  {userStatus.currentScore.toString()} PTS
+                  {orbitData.currentScore.toString()} PTS
                 </p>
               </div>
               <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-xl p-4 text-center">
@@ -162,12 +164,10 @@ export default function RegisterStep({
                 </span>
                 <p
                   className={`font-bold font-orbitron ${
-                    userStatus.scoreActive
-                      ? "text-green-400"
-                      : "text-orange-400"
+                    orbitData.scoreActive ? "text-green-400" : "text-orange-400"
                   }`}
                 >
-                  {userStatus.scoreActive ? "ACTIVE" : "INACTIVE"}
+                  {orbitData.scoreActive ? "ACTIVE" : "INACTIVE"}
                 </p>
               </div>
             </div>
@@ -319,7 +319,7 @@ export default function RegisterStep({
                 <p className="text-orange-200/80">
                   {!eligibilityData.isQualified
                     ? "Delegation requirements not met"
-                    : userStatus?.hasUserNFT && userStatus?.scoreActive
+                    : orbitData?.hasNFT && orbitData?.scoreActive
                     ? "Loyalty status is already active"
                     : "Unable to proceed at this time"}
                 </p>

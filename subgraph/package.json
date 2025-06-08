@@ -1,13 +1,13 @@
 {
-  "name": "orbit-rewards",
+  "name": "orbit-chnoricle",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ orbit-rewards",
-    "create-local": "graph create --node http://localhost:8020/ orbit-rewards",
-    "remove-local": "graph remove --node http://localhost:8020/ orbit-rewards",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 orbit-rewards",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ orbit-chnoricle",
+    "create-local": "graph create --node http://localhost:8020/ orbit-chnoricle",
+    "remove-local": "graph remove --node http://localhost:8020/ orbit-chnoricle",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 orbit-chnoricle",
     "test": "graph test"
   },
   "dependencies": {

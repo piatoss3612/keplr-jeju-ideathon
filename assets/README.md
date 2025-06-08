@@ -1,6 +1,6 @@
 # 🎨 Assets Directory
 
-이 디렉토리는 OrbitRewards 프로젝트의 디자인 에셋들을 포함합니다.
+이 디렉토리는 OrbitChronicle 프로젝트의 디자인 에셋들을 포함합니다.
 
 ## 📁 파일 목록
 
@@ -47,4 +47,4 @@
 
 ---
 
-_이 에셋들은 OrbitRewards 프로젝트의 시각적 정체성을 보여주는 핵심 요소들입니다._
+_이 에셋들은 OrbitChronicle 프로젝트의 시각적 정체성을 보여주는 핵심 요소들입니다._

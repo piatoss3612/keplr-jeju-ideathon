@@ -71,7 +71,7 @@ export default function SuccessStep({
 
   return (
     <div className="text-center space-y-8 relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-blue-500/5 to-purple-500/5 rounded-3xl animate-pulse"></div>
+      <div className="absolute inset-0 rounded-3xl animate-pulse"></div>
       <div className="relative z-10">
         {/* Enhanced Celebration Header */}
         <div className="mb-8">
@@ -80,7 +80,7 @@ export default function SuccessStep({
             TRANSACTION SUBMITTED!
           </h2>
           <p className="text-green-200/80 text-lg">
-            OrbitRewards protocol activation initiated successfully
+            OrbitChronicle protocol activation initiated successfully
           </p>
         </div>
 
@@ -372,7 +372,7 @@ export default function SuccessStep({
             </span>
           </div>
           <p className="text-green-200/80 text-sm font-orbitron text-center">
-            Your OrbitRewards registration has been submitted successfully!
+            Your OrbitChronicle registration has been submitted successfully!
             Monitor verification progress and access your rewards through the
             dashboard.
           </p>

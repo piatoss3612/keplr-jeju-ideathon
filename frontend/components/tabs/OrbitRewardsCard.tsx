@@ -9,10 +9,10 @@ import ConnectWallets from "./ConnectWallets";
 import Dashboard from "./Dashboard";
 import OrbitRewardsFlow from "../orbit/OrbitRewardsFlow";
 import {
-  OrbitRewardsProvider,
-  useOrbitRewards,
-} from "@/context/OrbitRewardsProvider";
-import { useOrbitRewardsData } from "@/hooks/useOrbitRewardsData";
+  OrbitChronicleProvider,
+  useOrbitChronicle,
+} from "@/context/OrbitChronicleProvider";
+import { useOrbitChronicleData } from "@/hooks/useOrbitChronicleData";
 
 function OrbitRewardsCardContent() {
   const { address, isConnected } = useAccount();
@@ -24,10 +24,10 @@ function OrbitRewardsCardContent() {
     registrationHash,
     registerOrUpdate,
     clearAll,
-  } = useOrbitRewards();
+  } = useOrbitChronicle();
 
   // 실제 데이터 가져오기
-  const orbitData = useOrbitRewardsData();
+  const orbitData = useOrbitChronicleData();
 
   const [activeTab, setActiveTab] = useState<Tab>("connect");
 
@@ -114,8 +114,8 @@ function OrbitRewardsCardContent() {
 
 export default function OrbitRewardsCard() {
   return (
-    <OrbitRewardsProvider>
+    <OrbitChronicleProvider>
       <OrbitRewardsCardContent />
-    </OrbitRewardsProvider>
+    </OrbitChronicleProvider>
   );
 }

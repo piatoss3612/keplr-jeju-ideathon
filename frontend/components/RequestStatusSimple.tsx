@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRequestStatusSimple } from "@/hooks/useRequestStatusSimple";
+import { useProcessRequest } from "@/hooks/useProcessRequest";
+import { useOrbitChronicleRefetch } from "@/hooks/useOrbitChronicleData";
 
 interface RequestStatusSimpleProps {
   userAddress?: string;
@@ -12,6 +14,38 @@ export default function RequestStatusSimple({
 }: RequestStatusSimpleProps) {
   const { stats, isLoading, error, refetch, isRefetching } =
     useRequestStatusSimple(userAddress);
+
+  const {
+    processRequest,
+    isLoading: isProcessing,
+    isSuccess: isProcessSuccess,
+    error: processError,
+    reset: resetProcessRequest,
+  } = useProcessRequest();
+
+  // 전체 OrbitChronicle 데이터 refetch
+  const { refetchAll } = useOrbitChronicleRefetch();
+
+  // processRequest 성공 후 3초 딜레이로 상태 갱신
+  useEffect(() => {
+    if (isProcessSuccess) {
+      const timer = setTimeout(async () => {
+        // RequestStatus 데이터와 전체 OrbitChronicle 데이터 모두 갱신
+        await Promise.all([refetch(), refetchAll()]);
+        resetProcessRequest(); // 성공 상태 리셋
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isProcessSuccess, refetch, refetchAll, resetProcessRequest]);
+
+  const handleProcessRequest = async (requestId: string) => {
+    try {
+      await processRequest(requestId);
+    } catch (error) {
+      console.error("Failed to process request:", error);
+    }
+  };
 
   if (!userAddress || isLoading) {
     return (
@@ -92,7 +126,7 @@ export default function RequestStatusSimple({
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-4 gap-3 mb-4">
         <div className="bg-blue-900/30 p-3 rounded-lg text-center">
           <div className="text-lg font-bold text-blue-400">
             {stats.totalRequests}
@@ -105,6 +139,12 @@ export default function RequestStatusSimple({
           </div>
           <div className="text-xs text-yellow-300">Pending</div>
         </div>
+        <div className="bg-orange-900/30 p-3 rounded-lg text-center">
+          <div className="text-lg font-bold text-orange-400">
+            {stats.readyToProcessCount}
+          </div>
+          <div className="text-xs text-orange-300">Ready</div>
+        </div>
         <div className="bg-green-900/30 p-3 rounded-lg text-center">
           <div className="text-lg font-bold text-green-400">
             {stats.verifiedCount}
@@ -113,62 +153,109 @@ export default function RequestStatusSimple({
         </div>
       </div>
 
-      {/* Status Indicators */}
-      <div className="space-y-2">
-        {stats.pendingCount > 0 && (
-          <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
-            <span className="text-yellow-400 text-sm">
-              {stats.pendingCount} request(s) pending verification
-            </span>
-          </div>
-        )}
-
-        {stats.readyToProcessCount > 0 && (
-          <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-orange-400 animate-pulse"></div>
-            <span className="text-orange-400 text-sm">
-              {stats.readyToProcessCount} request(s) ready to process
-            </span>
+      {/* Status Summary */}
+      <div className="mb-4">
+        {stats.totalRequests === 0 && (
+          <div className="flex items-center justify-center space-x-2 text-gray-400 text-sm py-2">
+            <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+            <span>No requests yet</span>
           </div>
         )}
 
         {stats.pendingCount === 0 &&
           stats.readyToProcessCount === 0 &&
           stats.totalRequests > 0 && (
-            <div className="flex items-center space-x-3">
-              <div className="w-3 h-3 rounded-full bg-green-400"></div>
-              <span className="text-green-400 text-sm">
-                All requests completed
-              </span>
+            <div className="flex items-center justify-center space-x-2 text-green-400 text-sm py-2">
+              <div className="w-2 h-2 rounded-full bg-green-400"></div>
+              <span>All requests completed</span>
             </div>
           )}
-
-        {stats.totalRequests === 0 && (
-          <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-            <span className="text-gray-400 text-sm">No requests yet</span>
-          </div>
-        )}
       </div>
 
-      {/* Processing Flow Explanation */}
+      {/* Process Status Display */}
+      {processError && (
+        <div className="mt-4 p-3 bg-red-900/20 border border-red-400/30 rounded-lg">
+          <div className="text-red-300 text-sm flex items-center">
+            <span className="mr-2">⚠️</span>
+            Process failed: {processError}
+          </div>
+        </div>
+      )}
+
+      {isProcessSuccess && (
+        <div className="mt-4 p-3 bg-green-900/20 border border-green-400/30 rounded-lg">
+          <div className="text-green-300 text-sm flex items-center">
+            <span className="mr-2">✅</span>
+            Process successful! Status will update in 3 seconds...
+          </div>
+        </div>
+      )}
+
+      {/* Ready to Process Requests */}
+      {stats.readyToProcessRequests.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-green-400/20">
+          <h4 className="text-green-300 font-orbitron font-bold text-sm mb-3 flex items-center">
+            <span className="mr-2 animate-pulse">⚡</span>
+            READY TO PROCESS ({stats.readyToProcessRequests.length})
+          </h4>
+          <div className="space-y-3">
+            {stats.readyToProcessRequests.map((request) => (
+              <div
+                key={request.id}
+                className="bg-green-900/20 border border-green-400/30 rounded-lg p-4 
+                          hover:bg-green-900/30 hover:border-green-400/50 
+                          transition-colors duration-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="text-green-300 font-mono text-xs">
+                      {request.requestId.slice(0, 12)}...
+                      {request.requestId.slice(-10)}
+                    </div>
+                    <div className="text-green-200/70 text-xs font-medium mt-1">
+                      {request.isVerification
+                        ? "🔄 Verification"
+                        : "🚀 Initial Registration"}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleProcessRequest(request.requestId)}
+                    disabled={isProcessing}
+                    className={`px-4 py-2 rounded-lg font-orbitron font-bold text-xs
+                              transition-all duration-200 border
+                              ${
+                                isProcessing
+                                  ? "bg-gray-700/60 border-gray-600/60 text-gray-400 cursor-not-allowed"
+                                  : "bg-green-600/80 hover:bg-green-500/90 border-green-400/60 hover:border-green-300/80 text-white hover:shadow-lg hover:shadow-green-400/30"
+                              }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      {isProcessing ? (
+                        <>
+                          <div className="animate-spin w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                          <span>PROCESSING</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>⚡</span>
+                          <span>PROCESS</span>
+                        </>
+                      )}
+                    </div>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Processing Flow */}
       {stats.totalRequests > 0 && (
-        <div className="mt-4 pt-3 border-t border-blue-400/20">
-          <div className="text-xs text-gray-400 space-y-1">
-            <p>
-              <strong>Flow:</strong> Request → Pending → Verified
-            </p>
-            <p>
-              <strong>Pending:</strong> Waiting for Chainlink fulfillment
-            </p>
-            <p>
-              <strong>Ready:</strong> Fulfilled, click Process button to
-              complete
-            </p>
-            <p>
-              <strong>Verified:</strong> User processed successfully
-            </p>
+        <div className="mt-4 pt-2 border-t border-blue-400/20">
+          <div className="text-xs text-gray-500 text-center">
+            Request → Pending → Ready → Verified
           </div>
         </div>
       )}

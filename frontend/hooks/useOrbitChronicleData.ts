@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAccount, useReadContract } from "wagmi";
-import { OrbitRewardsAbi, OrbitRewardsNFTAbi } from "@/utils/abis";
-import { OrbitRewardsAddress, OrbitRewardsNFTAddress } from "@/utils/constants";
+import { OrbitChronicleAbi, OrbitNftAbi } from "@/utils/abis";
+import { OrbitChronicleAddress, OrbitNftAddress } from "@/utils/constants";
 
 export interface UserOrbitData {
   // NFT 관련
@@ -72,7 +72,125 @@ function extractSVGFromTokenURI(tokenURI: string): string | undefined {
   }
 }
 
-export function useOrbitRewardsData() {
+// 전역 refetch 트리거 - Provider에서 사용할 수 있도록
+let globalRefetchTrigger: (() => void) | null = null;
+
+export function triggerOrbitDataRefresh() {
+  if (globalRefetchTrigger) {
+    globalRefetchTrigger();
+  }
+}
+
+// 상위 훅: 모든 readContract 관리
+function useOrbitChronicleContracts() {
+  const { address } = useAccount();
+  const [tokenId, setTokenId] = useState<bigint>(BigInt(0));
+  const [hasNFT, setHasNFT] = useState<boolean>(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
+  // 글로벌 refetch 트리거 설정
+  useEffect(() => {
+    globalRefetchTrigger = () => {
+      setRefreshCounter((prev) => prev + 1);
+    };
+    return () => {
+      globalRefetchTrigger = null;
+    };
+  }, []);
+
+  // 사용자 상태 정보 가져오기
+  const {
+    data: userStatus,
+    isLoading: statusLoading,
+    error: statusError,
+    refetch: refetchUserStatus,
+  } = useReadContract({
+    address: OrbitChronicleAddress,
+    abi: OrbitChronicleAbi,
+    functionName: "getUserStatus",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    },
+  });
+
+  // NFT tokenURI 가져오기 (tokenId가 있을 때만)
+  const { data: tokenURI, refetch: refetchTokenURI } = useReadContract({
+    address: OrbitNftAddress,
+    abi: OrbitNftAbi,
+    functionName: "tokenURI",
+    args: tokenId > BigInt(0) ? [tokenId] : undefined,
+    query: {
+      enabled: hasNFT && tokenId > BigInt(0),
+    },
+  });
+
+  // 주간 혜택 상태 가져오기
+  const { data: weeklyBenefitsData, refetch: refetchWeeklyBenefits } =
+    useReadContract({
+      address: OrbitChronicleAddress,
+      abi: OrbitChronicleAbi,
+      functionName: "getWeeklyBenefitStatus",
+      args: address ? [address] : undefined,
+      query: {
+        enabled: !!address && hasNFT,
+      },
+    });
+
+  // 즉시 보상 계산
+  const { data: instantRewardData, refetch: refetchInstantReward } =
+    useReadContract({
+      address: OrbitChronicleAddress,
+      abi: OrbitChronicleAbi,
+      functionName: "calculateInstantReward",
+      args: address ? [address] : undefined,
+      query: {
+        enabled: !!address && hasNFT,
+      },
+    });
+
+  // refreshCounter가 변경될 때마다 모든 데이터 refetch
+  useEffect(() => {
+    if (refreshCounter > 0 && address) {
+      const refetchAll = async () => {
+        await Promise.all([
+          refetchUserStatus(),
+          refetchTokenURI(),
+          refetchWeeklyBenefits(),
+          refetchInstantReward(),
+        ]);
+      };
+
+      // 트랜잭션 완료 후 약간의 지연을 둠
+      const timer = setTimeout(refetchAll, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    refreshCounter,
+    address,
+    refetchUserStatus,
+    refetchTokenURI,
+    refetchWeeklyBenefits,
+    refetchInstantReward,
+  ]);
+
+  return {
+    userStatus,
+    statusLoading,
+    statusError,
+    tokenURI,
+    weeklyBenefitsData,
+    instantRewardData,
+    refetchUserStatus,
+    refetchTokenURI,
+    refetchWeeklyBenefits,
+    refetchInstantReward,
+    setTokenId,
+    setHasNFT,
+  };
+}
+
+export function useOrbitChronicleData() {
   const { address } = useAccount();
   const [data, setData] = useState<UserOrbitData>({
     hasNFT: false,
@@ -99,53 +217,16 @@ export function useOrbitRewardsData() {
     isLoading: true,
   });
 
-  // 사용자 상태 정보 가져오기
   const {
-    data: userStatus,
-    isLoading: statusLoading,
-    error: statusError,
-  } = useReadContract({
-    address: OrbitRewardsAddress,
-    abi: OrbitRewardsAbi,
-    functionName: "getUserStatus",
-    args: address ? [address] : undefined,
-    query: {
-      enabled: !!address,
-    },
-  });
-
-  // NFT tokenURI 가져오기 (tokenId가 있을 때만)
-  const { data: tokenURI } = useReadContract({
-    address: OrbitRewardsNFTAddress,
-    abi: OrbitRewardsNFTAbi,
-    functionName: "tokenURI",
-    args: data.tokenId > BigInt(0) ? [data.tokenId] : undefined,
-    query: {
-      enabled: data.hasNFT && data.tokenId > BigInt(0),
-    },
-  });
-
-  // 주간 혜택 상태 가져오기
-  const { data: weeklyBenefitsData } = useReadContract({
-    address: OrbitRewardsAddress,
-    abi: OrbitRewardsAbi,
-    functionName: "getWeeklyBenefitStatus",
-    args: address ? [address] : undefined,
-    query: {
-      enabled: !!address && data.hasNFT,
-    },
-  });
-
-  // 즉시 보상 계산
-  const { data: instantRewardData } = useReadContract({
-    address: OrbitRewardsAddress,
-    abi: OrbitRewardsAbi,
-    functionName: "calculateInstantReward",
-    args: address ? [address] : undefined,
-    query: {
-      enabled: !!address && data.hasNFT,
-    },
-  });
+    userStatus,
+    statusLoading,
+    statusError,
+    tokenURI,
+    weeklyBenefitsData,
+    instantRewardData,
+    setTokenId,
+    setHasNFT,
+  } = useOrbitChronicleContracts();
 
   useEffect(() => {
     if (!address) {
@@ -187,6 +268,10 @@ export function useOrbitRewardsData() {
       String(status.nextVerificationTime || 0)
     );
     const verificationCount = BigInt(String(status.verificationCount || 0));
+
+    // 상위 훅의 상태 업데이트
+    setTokenId(tokenId);
+    setHasNFT(hasUserNFT);
 
     const now = Math.floor(Date.now() / 1000);
     const nextVerificationTimeNumber = Number(nextVerificationTime);
@@ -256,9 +341,42 @@ export function useOrbitRewardsData() {
     tokenURI,
     weeklyBenefitsData,
     instantRewardData,
+    setTokenId,
+    setHasNFT,
   ]);
 
   return data;
+}
+
+// 별도 refetch 훅 - 상위 훅 사용
+export function useOrbitChronicleRefetch() {
+  const { address } = useAccount();
+
+  const {
+    refetchUserStatus,
+    refetchTokenURI,
+    refetchWeeklyBenefits,
+    refetchInstantReward,
+  } = useOrbitChronicleContracts();
+
+  const refetchAll = useCallback(async () => {
+    if (!address) return;
+
+    await Promise.all([
+      refetchUserStatus(),
+      refetchTokenURI(),
+      refetchWeeklyBenefits(),
+      refetchInstantReward(),
+    ]);
+  }, [
+    address,
+    refetchUserStatus,
+    refetchTokenURI,
+    refetchWeeklyBenefits,
+    refetchInstantReward,
+  ]);
+
+  return { refetchAll };
 }
 
 export function formatTimeRemaining(seconds: number): string {

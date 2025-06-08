@@ -10,7 +10,6 @@ import React, {
 import {
   useAccount,
   useWriteContract,
-  useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
 import {
@@ -21,8 +20,12 @@ import {
   getTierColorClass,
   getNextTierInfo,
 } from "@/utils/tierUtils";
-import { OrbitRewardsAbi } from "@/utils/abis";
-import { OrbitRewardsAddress } from "@/utils/constants";
+import { OrbitChronicleAbi } from "@/utils/abis";
+import { OrbitChronicleAddress } from "@/utils/constants";
+import {
+  useOrbitChronicleData,
+  triggerOrbitDataRefresh,
+} from "@/hooks/useOrbitChronicleData";
 
 // EligibilityData interface (reuse from existing)
 export interface EligibilityData {
@@ -38,22 +41,6 @@ export interface EligibilityData {
 export interface ErrorData {
   error: string;
   message: string;
-}
-
-// User Status from contract
-export interface UserStatus {
-  hasUserNFT: boolean;
-  tokenId: bigint;
-  tier: DelegationTier;
-  amount: bigint;
-  currentScore: bigint;
-  boostPoints: bigint;
-  scoreActive: boolean;
-  nextVerificationTime: bigint;
-  verificationCount: bigint;
-  seasonPoints: bigint;
-  seasonMilestones: bigint;
-  seasonsCompleted: bigint;
 }
 
 // Tier information derived from eligibility data
@@ -75,8 +62,8 @@ export type RegistrationStep =
   | "success"
   | "error";
 
-// OrbitRewardsContext interface
-interface OrbitRewardsContextType {
+// OrbitChronicleContext interface
+interface OrbitChronicleContextType {
   // Eligibility state
   eligibilityData: EligibilityData | null;
   setEligibilityData: (data: EligibilityData | null) => void;
@@ -84,10 +71,6 @@ interface OrbitRewardsContextType {
   setErrorData: (error: ErrorData | null) => void;
   isChecking: boolean;
   setIsChecking: (checking: boolean) => void;
-
-  // Contract state
-  userStatus: UserStatus | null;
-  isLoadingStatus: boolean;
 
   // Registration state
   registrationStep: RegistrationStep;
@@ -101,7 +84,6 @@ interface OrbitRewardsContextType {
   // Actions
   checkEligibility: (keplrAddress: string) => Promise<void>;
   registerOrUpdate: (bech32Address: string) => Promise<void>;
-  refreshUserStatus: () => Promise<void>;
   clearAll: () => void;
 
   // Helper functions
@@ -111,16 +93,19 @@ interface OrbitRewardsContextType {
   getCurrentTierValue: () => number | null;
 }
 
-const OrbitRewardsContext = createContext<OrbitRewardsContextType | undefined>(
-  undefined
-);
+const OrbitChronicleContext = createContext<
+  OrbitChronicleContextType | undefined
+>(undefined);
 
-interface OrbitRewardsProviderProps {
+interface OrbitChronicleProviderProps {
   children: ReactNode;
 }
 
-export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
+export function OrbitChronicleProvider({
+  children,
+}: OrbitChronicleProviderProps) {
   const { address } = useAccount();
+  const orbitData = useOrbitChronicleData();
 
   // Eligibility state
   const [eligibilityData, setEligibilityData] =
@@ -140,30 +125,6 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
     data: writeData,
   } = useWriteContract();
 
-  const {
-    data: userStatusData,
-    isLoading: isLoadingStatus,
-    refetch: refetchUserStatus,
-  } = useReadContract({
-    address: OrbitRewardsAddress,
-    abi: OrbitRewardsAbi,
-    functionName: "getUserStatus",
-    args: address ? [address] : undefined,
-    query: {
-      enabled: !!address,
-    },
-  });
-
-  const { data: hasNFTData, refetch: refetchHasNFT } = useReadContract({
-    address: OrbitRewardsAddress,
-    abi: OrbitRewardsAbi,
-    functionName: "hasNFT",
-    args: address ? [address] : undefined,
-    query: {
-      enabled: !!address,
-    },
-  });
-
   // Wait for transaction receipt
   const {
     isLoading: isWaitingForReceipt,
@@ -178,13 +139,10 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
     if (isTransactionSuccess && writeData) {
       setRegistrationStep("success");
       setRegistrationHash(writeData);
-      // Refresh user status after successful transaction
-      setTimeout(() => {
-        refetchUserStatus();
-        refetchHasNFT();
-      }, 2000);
+      // Trigger OrbitChronicleData refresh after successful transaction
+      triggerOrbitDataRefresh();
     }
-  }, [isTransactionSuccess, writeData, refetchUserStatus, refetchHasNFT]);
+  }, [isTransactionSuccess, writeData]);
 
   React.useEffect(() => {
     if (isTransactionError) {
@@ -195,41 +153,6 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
       });
     }
   }, [isTransactionError]);
-
-  // Parse user status
-  const userStatus: UserStatus | null = React.useMemo(() => {
-    if (!userStatusData || !Array.isArray(userStatusData)) return null;
-
-    const [
-      hasUserNFT,
-      tokenId,
-      tier,
-      amount,
-      currentScore,
-      boostPoints,
-      scoreActive,
-      nextVerificationTime,
-      verificationCount,
-      seasonPoints,
-      seasonMilestones,
-      seasonsCompleted,
-    ] = userStatusData;
-
-    return {
-      hasUserNFT,
-      tokenId,
-      tier: tier as DelegationTier,
-      amount,
-      currentScore,
-      boostPoints,
-      scoreActive,
-      nextVerificationTime,
-      verificationCount,
-      seasonPoints,
-      seasonMilestones,
-      seasonsCompleted,
-    };
-  }, [userStatusData]);
 
   // Compute tier information from eligibility data
   const tierInfo: TierInfo | null = React.useMemo(() => {
@@ -306,22 +229,22 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
         setRegistrationStep("waiting");
         setErrorData(null);
 
-        // Check if user already has NFT
-        const hasNFT = Boolean(hasNFTData);
+        // Use orbitData to check if user already has NFT
+        const hasNFT = orbitData.hasNFT;
 
         if (hasNFT) {
           // User has NFT, call loyalty verification
           await writeContractAsync({
-            address: OrbitRewardsAddress,
-            abi: OrbitRewardsAbi,
+            address: OrbitChronicleAddress,
+            abi: OrbitChronicleAbi,
             functionName: "requestLoyaltyVerification",
             args: [bech32Address],
           });
         } else {
           // User doesn't have NFT, call delegation tier registration
           await writeContractAsync({
-            address: OrbitRewardsAddress,
-            abi: OrbitRewardsAbi,
+            address: OrbitChronicleAddress,
+            abi: OrbitChronicleAbi,
             functionName: "requestDelegationTier",
             args: [bech32Address],
           });
@@ -336,13 +259,8 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
         });
       }
     },
-    [address, hasNFTData, writeContractAsync]
+    [address, orbitData.hasNFT, writeContractAsync]
   );
-
-  const refreshUserStatus = useCallback(async () => {
-    await refetchUserStatus();
-    await refetchHasNFT();
-  }, [refetchUserStatus, refetchHasNFT]);
 
   const clearAll = useCallback(() => {
     setEligibilityData(null);
@@ -379,20 +297,17 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
     };
   }, [clearAll]);
 
-  // Helper computed values
+  // Helper computed values - now using orbitData instead of userStatus
   const isEligible = eligibilityData?.isQualified || false;
-  const canRegister = isEligible && !userStatus?.hasUserNFT;
-  const canUpdate =
-    isEligible &&
-    Boolean(userStatus?.hasUserNFT) &&
-    Boolean(userStatus?.scoreActive);
+  const canRegister = isEligible && !orbitData.hasNFT;
+  const canUpdate = isEligible && orbitData.hasNFT && orbitData.scoreActive;
 
   const getCurrentTierValue = useCallback((): number | null => {
     if (!tierInfo) return null;
     return tierInfo.currentTier;
   }, [tierInfo]);
 
-  const value: OrbitRewardsContextType = {
+  const value: OrbitChronicleContextType = {
     // Eligibility state
     eligibilityData,
     setEligibilityData,
@@ -400,10 +315,6 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
     setErrorData,
     isChecking,
     setIsChecking,
-
-    // Contract state
-    userStatus,
-    isLoadingStatus,
 
     // Registration state
     registrationStep,
@@ -417,7 +328,6 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
     // Actions
     checkEligibility,
     registerOrUpdate,
-    refreshUserStatus,
     clearAll,
 
     // Helper functions
@@ -428,17 +338,17 @@ export function OrbitRewardsProvider({ children }: OrbitRewardsProviderProps) {
   };
 
   return (
-    <OrbitRewardsContext.Provider value={value}>
+    <OrbitChronicleContext.Provider value={value}>
       {children}
-    </OrbitRewardsContext.Provider>
+    </OrbitChronicleContext.Provider>
   );
 }
 
-export function useOrbitRewards() {
-  const context = useContext(OrbitRewardsContext);
+export function useOrbitChronicle() {
+  const context = useContext(OrbitChronicleContext);
   if (context === undefined) {
     throw new Error(
-      "useOrbitRewards must be used within a OrbitRewardsProvider"
+      "useOrbitChronicle must be used within a OrbitChronicleProvider"
     );
   }
   return context;

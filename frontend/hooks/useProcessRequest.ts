@@ -2,8 +2,8 @@
 
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useState } from "react";
-import { OrbitRewardsAbi } from "@/utils/abis";
-import { OrbitRewardsAddress } from "@/utils/constants";
+import { OrbitChronicleAbi } from "@/utils/abis";
+import { OrbitChronicleAddress } from "@/utils/constants";
 import { baseSepolia } from "viem/chains";
 
 interface UseProcessRequestReturn {
@@ -35,8 +35,8 @@ export function useProcessRequest(): UseProcessRequestReturn {
       setTransactionHash(null);
 
       const hash = await writeContractAsync({
-        abi: OrbitRewardsAbi,
-        address: OrbitRewardsAddress,
+        abi: OrbitChronicleAbi,
+        address: OrbitChronicleAddress,
         functionName: "processRequest",
         args: [requestId as `0x${string}`],
         chainId: baseSepolia.id,

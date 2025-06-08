@@ -68,11 +68,11 @@ $ cast --help
 ### Generate ABI
 
 ```shell
-$ forge inspect OrbitRewards abi --json > OrbitRewards.json
-$ forge inspect OrbitRewardsNFT abi --json > OrbitRewardsNFT.json
+$ forge inspect OrbitChronicle abi --json > OrbitChronicle.json
+$ forge inspect OrbitNft abi --json > OrbitNft.json
 ```
 
 ## Deployed Contracts
 
-- OrbitRewards: 0x44e302d85EF36c363191A7535481Bd27ec887a10
-- OrbitRewardsNFT: 0x8c9badd84DcFfb62584365f020aD3f79C85726Bb
+- OrbitChronicle: 0xDAbe163E6A1f87e5611b12Da548443aa63889C1F
+- OrbitNft: 0xE9C076E693506f41a219c8285C3070DEec8f07E8
