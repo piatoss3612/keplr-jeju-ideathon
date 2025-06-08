@@ -81,7 +81,7 @@ export default function SpaceBackground() {
   }));
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden">
       {/* 사이버펑크 우주 배경 그라데이션 */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950 to-cyan-950"
@@ -113,14 +113,14 @@ export default function SpaceBackground() {
       {/* 사이버펑크 네온 궤도 링들 */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: 0.2 }}
-        whileHover={{ opacity: 0.35 }}
+        style={{ opacity: 0.3 }}
+        whileHover={{ opacity: 0.5 }}
         transition={{ duration: 0.3 }}
       >
-        <OrbitRing size={600} duration={40} color="#06b6d4" />
-        <OrbitRing size={450} duration={30} color="#ec4899" reverse />
-        <OrbitRing size={300} duration={35} color="#0891b2" />
-        <OrbitRing size={750} duration={50} color="#f472b6" />
+        <OrbitRing size={1000} duration={40} color="#06b6d4" />
+        <OrbitRing size={750} duration={30} color="#ec4899" reverse />
+        <OrbitRing size={500} duration={35} color="#0891b2" />
+        <OrbitRing size={1250} duration={50} color="#f472b6" />
       </motion.div>
 
       {/* 사이버펑크 중앙 글로우 효과 */}

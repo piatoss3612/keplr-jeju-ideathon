@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 type Tab = "connect" | "dashboard" | "proof";
 
 interface TabNavigationProps {
@@ -11,44 +13,89 @@ export default function TabNavigation({
   activeTab,
   onTabChange,
 }: TabNavigationProps) {
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
   const tabs = [
     {
       id: "connect" as Tab,
       label: "🔗 Connect",
-      clipPath: "polygon(0 0, 100% 0, 90% 100%, 10% 100%)",
+      icon: "🔗",
+      text: "CONNECT",
     },
     {
       id: "dashboard" as Tab,
       label: "🌌 Dashboard",
-      clipPath: "polygon(10% 0, 90% 0, 90% 100%, 10% 100%)",
+      icon: "🌌",
+      text: "DASHBOARD",
     },
     {
       id: "proof" as Tab,
-      label: "⚡ Generate Proof",
-      clipPath: "polygon(10% 0, 100% 0, 100% 100%, 0% 100%)",
+      label: "⚡ Register",
+      icon: "⚡",
+      text: "REGISTER",
     },
   ];
 
+  // 활성 탭에 따라 인디케이터 위치 계산
+  useEffect(() => {
+    const activeIndex = tabs.findIndex((tab) => tab.id === activeTab);
+    const tabWidth = 100 / tabs.length; // 각 탭의 상대적 폭
+    setIndicatorStyle({
+      left: activeIndex * tabWidth,
+      width: tabWidth,
+    });
+  }, [activeTab]);
+
   return (
     <div className="flex justify-center mb-0 relative z-20">
-      <div className="flex space-x-1">
+      <div className="relative flex bg-black/10 backdrop-blur-md rounded-2xl p-1 border border-pink-400/10">
+        {/* 슬라이딩 배경 인디케이터 */}
+        <div
+          className="absolute top-1 bottom-1 bg-gradient-to-r from-slate-900/70 to-purple-900/70 
+                     rounded-xl border border-pink-400/30 shadow-lg shadow-pink-500/15
+                     transition-all duration-300 ease-out"
+          style={{
+            left: `${indicatorStyle.left}%`,
+            width: `${indicatorStyle.width}%`,
+          }}
+        />
+
+        {/* 슬라이딩 그라데이션 오버레이 */}
+        <div
+          className="absolute top-1 bottom-1 bg-gradient-to-r from-cyan-500/5 to-pink-500/5 
+                     rounded-xl transition-all duration-300 ease-out"
+          style={{
+            left: `${indicatorStyle.left}%`,
+            width: `${indicatorStyle.width}%`,
+          }}
+        />
+
+        {/* 슬라이딩 하단 인디케이터 라인 */}
+        <div
+          className="absolute bottom-1 h-0.5 bg-gradient-to-r from-cyan-400/70 to-pink-400/70 
+                     rounded-full transition-all duration-300 ease-out"
+          style={{
+            left: `calc(${indicatorStyle.left}% + 1.5rem)`,
+            width: `calc(${indicatorStyle.width}% - 3rem)`,
+          }}
+        />
+
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`px-6 py-3 rounded-t-xl font-medium transition-all duration-300 relative border-t border-l border-r backdrop-blur-xl ${
-              activeTab === tab.id
-                ? "bg-gradient-to-r from-slate-900/95 to-purple-900/95 text-white border-pink-400/40 shadow-lg"
-                : "bg-slate-900/60 text-pink-300 hover:text-white hover:bg-slate-800/80 border-pink-400/20"
-            }`}
-            style={{
-              clipPath: activeTab === tab.id ? "none" : tab.clipPath,
-            }}
+            className={`
+              relative px-6 py-3 rounded-xl font-orbitron font-bold text-sm tracking-wider
+              transition-all duration-300 flex items-center space-x-2 z-10
+              ${
+                activeTab === tab.id
+                  ? "text-white"
+                  : "text-pink-300/60 hover:text-pink-200/80"
+              }
+            `}
           >
-            <span className="relative z-10 font-orbitron">{tab.label}</span>
-            {activeTab === tab.id && (
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-t-xl"></div>
-            )}
+            <span className="text-base">{tab.icon}</span>
+            <span>{tab.text}</span>
           </button>
         ))}
       </div>

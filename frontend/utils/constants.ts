@@ -1,4 +1,4 @@
 export const OrbitRewardsAddress =
-  "0x905330700Ceb47D1121ef6e9BdB248F18375ebca" as `0x${string}`;
+  "0x44e302d85EF36c363191A7535481Bd27ec887a10" as `0x${string}`;
 export const OrbitRewardsNFTAddress =
-  "0xf8078A3AD0E897D2164F7816D17F575d72a79C41" as `0x${string}`;
+  "0x8c9badd84DcFfb62584365f020aD3f79C85726Bb" as `0x${string}`;

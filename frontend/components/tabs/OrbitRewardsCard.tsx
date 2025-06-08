@@ -51,38 +51,63 @@ function OrbitRewardsCardContent() {
     setRegistrationStep("check");
   };
 
+  // 현재 상태를 기반으로 트랜잭션 상태 추정
+  const getTransactionStatus = ():
+    | "pending"
+    | "submitted"
+    | "confirming"
+    | "verifying"
+    | null => {
+    if (!isRegistering) return null;
+
+    if (registrationStep === "waiting") {
+      if (registrationHash) {
+        // 해시가 있으면 제출된 상태로 간주
+        return "submitted";
+      } else {
+        // 해시가 없으면 지갑 승인 대기
+        return "pending";
+      }
+    }
+
+    return null;
+  };
+
   return (
     <div className="relative">
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <CyberpunkCard>
-        {activeTab === "connect" && (
-          <ConnectWallets onBothConnected={() => setActiveTab("dashboard")} />
-        )}
+      <div className="mt-4">
+        <CyberpunkCard>
+          {activeTab === "connect" && (
+            <ConnectWallets onBothConnected={() => setActiveTab("dashboard")} />
+          )}
 
-        {activeTab === "dashboard" && (
-          <Dashboard
-            orbitData={orbitData}
-            isConnected={isConnected}
-            address={address}
-            keplr={keplr}
-            onSwitchToRegister={() => setActiveTab("proof")}
-          />
-        )}
+          {activeTab === "dashboard" && (
+            <Dashboard
+              orbitData={orbitData}
+              isConnected={isConnected}
+              address={address}
+              keplr={keplr}
+              onSwitchToRegister={() => setActiveTab("proof")}
+            />
+          )}
 
-        {activeTab === "proof" && (
-          <OrbitRewardsFlow
-            step={registrationStep}
-            setStep={setRegistrationStep}
-            isRegistering={isRegistering}
-            registrationHash={registrationHash}
-            keplr={keplr}
-            onRegisterOrUpdate={handleRegisterOrUpdate}
-            onReset={resetCard}
-            onGoToDashboard={() => setActiveTab("dashboard")}
-          />
-        )}
-      </CyberpunkCard>
+          {activeTab === "proof" && (
+            <OrbitRewardsFlow
+              step={registrationStep}
+              setStep={setRegistrationStep}
+              isRegistering={isRegistering}
+              registrationHash={registrationHash}
+              keplr={keplr}
+              onRegisterOrUpdate={handleRegisterOrUpdate}
+              onReset={resetCard}
+              onGoToDashboard={() => setActiveTab("dashboard")}
+              transactionStatus={getTransactionStatus()}
+            />
+          )}
+        </CyberpunkCard>
+      </div>
     </div>
   );
 }

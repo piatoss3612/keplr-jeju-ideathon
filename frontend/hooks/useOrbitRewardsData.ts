@@ -24,6 +24,17 @@ export interface UserOrbitData {
   nextVerificationTime: bigint;
   verificationCount: bigint;
 
+  // 새로운 혜택 시스템
+  weeklyBenefits: {
+    isEligible: boolean;
+    currentWeek: bigint;
+    tierLevel: bigint;
+  };
+  instantReward: {
+    reward: bigint;
+    multiplier: bigint;
+  };
+
   // 상태
   timeUntilNextVerification: number; // seconds
   isVerificationAvailable: boolean;
@@ -74,6 +85,15 @@ export function useOrbitRewardsData() {
     scoreActive: false,
     nextVerificationTime: BigInt(0),
     verificationCount: BigInt(0),
+    weeklyBenefits: {
+      isEligible: false,
+      currentWeek: BigInt(0),
+      tierLevel: BigInt(0),
+    },
+    instantReward: {
+      reward: BigInt(0),
+      multiplier: BigInt(0),
+    },
     timeUntilNextVerification: 0,
     isVerificationAvailable: false,
     isLoading: true,
@@ -102,6 +122,28 @@ export function useOrbitRewardsData() {
     args: data.tokenId > BigInt(0) ? [data.tokenId] : undefined,
     query: {
       enabled: data.hasNFT && data.tokenId > BigInt(0),
+    },
+  });
+
+  // 주간 혜택 상태 가져오기
+  const { data: weeklyBenefitsData } = useReadContract({
+    address: OrbitRewardsAddress,
+    abi: OrbitRewardsAbi,
+    functionName: "getWeeklyBenefitStatus",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address && data.hasNFT,
+    },
+  });
+
+  // 즉시 보상 계산
+  const { data: instantRewardData } = useReadContract({
+    address: OrbitRewardsAddress,
+    abi: OrbitRewardsAbi,
+    functionName: "calculateInstantReward",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address && data.hasNFT,
     },
   });
 
@@ -159,6 +201,34 @@ export function useOrbitRewardsData() {
       svgImage = extractSVGFromTokenURI(tokenURI);
     }
 
+    // 주간 혜택 데이터 파싱
+    let weeklyBenefits = {
+      isEligible: false,
+      currentWeek: BigInt(0),
+      tierLevel: BigInt(0),
+    };
+    if (weeklyBenefitsData && Array.isArray(weeklyBenefitsData)) {
+      const [isEligible, currentWeek, tierLevel] = weeklyBenefitsData;
+      weeklyBenefits = {
+        isEligible: Boolean(isEligible),
+        currentWeek: BigInt(String(currentWeek || 0)),
+        tierLevel: BigInt(String(tierLevel || 0)),
+      };
+    }
+
+    // 즉시 보상 데이터 파싱
+    let instantReward = {
+      reward: BigInt(0),
+      multiplier: BigInt(0),
+    };
+    if (instantRewardData && Array.isArray(instantRewardData)) {
+      const [reward, multiplier] = instantRewardData;
+      instantReward = {
+        reward: BigInt(String(reward || 0)),
+        multiplier: BigInt(String(multiplier || 0)),
+      };
+    }
+
     setData({
       hasNFT: hasUserNFT,
       tokenId,
@@ -172,11 +242,21 @@ export function useOrbitRewardsData() {
       scoreActive,
       nextVerificationTime,
       verificationCount,
+      weeklyBenefits,
+      instantReward,
       timeUntilNextVerification: timeUntilNext,
       isVerificationAvailable: isAvailable,
       isLoading: false,
     });
-  }, [address, userStatus, statusLoading, statusError, tokenURI]);
+  }, [
+    address,
+    userStatus,
+    statusLoading,
+    statusError,
+    tokenURI,
+    weeklyBenefitsData,
+    instantRewardData,
+  ]);
 
   return data;
 }

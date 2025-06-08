@@ -18,6 +18,12 @@ interface OrbitRewardsFlowProps {
   onRegisterOrUpdate: () => void;
   onReset: () => void;
   onGoToDashboard: () => void;
+  transactionStatus?:
+    | "pending"
+    | "submitted"
+    | "confirming"
+    | "verifying"
+    | null;
 }
 
 export default function OrbitRewardsFlow({
@@ -29,6 +35,7 @@ export default function OrbitRewardsFlow({
   onRegisterOrUpdate,
   onReset,
   onGoToDashboard,
+  transactionStatus,
 }: OrbitRewardsFlowProps) {
   return (
     <div>
@@ -51,6 +58,8 @@ export default function OrbitRewardsFlow({
         <WaitingStep
           isWaiting={isRegistering}
           onCancel={() => setStep("register")}
+          transactionStatus={transactionStatus}
+          transactionHash={registrationHash || undefined}
         />
       )}
 
@@ -62,7 +71,7 @@ export default function OrbitRewardsFlow({
         />
       )}
 
-      {step === "error" && <ErrorStep onRetry={onReset} onReset={onReset} />}
+      {step === "error" && <ErrorStep onReset={onReset} />}
     </div>
   );
 }

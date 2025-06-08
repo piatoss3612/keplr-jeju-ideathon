@@ -892,7 +892,11 @@ export const OrbitRewardsAbi = [
         type: "uint64",
         internalType: "uint64",
       },
-      { name: "_source", type: "string", internalType: "string" },
+      {
+        name: "_source",
+        type: "string",
+        internalType: "string",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -906,56 +910,155 @@ export const OrbitRewardsAbi = [
   {
     type: "function",
     name: "calculateCurrentScore",
-    inputs: [{ name: "user", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [
       {
         name: "currentScore",
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "isActive", type: "bool", internalType: "bool" },
+      {
+        name: "isActive",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "calculateInstantReward",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "instantReward",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "multiplier",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "fulfilledResults",
-    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "gasLimit",
     inputs: [],
-    outputs: [{ name: "", type: "uint32", internalType: "uint32" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint32",
+        internalType: "uint32",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getChainlinkConfig",
+    inputs: [],
+    outputs: [
+      {
+        name: "_subscriptionId",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "_gasLimit",
+        type: "uint32",
+        internalType: "uint32",
+      },
+      {
+        name: "_source",
+        type: "string",
+        internalType: "string",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "getNFTContract",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "getUserStatus",
-    inputs: [{ name: "user", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [
       {
         name: "info",
         type: "tuple",
         internalType: "struct OrbitRewards.UserStatusInfo",
         components: [
-          { name: "hasUserNFT", type: "bool", internalType: "bool" },
-          { name: "tokenId", type: "uint256", internalType: "uint256" },
+          {
+            name: "hasUserNFT",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "tokenId",
+            type: "uint256",
+            internalType: "uint256",
+          },
           {
             name: "tier",
             type: "uint8",
             internalType: "enum DelegationTier",
           },
-          { name: "amount", type: "uint256", internalType: "uint256" },
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
           {
             name: "currentScore",
             type: "uint256",
@@ -966,7 +1069,11 @@ export const OrbitRewardsAbi = [
             type: "uint256",
             internalType: "uint256",
           },
-          { name: "scoreActive", type: "bool", internalType: "bool" },
+          {
+            name: "scoreActive",
+            type: "bool",
+            internalType: "bool",
+          },
           {
             name: "nextVerificationTime",
             type: "uint256",
@@ -984,11 +1091,52 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "function",
+    name: "getWeeklyBenefitStatus",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "isEligible",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
+        name: "currentWeek",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "tierLevel",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "handleOracleFulfillment",
     inputs: [
-      { name: "requestId", type: "bytes32", internalType: "bytes32" },
-      { name: "response", type: "bytes", internalType: "bytes" },
-      { name: "err", type: "bytes", internalType: "bytes" },
+      {
+        name: "requestId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+      {
+        name: "response",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "err",
+        type: "bytes",
+        internalType: "bytes",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -996,29 +1144,77 @@ export const OrbitRewardsAbi = [
   {
     type: "function",
     name: "hasNFT",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "isRequestFulfilled",
-    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "isRequestReadyToProcess",
-    inputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "requestId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "isVerificationRequest",
-    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
@@ -1038,7 +1234,13 @@ export const OrbitRewardsAbi = [
     type: "function",
     name: "owner",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
@@ -1052,77 +1254,163 @@ export const OrbitRewardsAbi = [
     type: "function",
     name: "paused",
     inputs: [],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "previewRequestResult",
-    inputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    inputs: [
+      {
+        name: "requestId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
     outputs: [
-      { name: "amount", type: "uint256", internalType: "uint256" },
+      {
+        name: "amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
       {
         name: "tier",
         type: "uint8",
         internalType: "enum DelegationTier",
       },
-      { name: "isVerification", type: "bool", internalType: "bool" },
+      {
+        name: "isVerification",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "processExpiredScores",
-    inputs: [{ name: "users", type: "address[]", internalType: "address[]" }],
+    inputs: [
+      {
+        name: "users",
+        type: "address[]",
+        internalType: "address[]",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "processRequest",
-    inputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    inputs: [
+      {
+        name: "requestId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "requestDelegationTier",
-    inputs: [{ name: "bech32Address", type: "string", internalType: "string" }],
-    outputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    inputs: [
+      {
+        name: "bech32Address",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [
+      {
+        name: "requestId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "requestLoyaltyVerification",
-    inputs: [{ name: "bech32Address", type: "string", internalType: "string" }],
-    outputs: [{ name: "requestId", type: "bytes32", internalType: "bytes32" }],
+    inputs: [
+      {
+        name: "bech32Address",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [
+      {
+        name: "requestId",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "requestToSender",
-    inputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "source",
     inputs: [],
-    outputs: [{ name: "", type: "string", internalType: "string" }],
+    outputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "subscriptionId",
     inputs: [],
-    outputs: [{ name: "", type: "uint64", internalType: "uint64" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint64",
+        internalType: "uint64",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "transferOwnership",
-    inputs: [{ name: "to", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -1142,8 +1430,55 @@ export const OrbitRewardsAbi = [
         type: "uint64",
         internalType: "uint64",
       },
-      { name: "_gasLimit", type: "uint32", internalType: "uint32" },
-      { name: "_source", type: "string", internalType: "string" },
+      {
+        name: "_gasLimit",
+        type: "uint32",
+        internalType: "uint32",
+      },
+      {
+        name: "_source",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateGasLimit",
+    inputs: [
+      {
+        name: "_gasLimit",
+        type: "uint32",
+        internalType: "uint32",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateSource",
+    inputs: [
+      {
+        name: "_source",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "updateSubscriptionId",
+    inputs: [
+      {
+        name: "_subscriptionId",
+        type: "uint64",
+        internalType: "uint64",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -1151,9 +1486,19 @@ export const OrbitRewardsAbi = [
   {
     type: "function",
     name: "userData",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [
-      { name: "nftTokenId", type: "uint256", internalType: "uint256" },
+      {
+        name: "nftTokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
       {
         name: "mintTimestamp",
         type: "uint256",
@@ -1169,7 +1514,11 @@ export const OrbitRewardsAbi = [
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "boostPoints", type: "uint256", internalType: "uint256" },
+      {
+        name: "boostPoints",
+        type: "uint256",
+        internalType: "uint256",
+      },
       {
         name: "currentTier",
         type: "uint8",
@@ -1185,9 +1534,51 @@ export const OrbitRewardsAbi = [
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "isActive", type: "bool", internalType: "bool" },
+      {
+        name: "isActive",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "ChainlinkConfigUpdated",
+    inputs: [
+      {
+        name: "subscriptionId",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+      {
+        name: "gasLimit",
+        type: "uint32",
+        indexed: false,
+        internalType: "uint32",
+      },
+      {
+        name: "source",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "GasLimitUpdated",
+    inputs: [
+      {
+        name: "newGasLimit",
+        type: "uint32",
+        indexed: false,
+        internalType: "uint32",
+      },
+    ],
+    anonymous: false,
   },
   {
     type: "event",
@@ -1424,6 +1815,32 @@ export const OrbitRewardsAbi = [
   },
   {
     type: "event",
+    name: "SourceCodeUpdated",
+    inputs: [
+      {
+        name: "newSource",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SubscriptionIdUpdated",
+    inputs: [
+      {
+        name: "newSubscriptionId",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
     name: "Unpaused",
     inputs: [
       {
@@ -1438,38 +1855,96 @@ export const OrbitRewardsAbi = [
   {
     type: "error",
     name: "AlreadyHasNFT",
-    inputs: [{ name: "user", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
-  { type: "error", name: "EmptyArgs", inputs: [] },
-  { type: "error", name: "EmptySource", inputs: [] },
-  { type: "error", name: "EnforcedPause", inputs: [] },
-  { type: "error", name: "ExpectedPause", inputs: [] },
+  {
+    type: "error",
+    name: "EmptyArgs",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "EmptySource",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "EnforcedPause",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ExpectedPause",
+    inputs: [],
+  },
   {
     type: "error",
     name: "InvalidAmountString",
-    inputs: [{ name: "invalidAmount", type: "string", internalType: "string" }],
+    inputs: [
+      {
+        name: "invalidAmount",
+        type: "string",
+        internalType: "string",
+      },
+    ],
   },
   {
     type: "error",
     name: "InvalidBech32Address",
     inputs: [
-      { name: "invalidAddress", type: "string", internalType: "string" },
+      {
+        name: "invalidAddress",
+        type: "string",
+        internalType: "string",
+      },
     ],
   },
-  { type: "error", name: "InvalidClaimantAddress", inputs: [] },
-  { type: "error", name: "NoInlineSecrets", inputs: [] },
+  {
+    type: "error",
+    name: "InvalidClaimantAddress",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NoInlineSecrets",
+    inputs: [],
+  },
   {
     type: "error",
     name: "NoNFTFound",
-    inputs: [{ name: "user", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
-  { type: "error", name: "OnlyRouterCanFulfill", inputs: [] },
+  {
+    type: "error",
+    name: "OnlyRouterCanFulfill",
+    inputs: [],
+  },
   {
     type: "error",
     name: "UnauthorizedClaimant",
     inputs: [
-      { name: "expected", type: "address", internalType: "address" },
-      { name: "actual", type: "address", internalType: "address" },
+      {
+        name: "expected",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "actual",
+        type: "address",
+        internalType: "address",
+      },
     ],
   },
   {
