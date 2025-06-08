@@ -8,9 +8,9 @@ dataSources:
     name: OrbitRewards
     network: base-sepolia
     source:
-      address: "0x905330700Ceb47D1121ef6e9BdB248F18375ebca"
+      address: "0x44e302d85EF36c363191A7535481Bd27ec887a10"
       abi: OrbitRewards
-      startBlock: 26762255
+      startBlock: 26786855
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

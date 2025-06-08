@@ -12,8 +12,8 @@ import {OrbitRewardsNFT} from "./OrbitRewardsNFT.sol";
 
 /**
  * @title OrbitRewards - Delegation Rewards System
- * @notice Time-based loyalty system with 21-day scoring windows, 14-day verification cycles, and seasonal progression
- * @dev Main contract that manages scoring and interacts with separate NFT contract
+ * @notice Dynamic short-term rewards with 7-day scoring windows, 3-day verification cycles, and immediate benefits
+ * @dev Main contract that manages immediate rewards and interacts with separate NFT contract
  */
 contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     using ValidationUtils for uint256;
@@ -28,10 +28,10 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     bytes32 private constant DON_ID =
         0x66756e2d626173652d7365706f6c69612d310000000000000000000000000000;
 
-    // Time constants
-    uint256 private constant SCORING_WINDOW = 21 days;
-    uint256 private constant VERIFICATION_INTERVAL = 14 days;
-    uint256 private constant SCORE_GRACE_PERIOD = 7 days;
+    // Time constants - Short-term focus for immediate benefits
+    uint256 private constant SCORING_WINDOW = 7 days; // Shorter scoring window
+    uint256 private constant VERIFICATION_INTERVAL = 3 days; // Frequent verification (3-7 days)
+    uint256 private constant SCORE_GRACE_PERIOD = 2 days; // Quick grace period
     uint256 private constant TOTAL_CYCLE =
         VERIFICATION_INTERVAL + SCORE_GRACE_PERIOD;
 
@@ -186,7 +186,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     }
 
     /**
-     * @notice 기존 사용자의 loyalty 검증 요청 (14일 후부터 가능)
+     * @notice 기존 사용자의 loyalty 검증 요청 (3일 후부터 가능) - 빈번한 검증으로 즉시 혜택
      */
     function requestLoyaltyVerification(
         string calldata bech32Address
@@ -200,7 +200,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
 
         UserData storage user = userData[msg.sender];
 
-        // 14일 간격 체크
+        // 3일 간격 체크 - 빈번한 검증으로 즉시 혜택 제공
         if (
             block.timestamp < user.lastVerificationTime + VERIFICATION_INTERVAL
         ) {
@@ -275,7 +275,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     // ==================== VIEW FUNCTIONS ====================
 
     /**
-     * @notice 사용자의 현재 점수 계산 (21일 윈도우 기반)
+     * @notice 사용자의 현재 점수 계산 (7일 윈도우 기반) - 단기 활성화로 즉시 혜택
      */
     function calculateCurrentScore(
         address user
@@ -288,6 +288,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
         uint256 timeSinceLastVerification = block.timestamp -
             data.lastVerificationTime;
 
+        // 7일 윈도우로 더 빈번한 활성화 촉진
         bool withinMintWindow = timeSinceMint <= SCORING_WINDOW;
         bool withinVerificationWindow = timeSinceLastVerification <=
             SCORING_WINDOW;
@@ -298,6 +299,7 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
             return (0, false);
         }
 
+        // 현재 상태 기반 즉시 점수 계산
         uint256 baseScore = _calculateBaseScore(
             data.currentTier,
             data.currentAmount
@@ -467,25 +469,28 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     }
 
     /**
-     * @notice 기본 점수 계산
+     * @notice 기본 점수 계산 - 현재 상태 기반, 즉시 혜택 제공
      */
     function _calculateBaseScore(
         DelegationTier tier,
         uint256 amount
     ) internal pure returns (uint256) {
-        uint256 tierMultiplier;
-        if (tier == DelegationTier.Galaxy) tierMultiplier = 20;
-        else if (tier == DelegationTier.Star) tierMultiplier = 8;
-        else if (tier == DelegationTier.Comet) tierMultiplier = 3;
-        else tierMultiplier = 1;
+        // 현재 티어 기반 즉시 포인트 (누적 아닌 현재 상태)
+        uint256 tierPoints;
+        if (tier == DelegationTier.Galaxy)
+            tierPoints = 1000; // 높은 즉시 포인트
+        else if (tier == DelegationTier.Star) tierPoints = 500;
+        else if (tier == DelegationTier.Comet) tierPoints = 200;
+        else tierPoints = 100;
 
-        uint256 amountBonus = amount / 1e6;
+        // 위임량 보너스 (현재 상태 기반)
+        uint256 amountBonus = (amount / 1e6) * 10; // 더 높은 보너스
 
-        return tierMultiplier * 100 + amountBonus;
+        return tierPoints + amountBonus;
     }
 
     /**
-     * @notice 티어 상승 시 부스트 포인트 계산
+     * @notice 티어 상승 시 즉시 보너스 포인트 계산 - 빠른 만족감 제공
      */
     function _calculateBoostPoints(
         DelegationTier oldTier,
@@ -494,11 +499,73 @@ contract OrbitRewards is FunctionsClient, ConfirmedOwner, Pausable {
     ) internal pure returns (uint256) {
         if (newTier <= oldTier) return 0;
 
+        // 더 큰 즉시 보너스로 성취감 증대
         uint256 tierJump = uint256(newTier) - uint256(oldTier);
-        uint256 baseBoost = tierJump * 50;
-        uint256 amountBonus = (amount / 1e6) / 10;
+        uint256 baseBoost = tierJump * 200; // 4배 증가된 보너스
+        uint256 amountBonus = (amount / 1e6) * 5; // 더 높은 위임량 보너스
 
         return baseBoost + amountBonus;
+    }
+
+    /**
+     * @notice 주간 혜택 자격 확인 - 즉시 혜택 시스템
+     * @param user 사용자 주소
+     * @return isEligible 주간 혜택 자격 여부
+     * @return currentWeek 현재 주차
+     * @return tierLevel 현재 티어 레벨
+     */
+    function getWeeklyBenefitStatus(
+        address user
+    )
+        external
+        view
+        returns (bool isEligible, uint256 currentWeek, uint256 tierLevel)
+    {
+        if (!hasNFT[user]) return (false, 0, 0);
+
+        (uint256 currentScore, bool isActive) = calculateCurrentScore(user);
+        if (!isActive) return (false, 0, 0);
+
+        UserData memory data = userData[user];
+
+        // 현재 주차 계산 (epoch 기준)
+        currentWeek = block.timestamp / (7 days);
+
+        // 티어 레벨 (Galaxy=4, Star=3, Comet=2, Asteroid=1)
+        tierLevel = uint256(data.currentTier) + 1;
+
+        // 검증 활성 상태라면 주간 혜택 자격 있음
+        isEligible = isActive && currentScore > 0;
+
+        return (isEligible, currentWeek, tierLevel);
+    }
+
+    /**
+     * @notice 즉시 보상 포인트 계산 - 현재 상태 기반
+     * @param user 사용자 주소
+     * @return instantReward 즉시 보상 포인트
+     * @return multiplier 티어 배수
+     */
+    function calculateInstantReward(
+        address user
+    ) external view returns (uint256 instantReward, uint256 multiplier) {
+        if (!hasNFT[user]) return (0, 0);
+
+        (uint256 currentScore, bool isActive) = calculateCurrentScore(user);
+        if (!isActive) return (0, 0);
+
+        UserData memory data = userData[user];
+
+        // 티어별 배수 (더 높은 즉시 보상)
+        if (data.currentTier == DelegationTier.Galaxy) multiplier = 5;
+        else if (data.currentTier == DelegationTier.Star) multiplier = 3;
+        else if (data.currentTier == DelegationTier.Comet) multiplier = 2;
+        else multiplier = 1;
+
+        // 현재 점수의 일정 비율을 즉시 보상으로 제공
+        instantReward = (currentScore * multiplier) / 10;
+
+        return (instantReward, multiplier);
     }
 
     /**

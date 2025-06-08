@@ -339,7 +339,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
         TokenData memory data,
         UserScoreData memory scoreData
     ) internal pure returns (string memory) {
-        (string memory color, string memory emoji) = _getTierStyle(data.tier);
+        string memory color = _getTierStyle(data.tier);
 
         return
             Base64.encode(
@@ -347,7 +347,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                     string(
                         abi.encodePacked(
                             _buildSVGHeader(color, data.isSeasonEndNFT),
-                            _buildSVGBody(data, scoreData, color, emoji),
+                            _buildSVGBody(data, scoreData, color),
                             "</svg>"
                         )
                     )
@@ -356,7 +356,7 @@ contract OrbitRewardsNFT is ERC721, Ownable {
     }
 
     /**
-     * @notice SVG 헤더 빌드
+     * @notice SVG 헤더 빌드 - 향상된 디자인
      */
     function _buildSVGHeader(
         string memory color,
@@ -367,22 +367,124 @@ contract OrbitRewardsNFT is ERC721, Ownable {
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">',
                     "<defs>",
-                    '<radialGradient id="bg" cx="50%" cy="50%" r="50%">',
+                    _buildAdvancedGradients(color, isSpecial),
+                    _buildAdvancedFilters(isSpecial),
+                    "</defs>",
+                    _buildBackgroundElements(color, isSpecial)
+                )
+            );
+    }
+
+    /**
+     * @notice 고급 그라디언트 정의
+     */
+    function _buildAdvancedGradients(
+        string memory color,
+        bool isSpecial
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<radialGradient id="bg" cx="50%" cy="30%" r="70%">',
                     '<stop offset="0%" style="stop-color:',
                     color,
-                    ";stop-opacity:",
-                    isSpecial ? "1.0" : "0.8",
+                    ";stop-opacity:0.9",
                     '"/>',
-                    '<stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1"/>',
+                    '<stop offset="50%" style="stop-color:#1a1a2e;stop-opacity:0.8"/>',
+                    '<stop offset="100%" style="stop-color:#0d0d1a;stop-opacity:1"/>',
                     "</radialGradient>",
+                    '<linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">',
+                    '<stop offset="0%" style="stop-color:',
+                    color,
+                    ";stop-opacity:0.3",
+                    '"/>',
+                    '<stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.1"/>',
+                    "</linearGradient>",
                     isSpecial
-                        ? '<filter id="specialGlow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
-                        : "",
-                    "</defs>",
-                    '<rect width="400" height="400" fill="url(#bg)" rx="20"/>',
-                    isSpecial
-                        ? '<rect width="400" height="400" fill="none" stroke="gold" stroke-width="4" rx="20"/>'
+                        ? string(
+                            abi.encodePacked(
+                                '<linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">',
+                                '<stop offset="0%" style="stop-color:#FFD700"/>',
+                                '<stop offset="50%" style="stop-color:#FFA500"/>',
+                                '<stop offset="100%" style="stop-color:#FF8C00"/>',
+                                "</linearGradient>"
+                            )
+                        )
                         : ""
+                )
+            );
+    }
+
+    /**
+     * @notice 고급 필터 효과
+     */
+    function _buildAdvancedFilters(
+        bool isSpecial
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">',
+                    '<feGaussianBlur stdDeviation="3" result="coloredBlur"/>',
+                    '<feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>',
+                    "</filter>",
+                    '<filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">',
+                    '<feGaussianBlur in="SourceGraphic" stdDeviation="3"/>',
+                    '<feOffset dx="2" dy="2" result="offset"/>',
+                    "</filter>",
+                    isSpecial
+                        ? string(
+                            abi.encodePacked(
+                                '<filter id="specialGlow" x="-50%" y="-50%" width="200%" height="200%">',
+                                '<feGaussianBlur stdDeviation="5" result="coloredBlur"/>',
+                                '<feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>',
+                                "</filter>"
+                            )
+                        )
+                        : ""
+                )
+            );
+    }
+
+    /**
+     * @notice 배경 요소들
+     */
+    function _buildBackgroundElements(
+        string memory color,
+        bool isSpecial
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<rect width="400" height="400" fill="url(#bg)" rx="24"/>',
+                    '<rect x="8" y="8" width="384" height="384" fill="url(#cardGrad)" rx="20" opacity="0.5"/>',
+                    isSpecial
+                        ? '<rect x="4" y="4" width="392" height="392" fill="none" stroke="url(#goldGrad)" stroke-width="3" rx="22" filter="url(#specialGlow)"/>'
+                        : string(
+                            abi.encodePacked(
+                                '<rect x="6" y="6" width="388" height="388" fill="none" stroke="',
+                                color,
+                                '" stroke-width="1" rx="20" opacity="0.6"/>'
+                            )
+                        ),
+                    _buildStarField()
+                )
+            );
+    }
+
+    /**
+     * @notice 별빛 배경 효과
+     */
+    function _buildStarField() internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<circle cx="80" cy="80" r="1" fill="white" opacity="0.6"/>',
+                    '<circle cx="320" cy="120" r="0.8" fill="white" opacity="0.4"/>',
+                    '<circle cx="150" cy="300" r="1.2" fill="white" opacity="0.7"/>',
+                    '<circle cx="350" cy="280" r="0.6" fill="white" opacity="0.5"/>',
+                    '<circle cx="60" cy="250" r="1" fill="white" opacity="0.6"/>',
+                    '<circle cx="300" cy="60" r="0.8" fill="white" opacity="0.4"/>'
                 )
             );
     }
@@ -393,38 +495,104 @@ contract OrbitRewardsNFT is ERC721, Ownable {
     function _buildSVGBody(
         TokenData memory data,
         UserScoreData memory scoreData,
-        string memory color,
-        string memory emoji
+        string memory color
     ) internal pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
                     _buildSVGCircles(color, data.isSeasonEndNFT),
-                    _buildSVGTexts(data, scoreData, color, emoji)
+                    _buildSVGTexts(data, scoreData, color)
                 )
             );
     }
 
     /**
-     * @notice SVG 원형 요소들 빌드
+     * @notice SVG 원형 요소들 빌드 - 개선된 디자인
      */
     function _buildSVGCircles(
         string memory color,
         bool isSpecial
     ) internal pure returns (string memory) {
-        string memory glow = isSpecial ? ' filter="url(#specialGlow)"' : "";
+        string memory glow = isSpecial
+            ? ' filter="url(#specialGlow)"'
+            : ' filter="url(#glow)"';
 
         return
             string(
                 abi.encodePacked(
-                    '<circle cx="200" cy="120" r="50" fill="',
+                    _buildMainOrb(color, glow),
+                    _buildOrbitRings(color),
+                    _buildCenterIcon(color, isSpecial)
+                )
+            );
+    }
+
+    /**
+     * @notice 메인 오브 구체
+     */
+    function _buildMainOrb(
+        string memory color,
+        string memory glow
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<circle cx="200" cy="140" r="65" fill="',
                     color,
-                    '" opacity="0.3"',
+                    '" opacity="0.2"',
                     glow,
-                    '"/>',
-                    '<circle cx="200" cy="120" r="30" fill="white" opacity="0.9"',
+                    "/>",
+                    '<circle cx="200" cy="140" r="50" fill="',
+                    color,
+                    '" opacity="0.4"',
                     glow,
-                    '"/>'
+                    "/>",
+                    '<circle cx="200" cy="140" r="35" fill="white" opacity="0.9"',
+                    glow,
+                    "/>",
+                    '<circle cx="200" cy="140" r="25" fill="',
+                    color,
+                    '" opacity="0.8"',
+                    glow,
+                    "/>"
+                )
+            );
+    }
+
+    /**
+     * @notice 궤도 링들
+     */
+    function _buildOrbitRings(
+        string memory color
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<circle cx="200" cy="140" r="80" fill="none" stroke="',
+                    color,
+                    '" stroke-width="1" opacity="0.3" stroke-dasharray="5,5"/>',
+                    '<circle cx="200" cy="140" r="95" fill="none" stroke="white" stroke-width="0.5" opacity="0.2" stroke-dasharray="3,7"/>'
+                )
+            );
+    }
+
+    /**
+     * @notice 중앙 아이콘 영역
+     */
+    function _buildCenterIcon(
+        string memory color,
+        bool isSpecial
+    ) internal pure returns (string memory) {
+        string memory iconGlow = isSpecial ? ' filter="url(#specialGlow)"' : "";
+
+        return
+            string(
+                abi.encodePacked(
+                    '<circle cx="200" cy="140" r="18" fill="rgba(255,255,255,0.1)" stroke="',
+                    color,
+                    '" stroke-width="2"',
+                    iconGlow,
+                    "/>"
                 )
             );
     }
@@ -435,86 +603,295 @@ contract OrbitRewardsNFT is ERC721, Ownable {
     function _buildSVGTexts(
         TokenData memory data,
         UserScoreData memory scoreData,
-        string memory color,
-        string memory emoji
+        string memory color
     ) internal pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
-                    _buildEmojiAndTierText(data, color, emoji),
+                    _buildTierText(data, color),
                     _buildScoreAndStatusText(scoreData)
                 )
             );
     }
 
     /**
-     * @notice 이모지와 티어 텍스트 빌드
+     * @notice 티어 텍스트 빌드 - 개선된 타이포그래피
      */
-    function _buildEmojiAndTierText(
+    function _buildTierText(
         TokenData memory data,
-        string memory color,
-        string memory emoji
+        string memory color
     ) internal pure returns (string memory) {
         string memory glow = data.isSeasonEndNFT
             ? ' filter="url(#specialGlow)"'
-            : "";
+            : ' filter="url(#glow)"';
 
         return
             string(
                 abi.encodePacked(
-                    '<text x="200" y="135" text-anchor="middle" fill="',
-                    color,
-                    '" font-size="28"',
-                    glow,
-                    ">",
-                    emoji,
-                    "</text>",
-                    '<text x="200" y="180" text-anchor="middle" fill="white" font-size="16" font-weight="bold">',
+                    _buildCustomIconGraphic(color, glow, data.tier),
+                    '<text x="200" y="195" text-anchor="middle" fill="white" font-size="20" font-weight="bold" letter-spacing="2px">',
                     data.tier.getTierName(),
                     "</text>",
-                    '<text x="200" y="210" text-anchor="middle" fill="',
+                    '<text x="200" y="220" text-anchor="middle" fill="',
                     color,
-                    '" font-size="14">',
+                    '" font-size="14" opacity="0.9">',
                     data.amount.toString(),
-                    " INIT</text>"
+                    " INIT</text>",
+                    _buildTierBadge(data.tier, color)
                 )
             );
     }
 
     /**
-     * @notice 점수와 상태 텍스트 빌드
+     * @notice 티어 배지 생성
      */
-    function _buildScoreAndStatusText(
-        UserScoreData memory scoreData
+    function _buildTierBadge(
+        DelegationTier tier,
+        string memory color
     ) internal pure returns (string memory) {
-        string memory statusColor = scoreData.isActive ? "#4CAF50" : "#F44336";
+        uint256 tierLevel = uint256(tier) + 1;
 
         return
             string(
                 abi.encodePacked(
-                    '<text x="200" y="250" text-anchor="middle" fill="white" font-size="16">Score: ',
-                    scoreData.currentScore.toString(),
-                    "</text>",
-                    '<circle cx="350" cy="50" r="8" fill="',
-                    statusColor,
-                    '"/>',
-                    '<text x="200" y="320" text-anchor="middle" fill="',
-                    statusColor,
-                    '" font-size="12">',
-                    scoreData.isActive ? "ACTIVE" : "INACTIVE",
-                    "</text>",
-                    '<text x="200" y="350" text-anchor="middle" fill="white" font-size="10" opacity="0.7">SOULBOUND NFT</text>'
+                    '<rect x="170" y="230" width="60" height="20" rx="10" fill="',
+                    color,
+                    '" opacity="0.3"/>',
+                    '<text x="200" y="243" text-anchor="middle" fill="white" font-size="10" font-weight="bold">TIER ',
+                    tierLevel.toString(),
+                    "</text>"
                 )
             );
     }
 
+    /**
+     * @notice 점수와 상태 표시 - 현대적 디자인
+     */
+    function _buildScoreAndStatusText(
+        UserScoreData memory scoreData
+    ) internal pure returns (string memory) {
+        string memory statusColor = scoreData.isActive ? "#00E676" : "#FF5722";
+        string memory statusBg = scoreData.isActive ? "#1B5E20" : "#BF360C";
+
+        return
+            string(
+                abi.encodePacked(
+                    _buildScoreCard(scoreData.currentScore),
+                    _buildStatusIndicator(
+                        scoreData.isActive,
+                        statusColor,
+                        statusBg
+                    ),
+                    _buildFooterElements()
+                )
+            );
+    }
+
+    /**
+     * @notice 점수 카드
+     */
+    function _buildScoreCard(
+        uint256 score
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<rect x="120" y="265" width="160" height="35" rx="17" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>',
+                    '<text x="200" y="280" text-anchor="middle" fill="white" font-size="12" opacity="0.8">SCORE</text>',
+                    '<text x="200" y="295" text-anchor="middle" fill="white" font-size="18" font-weight="bold">',
+                    score.toString(),
+                    "</text>"
+                )
+            );
+    }
+
+    /**
+     * @notice 상태 표시기
+     */
+    function _buildStatusIndicator(
+        bool isActive,
+        string memory statusColor,
+        string memory statusBg
+    ) internal pure returns (string memory) {
+        string memory statusText = isActive ? "ACTIVE" : "INACTIVE";
+
+        return
+            string(
+                abi.encodePacked(
+                    '<rect x="150" y="315" width="100" height="25" rx="12" fill="',
+                    statusBg,
+                    '" opacity="0.8"/>',
+                    '<circle cx="170" cy="327" r="4" fill="',
+                    statusColor,
+                    '" filter="url(#glow)"/>',
+                    '<text x="200" y="332" text-anchor="middle" fill="',
+                    statusColor,
+                    '" font-size="11" font-weight="bold">',
+                    statusText,
+                    "</text>"
+                )
+            );
+    }
+
+    /**
+     * @notice 하단 요소들
+     */
+    function _buildFooterElements() internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<line x1="80" y1="360" x2="320" y2="360" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>',
+                    '<text x="200" y="380" text-anchor="middle" fill="white" font-size="9" opacity="0.6" letter-spacing="1px">SOULBOUND NFT</text>',
+                    '<text x="200" y="395" text-anchor="middle" fill="white" font-size="8" opacity="0.4">ORBIT REWARDS</text>'
+                )
+            );
+    }
+
+    /**
+     * @notice 티어별 커스텀 아이콘 그래픽 생성 (IPFS 지원)
+     */
+    function _buildCustomIconGraphic(
+        string memory color,
+        string memory glow,
+        DelegationTier tier
+    ) internal pure returns (string memory) {
+        // IPFS 링크 사용 시 (향후 업그레이드 가능)
+        string memory ipfsHash = _getTierIPFSHash(tier);
+
+        if (bytes(ipfsHash).length > 0) {
+            return
+                string(
+                    abi.encodePacked(
+                        // 클립 패스로 둥근 테두리 정의
+                        '<defs><clipPath id="roundedClip"><circle cx="200" cy="140" r="30"/></clipPath></defs>',
+                        // IPFS 이미지 (둥근 클립 적용, z-index 높임)
+                        '<image href="https://ipfs.io/ipfs/',
+                        ipfsHash,
+                        '" x="170" y="110" width="60" height="60" clip-path="url(#roundedClip)" filter="url(#specialGlow)"/>',
+                        // 둥근 테두리 추가
+                        '<circle cx="200" cy="140" r="30" fill="none" stroke="',
+                        color,
+                        '" stroke-width="3" opacity="0.8"/>',
+                        // 대체 그래픽 (IPFS 실패 시, z-index 뒤쪽)
+                        '<circle cx="200" cy="140" r="18" fill="rgba(255,255,255,0.1)" stroke="',
+                        color,
+                        '" stroke-width="2" opacity="0.3"/>'
+                    )
+                );
+        }
+
+        // 기본 온체인 그래픽
+        return
+            string(
+                abi.encodePacked(
+                    '<g transform="translate(170,110)">',
+                    "<defs>",
+                    '<radialGradient id="customGrad" cx="50%" cy="30%" r="70%">',
+                    '<stop offset="0%" style="stop-color:',
+                    color,
+                    ';stop-opacity:0.8"/>',
+                    '<stop offset="100%" style="stop-color:',
+                    _getDarkerColor(tier),
+                    ';stop-opacity:1"/>',
+                    "</radialGradient>",
+                    "</defs>",
+                    _buildTierSpecificShape(tier, glow),
+                    "</g>"
+                )
+            );
+    }
+
+    /**
+     * @notice 티어별 IPFS 해시 반환 - 실제 CID 적용!
+     */
+    function _getTierIPFSHash(
+        DelegationTier tier
+    ) internal pure returns (string memory) {
+        // Galaxy 티어에 실제 IPFS 이미지 사용
+        if (tier == DelegationTier.Galaxy) {
+            return
+                "bafkreigcz7at4vvsb27zzl4njmplthcdzn5vgtblv4akne2mr3aarsarqy";
+        }
+        // 다른 티어들은 온체인 그래픽 사용
+        return "";
+    }
+
+    /**
+     * @notice 티어별 전용 모양 생성
+     */
+    function _buildTierSpecificShape(
+        DelegationTier tier,
+        string memory glow
+    ) internal pure returns (string memory) {
+        if (tier == DelegationTier.Galaxy) {
+            return
+                string(
+                    abi.encodePacked(
+                        '<path fill="url(#customGrad)"',
+                        glow,
+                        ' d="M30,5 C40,8 50,18 55,30 C55,35 50,45 40,50 C30,55 20,50 10,45 C5,35 5,25 10,15 C20,8 25,5 30,5 Z"/>',
+                        '<circle cx="30" cy="30" r="12" fill="rgba(255,255,255,0.4)"/>',
+                        '<circle cx="30" cy="30" r="6" fill="rgba(255,255,255,0.7)"/>',
+                        '<path fill="rgba(255,255,255,0.3)" d="M15,20 Q30,10 45,20 Q40,30 30,25 Q20,30 15,20"/>',
+                        '<path fill="rgba(255,255,255,0.2)" d="M15,40 Q30,50 45,40 Q40,35 30,38 Q20,35 15,40"/>'
+                    )
+                );
+        } else if (tier == DelegationTier.Star) {
+            return
+                string(
+                    abi.encodePacked(
+                        '<path fill="url(#customGrad)"',
+                        glow,
+                        ' d="M30,8 L35,20 L48,20 L38,28 L42,42 L30,35 L18,42 L22,28 L12,20 L25,20 Z"/>',
+                        '<circle cx="30" cy="28" r="8" fill="rgba(255,255,255,0.5)"/>',
+                        '<circle cx="30" cy="28" r="4" fill="rgba(255,255,255,0.8)"/>'
+                    )
+                );
+        } else if (tier == DelegationTier.Comet) {
+            return
+                string(
+                    abi.encodePacked(
+                        '<ellipse cx="30" cy="30" rx="25" ry="15" fill="url(#customGrad)"',
+                        glow,
+                        "/>",
+                        '<circle cx="35" cy="30" r="10" fill="rgba(255,255,255,0.4)"/>',
+                        '<circle cx="35" cy="30" r="5" fill="rgba(255,255,255,0.7)"/>',
+                        '<path fill="rgba(255,255,255,0.3)" d="M10,25 Q20,20 30,25 Q25,30 20,28 Q15,30 10,25"/>'
+                    )
+                );
+        } else {
+            return
+                string(
+                    abi.encodePacked(
+                        '<rect x="15" y="15" width="30" height="30" rx="8" fill="url(#customGrad)"',
+                        glow,
+                        "/>",
+                        '<circle cx="30" cy="30" r="8" fill="rgba(255,255,255,0.4)"/>',
+                        '<circle cx="30" cy="30" r="4" fill="rgba(255,255,255,0.6)"/>'
+                    )
+                );
+        }
+    }
+
+    /**
+     * @notice 티어별 어두운 색상 반환
+     */
+    function _getDarkerColor(
+        DelegationTier tier
+    ) internal pure returns (string memory) {
+        if (tier == DelegationTier.Galaxy) return "#4A148C";
+        if (tier == DelegationTier.Star) return "#FF8F00";
+        if (tier == DelegationTier.Comet) return "#01579B";
+        return "#1B5E20";
+    }
+
     function _getTierStyle(
         DelegationTier tier
-    ) internal pure returns (string memory color, string memory emoji) {
-        if (tier == DelegationTier.Galaxy) return ("#9C27B0", unicode"🌌");
-        if (tier == DelegationTier.Star) return ("#FF9800", unicode"⭐");
-        if (tier == DelegationTier.Comet) return ("#2196F3", unicode"☄️");
-        return ("#4CAF50", unicode"🪨");
+    ) internal pure returns (string memory color) {
+        if (tier == DelegationTier.Galaxy) return ("#8A2BE2"); // 더 진한 보라색
+        if (tier == DelegationTier.Star) return ("#FFD700"); // 골든 컬러
+        if (tier == DelegationTier.Comet) return ("#00BFFF"); // 더 밝은 블루
+        return ("#32CD32"); // 더 밝은 그린
     }
 
     // ==================== ADMIN FUNCTIONS ====================

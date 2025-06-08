@@ -65,7 +65,14 @@ $ anvil --help
 $ cast --help
 ```
 
+### Generate ABI
+
+```shell
+$ forge inspect OrbitRewards abi --json > OrbitRewards.json
+$ forge inspect OrbitRewardsNFT abi --json > OrbitRewardsNFT.json
+```
+
 ## Deployed Contracts
 
-- OrbitRewards: 0x905330700Ceb47D1121ef6e9BdB248F18375ebca
-- OrbitRewardsNFT: 0xf8078A3AD0E897D2164F7816D17F575d72a79C41
+- OrbitRewards: 0x44e302d85EF36c363191A7535481Bd27ec887a10
+- OrbitRewardsNFT: 0x8c9badd84DcFfb62584365f020aD3f79C85726Bb

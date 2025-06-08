@@ -1,599 +1,1076 @@
 [
   {
-    "inputs": [
-      { "internalType": "uint64", "name": "_subscriptionId", "type": "uint64" },
-      { "internalType": "string", "name": "_source", "type": "string" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "AlreadyHasNFT",
-    "type": "error"
-  },
-  { "inputs": [], "name": "EmptyArgs", "type": "error" },
-  { "inputs": [], "name": "EmptySource", "type": "error" },
-  { "inputs": [], "name": "EnforcedPause", "type": "error" },
-  { "inputs": [], "name": "ExpectedPause", "type": "error" },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "invalidAmount", "type": "string" }
-    ],
-    "name": "InvalidAmountString",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "invalidAddress", "type": "string" }
-    ],
-    "name": "InvalidBech32Address",
-    "type": "error"
-  },
-  { "inputs": [], "name": "InvalidClaimantAddress", "type": "error" },
-  { "inputs": [], "name": "NoInlineSecrets", "type": "error" },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "NoNFTFound",
-    "type": "error"
-  },
-  { "inputs": [], "name": "OnlyRouterCanFulfill", "type": "error" },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "expected", "type": "address" },
-      { "internalType": "address", "name": "actual", "type": "address" }
-    ],
-    "name": "UnauthorizedClaimant",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "timeRemaining", "type": "uint256" }
-    ],
-    "name": "VerificationTooEarly",
-    "type": "error"
-  },
-  {
-    "anonymous": false,
+    "type": "constructor",
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
+        "name": "_subscriptionId",
+        "type": "uint64",
+        "internalType": "uint64"
       },
       {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum DelegationTier",
-        "name": "tier",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "name": "_source",
+        "type": "string",
+        "internalType": "string"
       }
     ],
-    "name": "InitialQualificationClaimed",
-    "type": "event"
+    "stateMutability": "nonpayable"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "LoyaltyVerificationRequested",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum DelegationTier",
-        "name": "newTier",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "boostPoints",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "currentScore",
-        "type": "uint256"
-      }
-    ],
-    "name": "LoyaltyVerified",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferRequested",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "Paused",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "id",
-        "type": "bytes32"
-      }
-    ],
-    "name": "RequestFulfilled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "isVerification",
-        "type": "bool"
-      }
-    ],
-    "name": "RequestProcessed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "id",
-        "type": "bytes32"
-      }
-    ],
-    "name": "RequestSent",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "score",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "isActive",
-        "type": "bool"
-      }
-    ],
-    "name": "ScoreCalculated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "expiredScore",
-        "type": "uint256"
-      }
-    ],
-    "name": "ScoreExpired",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "Unpaused",
-    "type": "event"
-  },
-  {
-    "inputs": [],
+    "type": "function",
     "name": "acceptOwnership",
+    "inputs": [],
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
+    "type": "function",
     "name": "calculateCurrentScore",
-    "outputs": [
-      { "internalType": "uint256", "name": "currentScore", "type": "uint256" },
-      { "internalType": "bool", "name": "isActive", "type": "bool" }
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "outputs": [
+      {
+        "name": "currentScore",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "isActive",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "type": "function",
+    "name": "calculateInstantReward",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "instantReward",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "multiplier",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "fulfilledResults",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "gasLimit",
-    "outputs": [{ "internalType": "uint32", "name": "", "type": "uint32" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getNFTContract",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getUserStatus",
-    "outputs": [
       {
-        "components": [
-          { "internalType": "bool", "name": "hasUserNFT", "type": "bool" },
-          { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
-          {
-            "internalType": "enum DelegationTier",
-            "name": "tier",
-            "type": "uint8"
-          },
-          { "internalType": "uint256", "name": "amount", "type": "uint256" },
-          {
-            "internalType": "uint256",
-            "name": "currentScore",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "boostPoints",
-            "type": "uint256"
-          },
-          { "internalType": "bool", "name": "scoreActive", "type": "bool" },
-          {
-            "internalType": "uint256",
-            "name": "nextVerificationTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "verificationCount",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct OrbitRewards.UserStatusInfo",
-        "name": "info",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "bytes32", "name": "requestId", "type": "bytes32" },
-      { "internalType": "bytes", "name": "response", "type": "bytes" },
-      { "internalType": "bytes", "name": "err", "type": "bytes" }
-    ],
-    "name": "handleOracleFulfillment",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "name": "hasNFT",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
-    "name": "isRequestFulfilled",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "bytes32", "name": "requestId", "type": "bytes32" }
-    ],
-    "name": "isRequestReadyToProcess",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
-    "name": "isVerificationRequest",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "nftContract",
-    "outputs": [
-      {
-        "internalType": "contract OrbitRewardsNFT",
         "name": "",
-        "type": "address"
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
+    "type": "function",
+    "name": "gasLimit",
     "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getChainlinkConfig",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "_subscriptionId",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "_gasLimit",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "_source",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getNFTContract",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getUserStatus",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "info",
+        "type": "tuple",
+        "internalType": "struct OrbitRewards.UserStatusInfo",
+        "components": [
+          {
+            "name": "hasUserNFT",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "tokenId",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "tier",
+            "type": "uint8",
+            "internalType": "enum DelegationTier"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "currentScore",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "boostPoints",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "scoreActive",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "nextVerificationTime",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "verificationCount",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getWeeklyBenefitStatus",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "isEligible",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "currentWeek",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "tierLevel",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "handleOracleFulfillment",
+    "inputs": [
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "response",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "err",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hasNFT",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isRequestFulfilled",
+    "inputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isRequestReadyToProcess",
+    "inputs": [
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isVerificationRequest",
+    "inputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "nftContract",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract OrbitRewardsNFT"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "owner",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    "inputs": [],
+    "type": "function",
     "name": "pause",
+    "inputs": [],
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [],
+    "type": "function",
     "name": "paused",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    "inputs": [
-      { "internalType": "bytes32", "name": "requestId", "type": "bytes32" }
-    ],
+    "type": "function",
     "name": "previewRequestResult",
-    "outputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+    "inputs": [
       {
-        "internalType": "enum DelegationTier",
+        "name": "requestId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "name": "tier",
-        "type": "uint8"
+        "type": "uint8",
+        "internalType": "enum DelegationTier"
       },
-      { "internalType": "bool", "name": "isVerification", "type": "bool" }
+      {
+        "name": "isVerification",
+        "type": "bool",
+        "internalType": "bool"
+      }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "stateMutability": "view"
   },
   {
-    "inputs": [
-      { "internalType": "address[]", "name": "users", "type": "address[]" }
-    ],
+    "type": "function",
     "name": "processExpiredScores",
+    "inputs": [
+      {
+        "name": "users",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [
-      { "internalType": "bytes32", "name": "requestId", "type": "bytes32" }
-    ],
+    "type": "function",
     "name": "processRequest",
+    "inputs": [
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [
-      { "internalType": "string", "name": "bech32Address", "type": "string" }
-    ],
+    "type": "function",
     "name": "requestDelegationTier",
-    "outputs": [
-      { "internalType": "bytes32", "name": "requestId", "type": "bytes32" }
+    "inputs": [
+      {
+        "name": "bech32Address",
+        "type": "string",
+        "internalType": "string"
+      }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "outputs": [
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [
-      { "internalType": "string", "name": "bech32Address", "type": "string" }
-    ],
+    "type": "function",
     "name": "requestLoyaltyVerification",
-    "outputs": [
-      { "internalType": "bytes32", "name": "requestId", "type": "bytes32" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
-    "name": "requestToSender",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "source",
-    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "subscriptionId",
-    "outputs": [{ "internalType": "uint64", "name": "", "type": "uint64" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "address", "name": "to", "type": "address" }],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "unpause",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
-      { "internalType": "uint64", "name": "_subscriptionId", "type": "uint64" },
-      { "internalType": "uint32", "name": "_gasLimit", "type": "uint32" },
-      { "internalType": "string", "name": "_source", "type": "string" }
+      {
+        "name": "bech32Address",
+        "type": "string",
+        "internalType": "string"
+      }
     ],
-    "name": "updateChainlinkConfig",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "outputs": [
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "name": "userData",
-    "outputs": [
-      { "internalType": "uint256", "name": "nftTokenId", "type": "uint256" },
-      { "internalType": "uint256", "name": "mintTimestamp", "type": "uint256" },
+    "type": "function",
+    "name": "requestToSender",
+    "inputs": [
       {
-        "internalType": "uint256",
-        "name": "lastVerificationTime",
-        "type": "uint256"
-      },
-      { "internalType": "uint256", "name": "currentScore", "type": "uint256" },
-      { "internalType": "uint256", "name": "boostPoints", "type": "uint256" },
-      {
-        "internalType": "enum DelegationTier",
-        "name": "currentTier",
-        "type": "uint8"
-      },
-      { "internalType": "uint256", "name": "currentAmount", "type": "uint256" },
-      {
-        "internalType": "uint256",
-        "name": "verificationCount",
-        "type": "uint256"
-      },
-      { "internalType": "bool", "name": "isActive", "type": "bool" }
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "source",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "subscriptionId",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "to",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "unpause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateChainlinkConfig",
+    "inputs": [
+      {
+        "name": "_subscriptionId",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "_gasLimit",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "_source",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateGasLimit",
+    "inputs": [
+      {
+        "name": "_gasLimit",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateSource",
+    "inputs": [
+      {
+        "name": "_source",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateSubscriptionId",
+    "inputs": [
+      {
+        "name": "_subscriptionId",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "userData",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "nftTokenId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "mintTimestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "lastVerificationTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "currentScore",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "boostPoints",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "currentTier",
+        "type": "uint8",
+        "internalType": "enum DelegationTier"
+      },
+      {
+        "name": "currentAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "verificationCount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "isActive",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "ChainlinkConfigUpdated",
+    "inputs": [
+      {
+        "name": "subscriptionId",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "gasLimit",
+        "type": "uint32",
+        "indexed": false,
+        "internalType": "uint32"
+      },
+      {
+        "name": "source",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "GasLimitUpdated",
+    "inputs": [
+      {
+        "name": "newGasLimit",
+        "type": "uint32",
+        "indexed": false,
+        "internalType": "uint32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "InitialQualificationClaimed",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "tier",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum DelegationTier"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LoyaltyVerificationRequested",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LoyaltyVerified",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newTier",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum DelegationTier"
+      },
+      {
+        "name": "newAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "boostPoints",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "currentScore",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferRequested",
+    "inputs": [
+      {
+        "name": "from",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "from",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Paused",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RequestFulfilled",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RequestProcessed",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "isVerification",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RequestSent",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ScoreCalculated",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "score",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "isActive",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ScoreExpired",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "expiredScore",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SourceCodeUpdated",
+    "inputs": [
+      {
+        "name": "newSource",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SubscriptionIdUpdated",
+    "inputs": [
+      {
+        "name": "newSubscriptionId",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Unpaused",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AlreadyHasNFT",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "EmptyArgs",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "EmptySource",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "EnforcedPause",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ExpectedPause",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAmountString",
+    "inputs": [
+      {
+        "name": "invalidAmount",
+        "type": "string",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidBech32Address",
+    "inputs": [
+      {
+        "name": "invalidAddress",
+        "type": "string",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidClaimantAddress",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NoInlineSecrets",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NoNFTFound",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OnlyRouterCanFulfill",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "UnauthorizedClaimant",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "actual",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "VerificationTooEarly",
+    "inputs": [
+      {
+        "name": "timeRemaining",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
   }
 ]
