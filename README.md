@@ -31,28 +31,31 @@
 
 ## ⭐ Key Features
 
-- 🔗 **Chainlink Oracle**: Automated cross-chain delegation verification
+- 🔗 **Chainlink Functions**: Automated cross-chain delegation verification via DON
 - 🎨 **Dynamic NFTs**: Tier-based soulbound tokens with IPFS graphics
-- 📊 **Live Dashboard**: Real-time status and benefit tracking with cyberpunk styling
+- 📊 **Live Dashboard**: Real-time status via The Graph indexing with cyberpunk styling
 - ⚡ **Instant Rewards**: Weekly benefits and immediate gratification
 - 🌌 **Immersive UI**: Space-themed background with orbit rings and nebula effects
-- 🎮 **Smooth Animations**: Tab navigation with sliding indicators and state transitions
 
 ## 🚀 How It Works
 
 ```mermaid
 graph LR
-    A[👤 User] --> B[📝 Request Verification]
-    B --> C[🔗 Chainlink Functions]
-    C --> D[🌌 Cosmos Data]
-    D --> E[✅ Mint/Update NFT]
-    E --> F[🎁 Earn Rewards]
+    A[👤 User Wallet] --> B[📝 OrbitChronicle Contract]
+    B --> C[🔗 Chainlink Functions DON]
+    C --> D[🌌 Initia LCD API]
+    D --> E[✅ NFT Mint & Rewards]
+
+    B --> F[📡 Events]
+    E --> F
+    F --> G[📊 Real-time UI]
 ```
 
 1. **Connect** both EVM and Cosmos wallets through our sleek interface
-2. **Verify** your delegation status via Chainlink oracle with real-time progress tracking
-3. **Receive** tier-based soulbound NFT with enhanced visual feedback
-4. **Enjoy** weekly benefits and instant rewards in our immersive dashboard
+2. **Request** delegation verification via Chainlink Functions
+3. **Execute** cross-chain data fetching with DON consensus
+4. **Receive** tier-based soulbound NFT with instant rewards
+5. **Track** progress with real-time updates via The Graph indexing
 
 ## 🏆 Delegation Tiers
 
@@ -63,13 +66,13 @@ graph LR
 
 ## 🛠️ Tech Stack
 
-- **Contracts**: Solidity on Base Sepolia
-- **Oracle**: Chainlink Functions
+- **Contracts**: Solidity on Base Sepolia with comprehensive event emission
+- **Functions**: Chainlink DON (Decentralized Oracle Network)
 - **Frontend**: Next.js + wagmi + Keplr + Framer Motion
-- **Indexing**: The Graph Protocol
-- **Storage**: IPFS for premium graphics
+- **Indexing**: The Graph Protocol for real-time event tracking
+- **Storage**: IPFS for premium graphics and metadata
 - **Styling**: Tailwind CSS with cyberpunk theme
-- **Animations**: Advanced CSS effects and transitions
+- **Animations**: Advanced CSS effects and smooth state transitions
 
 ### 🔄 Technical Evolution
 
@@ -94,7 +97,7 @@ keplr-ideathon/
 ├── assets/          # 🎨 NFT designs & examples
 ├── contracts/       # 🔷 Solidity smart contracts
 ├── verifier-api/    # 🌐 Chainlink Functions runtime
-├── subgraph/        # 📊 The Graph indexer
+├── subgraph/        # 📊 The Graph indexer for real-time events
 └── frontend/        # 💻 Next.js web app
     ├── components/  # 🧩 UI components
     │   ├── background/  # 🌌 Space background effects

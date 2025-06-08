@@ -208,6 +208,25 @@ forge verify-contract \
 
 ## 🔗 Chainlink Functions Integration
 
+Chainlink Functions enables **serverless, decentralized computation** using the [Request and Receive Data model](https://docs.chain.link/chainlink-functions/resources/architecture). Our JavaScript verification code runs on a **Decentralized Oracle Network (DON)** with **Offchain Reporting (OCR)** protocol for secure aggregation.
+
+### Architecture Components
+
+- **🏗️ FunctionsRouter**: Entry point managing subscriptions and request routing
+- **🎯 FunctionsCoordinator**: Interface between smart contracts and DON
+- **🌐 DON Nodes**: Independent oracle nodes executing JavaScript in sandboxed environments
+- **🔄 OCR Protocol**: Aggregates responses from multiple nodes for consensus
+- **🔐 Secrets Management**: Threshold encryption for secure API keys and sensitive data
+
+### DON Architecture Benefits
+
+- **🔒 Decentralized Execution**: Code runs independently on multiple oracle nodes
+- **🛡️ OCR Consensus**: Offchain Reporting protocol aggregates all node responses
+- **⚡ Serverless Environment**: Each node uses isolated, sandboxed computation
+- **🌐 Cross-chain Capability**: Seamless data fetching from Cosmos LCD APIs to EVM
+- **🎯 Byzantine Fault Tolerance**: Survives up to 1/3 malicious or failing nodes
+- **📊 LINK Token Billing**: Subscription-based model with cost estimation
+
 ### Configuration
 
 ```solidity
@@ -217,20 +236,127 @@ bytes32 donId = 0x66756e2d626173652d7365706f6c69612d3100000000000000000000000000
 uint64 subscriptionId = 123; // Your subscription ID
 ```
 
+### Request Flow Architecture
+
+Following the [Chainlink Functions Request and Receive Data model](https://docs.chain.link/chainlink-functions/resources/architecture):
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant OrbitChronicle
+    participant FunctionsRouter
+    participant FunctionsCoordinator
+    participant DON as DON Nodes
+    participant Cosmos as Initia LCD API
+
+    User->>OrbitChronicle: requestVerification(delegatorAddress)
+    OrbitChronicle->>FunctionsRouter: sendRequest(source, subscription, gasLimit)
+    FunctionsRouter->>FunctionsCoordinator: emit OracleRequest event
+
+    loop Each DON Node
+        FunctionsCoordinator->>DON: Process request event
+        DON->>Cosmos: HTTP request to LCD API
+        Cosmos->>DON: Return delegation data
+    end
+
+    DON->>DON: OCR Protocol aggregation
+    DON->>FunctionsCoordinator: Submit aggregated response
+    FunctionsCoordinator->>FunctionsRouter: fulfill(requestId, response)
+    FunctionsRouter->>OrbitChronicle: handleOracleFulfillment(requestId, response)
+    OrbitChronicle->>OrbitChronicle: mintOrUpdateNFT(user, tier)
+```
+
 ### JavaScript Source Code
 
-The verification logic runs on Chainlink's decentralized oracle network:
+The verification logic runs trustlessly on each DON node in sandboxed environments:
 
 ```javascript
-// Fetch delegation data from Initia LCD
+// OrbitChronicle Functions source code
+// Runs independently on multiple DON nodes
+
+// Fetch delegation data from Initia LCD API
 const response = await Functions.makeHttpRequest({
   url: `https://lcd-initia.keplr.app/cosmos/staking/v1beta1/delegations/${delegatorAddress}`,
   method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// Process and return verification result
-return Functions.encodeUint256(delegationAmount);
+if (response.error) {
+  throw new Error(`API Error: ${response.error}`);
+}
+
+// Parse delegation amount and calculate tier
+const delegations = response.data.delegation_responses || [];
+const totalDelegated = delegations.reduce(
+  (sum, del) => sum + parseInt(del.balance.amount),
+  0
+);
+
+// Convert from micro-INIT to INIT (1 INIT = 1,000,000 micro-INIT)
+const delegatedINIT = Math.floor(totalDelegated / 1000000);
+
+// Determine tier based on delegation amount
+let tier = 0;
+if (delegatedINIT >= 1000) tier = 4; // Galaxy
+else if (delegatedINIT >= 100) tier = 3; // Star
+else if (delegatedINIT >= 20) tier = 2; // Comet
+else if (delegatedINIT >= 5) tier = 1; // Asteroid
+
+// Return tier for OCR aggregation
+return Functions.encodeUint256(tier);
 ```
+
+### Subscription Management
+
+OrbitChronicle uses [LINK token subscriptions](https://docs.chain.link/chainlink-functions/resources/architecture#subscription-management) for billing:
+
+- **Subscription ID**: Unique identifier funding our requests
+- **Consumer Contract**: OrbitChronicle contract authorized to use subscription
+- **LINK Balance**: Funds requests with cost estimation and reservation system
+- **Effective Balance**: Available funds = Balance - Reserved (in-flight requests)
+
+## 📡 Event Emission & Indexing
+
+### Contract Events
+
+OrbitChronicle emits key events for The Graph indexing and frontend updates:
+
+```solidity
+// Core events for subgraph indexing
+event UserRequestSent(
+    address indexed user,
+    bytes32 indexed requestId,
+    bool isVerification
+);
+
+event RequestFulfilled(
+    bytes32 indexed id
+);
+
+event LoyaltyVerified(
+    address indexed user,
+    uint8 newTier,
+    uint256 newAmount,
+    uint256 boostPoints,
+    uint256 currentScore
+);
+
+event InitialQualificationClaimed(
+    address indexed user,
+    uint256 indexed tokenId,
+    uint8 tier,
+    uint256 amount
+);
+```
+
+### The Graph Integration
+
+- **Real-time Indexing**: Subgraph tracks all contract events for instant UI updates
+- **GraphQL Queries**: Frontend queries user data, tier history, and verification status
+- **Historical Data**: Complete transaction and tier progression history
+- **Performance**: Sub-second query responses for smooth user experience
 
 ## 🔒 Security Considerations
 
