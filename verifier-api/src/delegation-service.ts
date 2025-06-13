@@ -57,10 +57,22 @@ export class DelegationService {
       console.error(
         formatLog("ERROR", "Failed to fetch delegation info", { error })
       );
+
+      // Return default values for 404 Not Found errors
+      if (
+        error instanceof Error &&
+        error.message.includes("Request failed with status code 404")
+      ) {
+        return {
+          amount: "0",
+          denom: config.denom,
+          isEnough: false,
+        };
+      }
+
+      // Throw internal server error for other cases
       throw new Error(
-        `Failed to fetch delegation info: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
+        "Internal server error occurred while fetching delegation info"
       );
     }
   }
@@ -93,7 +105,7 @@ export class DelegationService {
   formatDelegationAmount(amount: string): string {
     const dec = new Dec(amount);
     const formatted = dec.quo(new Dec(10 ** config.decimals));
-    return `${formatted.toString()} ${config.denom
+    return `${formatted.toString(6)} ${config.denom
       .replace("u", "")
       .toUpperCase()}`;
   }
